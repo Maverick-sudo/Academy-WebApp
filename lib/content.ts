@@ -4,6 +4,15 @@ import matter from 'gray-matter'
 
 const contentDir = path.join(process.cwd(), 'content')
 
+function parseMatterSafe(raw: string, filePath: string) {
+  try {
+    return matter(raw)
+  } catch (error) {
+    console.error(`Frontmatter parse failed for ${filePath}:`, error)
+    return { data: {}, content: raw }
+  }
+}
+
 export interface DocMeta {
   title: string
   description?: string
@@ -88,7 +97,7 @@ export function buildFileTree(dir: string, relativePath: string = ''): FileTreeN
     } else if (item.endsWith('.md')) {
       try {
         const fileContents = fs.readFileSync(fullPath, 'utf8')
-        const { data } = matter(fileContents)
+        const { data } = parseMatterSafe(fileContents, fullPath)
         
         tree.push({
           name: item.replace(/\.md$/, ''),
@@ -116,7 +125,7 @@ export function getDocBySlug(slug: string[]): Doc | null {
   for (const filePath of possiblePaths) {
     if (fs.existsSync(filePath)) {
       const fileContents = fs.readFileSync(filePath, 'utf8')
-      const { data, content } = matter(fileContents)
+      const { data, content } = parseMatterSafe(fileContents, filePath)
 
       return {
         slug,
@@ -143,7 +152,7 @@ export function getAllDocs(folder: string): Doc[] {
   for (const file of files) {
     const fullPath = path.join(docsDir, file)
     const fileContents = fs.readFileSync(fullPath, 'utf8')
-    const { data, content } = matter(fileContents)
+    const { data, content } = parseMatterSafe(fileContents, fullPath)
     
     const slug = file
       .replace(/\.md$/, '')
@@ -219,7 +228,7 @@ export function getDocsInDirectory(slug: string[]): Doc[] {
 
     if (stat.isFile() && item.endsWith('.md')) {
       const fileContents = fs.readFileSync(itemPath, 'utf8')
-      const { data, content } = matter(fileContents)
+      const { data, content } = parseMatterSafe(fileContents, itemPath)
       const itemSlug = [...slug, item.replace(/\.md$/, '')]
 
       docs.push({
@@ -232,7 +241,7 @@ export function getDocsInDirectory(slug: string[]): Doc[] {
       const readmePath = path.join(itemPath, 'README.md')
       if (fs.existsSync(readmePath)) {
         const fileContents = fs.readFileSync(readmePath, 'utf8')
-        const { data, content } = matter(fileContents)
+        const { data, content } = parseMatterSafe(fileContents, readmePath)
         const itemSlug = [...slug, item]
 
         docs.push({

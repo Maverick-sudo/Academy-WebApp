@@ -145,7 +145,7 @@ export default async function DocPage({ params }: DocPageProps) {
                 )
               },
             }}
-          >}
+          >
             {doc.content}
           </ReactMarkdown>
         </article>

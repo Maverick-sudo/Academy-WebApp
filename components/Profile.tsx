@@ -13,16 +13,16 @@ export default function Profile() {
         {/* Summary */}
         <div className="space-y-4 text-gray-700 dark:text-gray-300 leading-relaxed">
           <p>
-            I'm a multi-disciplinary <strong>Full-Stack Software Engineer</strong> with 7+ years of hands-on experience building scalable, secure, and reliable systems. My journey started in network engineering and cybersecurity, which gave me something most developers don't have: an instinct for thinking like an attacker while building like a defender. That foundation taught me to design systems that are secure-by-design, not as an afterthought.
+            I&apos;m a multi-disciplinary <strong>Full-Stack Software Engineer</strong> with 7+ years of hands-on experience building scalable, secure, and reliable systems. My journey started in network engineering and cybersecurity, which gave me something most developers don&apos;t have: an instinct for thinking like an attacker while building like a defender. That foundation taught me to design systems that are secure-by-design, not as an afterthought.
           </p>
           <p>
-            Over the years, I've worked across the entire software development lifecycle, translating ambiguous business requirements into well-architected APIs, cloud-native applications, and high-performance backend systems. Whether it's architecting microservices with Node.js and Python, building responsive frontends with React and Next.js, or orchestrating cloud infrastructure on AWS and Azure, I approach every challenge as a problem-solver first and a technologist second.
+            Over the years, I&apos;ve worked across the entire software development lifecycle, translating ambiguous business requirements into well-architected APIs, cloud-native applications, and high-performance backend systems. Whether it&apos;s architecting microservices with Node.js and Python, building responsive frontends with React and Next.js, or orchestrating cloud infrastructure on AWS and Azure, I approach every challenge as a problem-solver first and a technologist second.
           </p>
           <p>
-            I'm known for combining deep technical rigor with practical execution. What sets me apart is my belief in the power of <strong>'Engineering Excellence.'</strong> By leveraging AI-assisted development (Cursor, Claude, Copilot)—not as a crutch, but as a force multiplier. I've accelerated development cycles by 40% while maintaining code quality, because I understand that velocity without reliability is just technical debt in motion.
+            I&apos;m known for combining deep technical rigor with practical execution. What sets me apart is my belief in the power of <strong>&apos;Engineering Excellence.&apos;</strong> By leveraging AI-assisted development (Cursor, Claude, Copilot)—not as a crutch, but as a force multiplier. I&apos;ve accelerated development cycles by 40% while maintaining code quality, because I understand that velocity without reliability is just technical debt in motion.
           </p>
           <p className="text-lg font-semibold text-gray-900 dark:text-gray-100 italic border-l-4 border-blue-500 pl-4">
-            Bottom line: I don't just build applications; I engineer resilient digital ecosystems. I build software that solves real problems, scales with your growth, and doesn't wake you up at night.
+            Bottom line: I don&apos;t just build applications; I engineer resilient digital ecosystems. I build software that solves real problems, scales with your growth, and doesn&apos;t wake you up at night.
           </p>
         </div>
 
