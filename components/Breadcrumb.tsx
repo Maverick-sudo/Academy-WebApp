@@ -29,7 +29,7 @@ export default function Breadcrumb({ slug }: BreadcrumbProps) {
   ]
 
   return (
-    <div className="mb-6">
+    <div className="mb-6 hidden lg:block">
       <div className="flex items-center justify-between gap-3 mb-2">
         <nav className={`flex flex-wrap items-center gap-2 text-sm text-slate-600 dark:text-slate-400 transition-all ${
           isCollapsed ? 'opacity-50' : 'opacity-100'
