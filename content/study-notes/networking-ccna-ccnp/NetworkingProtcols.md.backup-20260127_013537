@@ -230,7 +230,7 @@ The application layer of the OSI model essentially provides networking options t
 ---
 
 
-## Chapter 2: TCP/IP Network Model and Implementation 
+# CHAPTER 2: TCP/IP NETWORK MODEL AND IMPLEMENTATION 
 In the Internet protocol suite, the application layer contains the communications protocols and interface methods used in process-to-process communications across an Internet Protocol (IP) computer network. The application layer only standardizes communication and depends upon the underlying transport layer protocols to establish host-to-host data transfer channels and manage the data exchange in a client–server or peer-to-peer networking model. Though the TCP/IP application layer does not describe specific rules or data formats that applications must consider when communicating, the original specification (in RFC 1123) does rely on and recommend the robustness principle for application design.
 You will hear more often about the TCP/IP model, which is a 4-Abstraction layered model that makes direct reference to current Internet implementations. Its foundational protocols are TCP and IP.
 
@@ -366,7 +366,7 @@ This includes the opening and closing of sessions, translating data, and the int
 
 
 
-## Chapter 3: Internet Protocol Addressing Techniques 
+# CHAPTER 3: INTERNET PROTOCOL ADDRESSING TECHNIQUES 
 
 ### Internet Protocols Packet Structure: IPv4 Header
 
@@ -1394,7 +1394,7 @@ Both IPv4 and IPv6 addresses are ultimately represented in binary, although you'
 ---
 
 
-## Chapter 4: Transport Layer
+# CHAPTER 4: TRANSPORT LAYER
 
 ### Transport Layer Overview
 * **Function:** Responsible for end-to-end communication between applications on different hosts. It segments data from the application layer and reassembles it at the destination.
@@ -1720,7 +1720,7 @@ Networks are usually "unreliable", meaning they offer no guarantees that they wi
 ---
 
 
-## Chapter 5: Application Layer
+# CHAPTER 5: APPLICATION LAYER
 
 ## Domain Name System (DNS)
 * **Function:** A hierarchical and decentralized naming system for computers, services, or any resource connected to the Internet or a private network. It translates human-readable domain names (e.g., `google.com`) into machine-readable IP addresses (e.g., `172.217.160.142`).
@@ -2622,7 +2622,7 @@ A firewall is a tool designed to intercept and assess incoming and outgoing pack
 
 ---
 
-## Chapter 6: Voice and Video Protocols
+# CHAPTER 6: VOICE AND VIDEO PROTOCOLS
 
 Voice over IP (VoIP) and Video Teleconferencing have become standard communication methods. Many networks are upgrading from legacy voice services to IP-based protocols and products. Voice and video communication over IP networks has become ubiquitous, replacing traditional circuit-switched telephony and enabling rich multimedia experiences. These services rely on a suite of specialized protocols to ensure real-time delivery, quality of service (QoS), and session management. This chapter explores the foundational protocols that enable voice (VoIP) and video communication across IP networks.
 Voice over IP (VoIP) Fundamentals
@@ -3192,7 +3192,7 @@ Network devices can also be categorized based on their logical placement and rol
 
 ---
 
-## Chapter 9: Device Configuration
+# CHAPTER 9: DEVICE CONFIGURATION
 
 ## InterOperating System (IOS) Boot Phase
 
@@ -3539,7 +3539,7 @@ Of the two options—to protect inbound and outbound connections—protecting in
 
 ---
 
-## Chapter 10: Switches (Layer 2) 
+# CHAPTER 10: SWITCHES (LAYER 2) 
 
 ## Network Interface
 
@@ -4784,7 +4784,7 @@ This setup uses IP address directly assigned to the port-channel, facilitating e
 The EtherChannel aggregation protocol (PAgP/LACP) must be uniform across all devices in the EtherChannel. If explicitly set, each switch port in the bundle must support the selected protocol.
 
 
-## Chapter 11: Routers (Layer 3) 
+# CHAPTER 11: ROUTERS (LAYER 3) 
 
 ## Router Basics
 
@@ -5626,7 +5626,7 @@ VRF is used commonly by service providers to allow one device to carry traffic f
 ---
 
 
-## Access Control Lists
+## ACCESS CONTROL LISTS
 
 IPv4 access control lists (ACL) give network engineers the ability to program a filter into a router. Each router, on each interface, for both the inbound and outbound direction, can enable a different ACL with different rules. Each ACL’s rules tell the router which packets to discard and which to allow through. IPv4 ACLs perform many functions in Cisco routers, with the most common use as a packet filter. Engineers can enable ACLs on a router so that the ACL sits in the forwarding path of packets as they pass through the router. After it is enabled, the router considers whether each IP packet will either be discarded or allowed to continue as if the ACL did not exist. ACLs can be used for many other IOS features as well. As an example, ACLs can be used to match packets for applying Quality of Service (QoS) features. QoS allows a router to give some packets better service, and other packets worse service.
 
@@ -5770,7 +5770,7 @@ In Summary:
 * Extended ACLs are placed closer to the source (often inbound) for more efficient filtering.
 
 
-## Chapter 12: Management Plane/Layer Protocols
+# CHAPTER 12: MANAGEMENT PLANE/LAYER PROTOCOLS
 
 ## CISCO DISCOVERY PROTOCOL (CDP)
 
@@ -6073,7 +6073,7 @@ For good design, the enterprise NTP configuration ought to refer to at least two
 
 ---
 
-## FTP and TFTP
+## FTP AND TFTP
 
 File Transfer Protocol (FTP) and Trivial File Transfer Protocol (TFTP). Both exist as TCP/IP protocols defined in RFCs. Both use a client and server model, in which the client connects to a server and then the client can copy files to the server or from the server.
 
@@ -6349,7 +6349,7 @@ IPv4 doesn't provide enough addresses for all devices that need an IP address in
 | `clear ip nat translation protocol inside global-ip global-port local-ip local-port [outside local-ip global-ip]` | Clears some of the dynamic entries in the NAT table, depending on which parameters are used.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 
-## Chapter 13: Control Plane/Layer Protocols
+# CHAPTER 13: CONTROL PLANE/LAYER PROTOCOLS
 
 ## Quality of Service (QoS)
 
@@ -6590,9 +6590,9 @@ The journey to deliver a seamless experience for real-time applications like voi
 * **Applications:** CAC is typically associated with voice and video systems (e.g., Cisco Unified Communications Manager, IP PBXs) that integrate with network QoS policies.
 
 
-## Chapter 14: Network Device Security
+# CHAPTER 14: NETWORK DEVICE SECURITY
 
-## Port Security
+## PORT SECURITY
 
 Port security allows you to control which source MAC address(es) are allowed to enter a switchport. If an unauthorized source MAC address enters a port, an action will be taken. The default action is ERR-Disabled.
 
@@ -6667,7 +6667,7 @@ MAC addresses dynamically learned or statically configured on a port-security en
 * `switchport port-security mac-address sticky`: When enabled on an interface, dynamically learned secure MAC addresses will be added to the running configuration like this: `switchport port-security mac-address sticky 0009.000b.000c`. These are considered both dynamic and static.
 * The 'Sticky' secure MAC addresses will never age out; you will need to save the running-config to the startup-config (`copy run start`) to make them truly permanent (else they will not be kept if the switch reboots).
 
-## DHCP Snooping
+## DHCP SNOOPING
 
 DHCP Snooping is a security feature of switches used to filter DHCP messages received on **Untrusted** ports. DHCP Snooping only filters DHCP messages; non-DHCP messages are not affected. All ports are untrusted by default.
 
@@ -6805,7 +6805,7 @@ If ARP messages are received faster than the specified rate, the switchport inte
 * To recover from the `ERR-Disabled` state manually: `shutdown` and then `no shutdown`.
 
 
-## Chapter 15: Architecture, Design, Topology
+# CHAPTER 15: ARCHITECTURE, DESIGN, TOPOLOGY
 
 ## Network Architecture
 
@@ -6924,7 +6924,7 @@ MPLS allows WAN providers to offer various robust solutions for enterprise netwo
 * **Ethernet LAN Service (full-mesh):** Acts like a LAN; all devices can send frames to all other devices. All devices have to be in the same subnet and become OSPF neighbors.
 * **Ethernet Tree Service (Hub-n-Spoke):** A central site can communicate to a defined set of remote sites, but the remote sites cannot communicate directly with each other. This is also referred to as "partial mesh, point-multipoint, hub-and-spoke."
 
-## Network Types and Characteristics
+## NETWORK TYPES AND CHARACTERISTICS
 
 A network comprises **nodes** and **links**.
 * **Intermediate system nodes** perform a forwarding function (e.g., routers, switches).
@@ -6969,7 +6969,7 @@ A network type refers primarily to its **scope** and **size**.
 
 ---
 
-## Network Topology
+## NETWORK TOPOLOGY
 
 A **network topology** describes the physical or logical structure of the network in terms of **nodes** and **links**.
 
@@ -7086,7 +7086,7 @@ In summary, choosing the right network type and topology, combined with appropri
 
 ---
 
-## Chapter 16: Troubleshooting & Information Gathering Tools
+# CHAPTER 16: TROUBLESHOOTING & INFORMATION GATHERING TOOLS
 
 This chapter details various network troubleshooting and information-gathering tools, focusing on their functionality and typical use cases.
 
@@ -7259,7 +7259,7 @@ A **Protocol Analyzer** works in conjunction with a **packet capture** or **snif
 **Use Cases:** Network monitoring, security analysis, billing, traffic engineering, and capacity planning.
 ---
 
-## Chapter 17: Network Troubleshooting Methodology
+# CHAPTER 17: NETWORK TROUBLESHOOTING METHODOLOGY
 
 Effective network troubleshooting requires a systematic approach to problem-solving and clear communication with users/clients. The following best practice model provides a proven process:
 
@@ -7725,7 +7725,7 @@ Licensing for servers and network appliances can be complex, and it's easy to ma
 
 ---
 
-## Chapter 18: Wireless Standard & Wireless Security
+# CHAPTER 18: WIRELESS STANDARD & WIRELESS SECURITY
 
 ## Wireless LANs (WLANs) based on IEEE 802.11 Standard (Wi-Fi)
 
@@ -7977,7 +7977,7 @@ A **site survey** is a critical planning tool to ensure the WLAN delivers accept
 
 ---
 
-## Wireless Network Security
+## WIRELESS NETWORK SECURITY
 
 Wireless networks, while offering mobility and convenience, pose considerable security risks if not properly secured with access controls. All clients must be authenticated before they can associate with an Access Point (AP). In corporate settings, a separate SSID (Service Set Identifier) with restricted access can be provided for guest Internet access, keeping them off the main corporate network.
 
@@ -8369,7 +8369,7 @@ Let's break down network types, characteristics, topology, and how they relate t
 
 ---
 
-## Chapter 19: Software Defined Networking
+# CHAPTER 19: SOFTWARE DEFINED NETWORKING
 
 ## SOFTWARE-DEFINED WIDE AREA NETWORKING (SD-WAN)
 
@@ -8397,7 +8397,7 @@ The SD-WAN is managed by a **Controller and management software**, which can be 
 
 ---
 
-## Data Center Network Design
+## DATA CENTER NETWORK DESIGN
 
 A data center is a site dedicated to provisioning server resources. It hosts network services (authentication, addressing, name resolution), application servers, and storage area networks (SANs). While many are purpose-built facilities, some concepts apply to on-premises server rooms.
 
@@ -8480,9 +8480,9 @@ SDN architectures are typically divided into three logical layers, from top to b
 
 ---
 
-## Chapter 20: Infrastructure As Code (IaC): Automation & Orchestration 
+# CHAPTER 20: INFRASTRUCTURE AS CODE (IAC): AUTOMATION & ORCHESTRATION 
 
-## Network Automation
+## NETWORK AUTOMATION
 
 Network automation provides many key benefits by using tools and methods to automate tasks.
 
@@ -8502,7 +8502,7 @@ Network automation provides many key benefits by using tools and methods to auto
 
 ---
 
-## Cisco Sd-Access
+## CISCO SD-ACCESS
 
 Cisco SD-Access is Cisco's enterprise-level SDN solution for campus and branch networks.
 
