@@ -50,7 +50,7 @@ export default function LayoutClient({ children, sidebarData }: LayoutClientProp
           isCollapsed={isCollapsed}
           onToggleCollapse={toggleCollapse}
         />
-        <main className={`flex-1 min-w-0 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-72'}`}>
+        <main className={`flex-1 min-w-0 transition-[margin] duration-150 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-72'}`}>
           {children}
         </main>
       </div>

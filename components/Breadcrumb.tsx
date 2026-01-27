@@ -38,7 +38,7 @@ export default function Breadcrumb({ slug }: BreadcrumbProps) {
             // Show only last item when collapsed
             <div className="flex items-center">
               <span className="text-slate-400 dark:text-slate-600 mr-2">...</span>
-              <span className="font-medium text-slate-900 dark:text-slate-100 truncate max-w-[200px] md:max-w-none">
+              <span className="font-medium text-slate-900 dark:text-slate-100 truncate max-w-[160px] sm:max-w-[240px] md:max-w-none">
                 {breadcrumbs[breadcrumbs.length - 1].label}
               </span>
             </div>
@@ -57,13 +57,13 @@ export default function Breadcrumb({ slug }: BreadcrumbProps) {
                   </svg>
                 )}
                 {index === breadcrumbs.length - 1 ? (
-                  <span className="font-medium text-slate-900 dark:text-slate-100 truncate max-w-[150px] md:max-w-none">
+                  <span className="font-medium text-slate-900 dark:text-slate-100 truncate max-w-[120px] sm:max-w-[180px] md:max-w-none">
                     {crumb.label}
                   </span>
                 ) : (
                   <Link
                     href={crumb.href}
-                    className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors truncate max-w-[100px] md:max-w-none"
+                    className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors truncate max-w-[80px] sm:max-w-[120px] md:max-w-none"
                   >
                     {crumb.label}
                   </Link>

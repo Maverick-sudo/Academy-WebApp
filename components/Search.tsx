@@ -153,7 +153,7 @@ export default function Search() {
     <>
       {/* Overlay */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-50"
+        className="fixed inset-0 bg-black bg-opacity-50 z-[60]"
         onClick={() => {
           setIsOpen(false)
           setQuery('')
@@ -161,7 +161,7 @@ export default function Search() {
       />
 
       {/* Search modal */}
-      <div className="fixed top-20 left-1/2 -translate-x-1/2 w-full max-w-2xl z-50 px-4">
+      <div className="fixed top-4 sm:top-20 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] sm:w-full max-w-2xl z-[60] px-2 sm:px-4">
         <div className="bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
           {/* Search input */}
           <div className="flex items-center px-4 border-b border-slate-200 dark:border-slate-800">
@@ -184,7 +184,7 @@ export default function Search() {
 
           {/* Results */}
           {results.length > 0 && (
-            <div className="max-h-96 overflow-y-auto">
+            <div className="max-h-[50vh] sm:max-h-96 overflow-y-auto">
               {results.map((result, index) => (
                 <Link
                   key={result.slug}
