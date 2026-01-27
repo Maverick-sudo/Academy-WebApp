@@ -10,15 +10,15 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        border: 'hsl(var(--border))',
-        background: 'hsl(var(--background))',
-        foreground: 'hsl(var(--foreground))',
+        border: 'var(--border)',
+        background: 'var(--background)',
+        foreground: 'var(--foreground)',
       },
       typography: {
         DEFAULT: {
           css: {
             maxWidth: '75ch',
-            color: 'hsl(var(--foreground))',
+            color: 'var(--foreground)',
             a: {
               color: '#3b82f6',
               '&:hover': {
@@ -26,8 +26,8 @@ const config: Config = {
               },
             },
             code: {
-              color: 'hsl(var(--foreground))',
-              backgroundColor: 'hsl(var(--code-bg))',
+              color: 'var(--foreground)',
+              backgroundColor: 'var(--code-bg)',
               padding: '0.25rem 0.375rem',
               borderRadius: '0.25rem',
               fontWeight: '400',

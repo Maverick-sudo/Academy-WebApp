@@ -3,19 +3,33 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import Tooltip from '@/components/ui/Tooltip'
+import { cn } from '@/lib/utils'
 import type { SidebarItem } from '@/lib/sidebar'
 
 interface SidebarProps {
   data: SidebarItem[]
   isOpen: boolean
   onClose: () => void
+  isCollapsed?: boolean
+  onToggleCollapse?: () => void
 }
 
-export default function Sidebar({ data, isOpen, onClose }: SidebarProps) {
+export default function Sidebar({ 
+  data, 
+  isOpen, 
+  onClose, 
+  isCollapsed = false,
+  onToggleCollapse 
+}: SidebarProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set())
   const pathname = usePathname()
 
   const toggleSection = (sectionId: string) => {
+    // Don't allow expanding sections when collapsed
+    if (isCollapsed) return
+    
     const newExpanded = new Set(expandedSections)
     if (newExpanded.has(sectionId)) {
       newExpanded.delete(sectionId)
@@ -26,14 +40,16 @@ export default function Sidebar({ data, isOpen, onClose }: SidebarProps) {
   }
 
   useEffect(() => {
-    // Auto-expand sections containing active page
-    const activeSection = data.find(section =>
-      section.items?.some(item => item.href && pathname.startsWith(item.href))
-    )
-    if (activeSection) {
-      setExpandedSections(new Set([activeSection.id]))
+    // Auto-expand sections containing active page (only when not collapsed)
+    if (!isCollapsed) {
+      const activeSection = data.find(section =>
+        section.items?.some(item => item.href && pathname.startsWith(item.href))
+      )
+      if (activeSection) {
+        setExpandedSections(new Set([activeSection.id]))
+      }
     }
-  }, [pathname, data])
+  }, [pathname, data, isCollapsed])
 
   return (
     <>
@@ -48,13 +64,15 @@ export default function Sidebar({ data, isOpen, onClose }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={`
-          fixed lg:sticky top-16 left-0 h-[calc(100vh-4rem)] w-64 lg:w-72
-          bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800
-          overflow-y-auto z-40 transition-transform duration-300 ease-in-out
+          fixed lg:sticky top-16 left-0 h-[calc(100vh-4rem)]
+          bg-white dark:bg-[var(--sidebar)] border-r border-slate-200 dark:border-[var(--sidebar-border)]
+          overflow-y-auto z-40 relative
+          transition-[width,transform] duration-150 ease-in-out
+          ${isCollapsed ? 'lg:w-16' : 'w-64 lg:w-72'}
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
       >
-        <nav className="p-4 space-y-1">
+        <nav className="p-4 space-y-1 pb-16">
           {data.map((section) => (
             <SidebarSection 
               key={section.id} 
@@ -63,9 +81,33 @@ export default function Sidebar({ data, isOpen, onClose }: SidebarProps) {
               expandedSections={expandedSections}
               toggleSection={toggleSection}
               depth={0}
+              isCollapsed={isCollapsed}
             />
           ))}
         </nav>
+
+        {/* Collapse toggle button (desktop only) */}
+        <div className="hidden lg:flex items-center justify-between px-2 py-2 border-t border-slate-200 dark:border-[var(--sidebar-border)] absolute bottom-0 left-0 right-0 bg-white dark:bg-[var(--sidebar)]">
+          <button
+            onClick={onToggleCollapse}
+            className={cn(
+              "flex items-center gap-2 rounded-md transition-colors",
+              "hover:bg-slate-100 dark:hover:bg-[var(--sidebar-accent)]",
+              "text-slate-600 dark:text-[var(--sidebar-foreground)]",
+              isCollapsed ? "w-full justify-center p-1.5" : "w-full px-3 py-2"
+            )}
+            aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {isCollapsed ? (
+              <ChevronRight className="w-4 h-4" />
+            ) : (
+              <>
+                <ChevronLeft className="w-4 h-4" />
+                <span className="text-sm font-medium">Collapse sidebar</span>
+              </>
+            )}
+          </button>
+        </div>
       </aside>
     </>
   )
@@ -77,51 +119,68 @@ interface SidebarSectionProps {
   expandedSections: Set<string>
   toggleSection: (id: string) => void
   depth: number
+  isCollapsed: boolean
 }
 
-function SidebarSection({ section, pathname, expandedSections, toggleSection, depth }: SidebarSectionProps) {
+function SidebarSection({ 
+  section, 
+  pathname, 
+  expandedSections, 
+  toggleSection, 
+  depth,
+  isCollapsed 
+}: SidebarSectionProps) {
   const isExpanded = expandedSections.has(section.id)
   const isActive = pathname === section.href
   const hasChildren = section.items && section.items.length > 0
 
   const paddingLeft = depth * 12
 
+  // For leaf items (no children)
   if (!hasChildren && section.href) {
-    return (
+    const linkContent = (
       <Link
         href={section.href}
-        className={`flex items-center gap-2 px-3 py-2 text-sm rounded-md ${
+        className={`flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors ${
           isActive
             ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium'
-            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900'
-        }`}
-        style={{ paddingLeft: `${paddingLeft + 12}px` }}
+            : 'text-slate-700 dark:text-[var(--sidebar-foreground)] hover:bg-slate-100 dark:hover:bg-[var(--sidebar-accent)]'
+        } ${isCollapsed ? 'justify-center' : ''}`}
+        style={!isCollapsed ? { paddingLeft: `${paddingLeft + 12}px` } : undefined}
       >
-        {section.status && (
-          <span className={`w-2 h-2 rounded-full ${
-            section.status === 'draft' ? 'bg-yellow-500' :
-            section.status === 'updated' ? 'bg-green-500' :
-            'bg-blue-500'
-          }`} />
-        )}
-        <span className="flex-1">{section.label}</span>
+        {section.icon && <span className="flex-shrink-0">{section.icon}</span>}
+        {!isCollapsed && <span className="flex-1 truncate">{section.label}</span>}
       </Link>
     )
+
+    // Wrap in tooltip when collapsed
+    if (isCollapsed && depth === 0) {
+      return (
+        <Tooltip content={section.label} position="right">
+          {linkContent}
+        </Tooltip>
+      )
+    }
+
+    return linkContent
   }
 
-  return (
-    <div>
-      <button
-        onClick={() => toggleSection(section.id)}
-        className="flex items-center justify-between w-full px-3 py-2 text-sm font-semibold rounded-md hover:bg-gray-100 dark:hover:bg-gray-900"
-        style={{ paddingLeft: `${paddingLeft + 12}px` }}
-      >
-        <span className="flex items-center gap-2">
-          {section.icon && <span>{section.icon}</span>}
-          <span>{section.label}</span>
-        </span>
+  // For parent items (with children)
+  const buttonContent = (
+    <button
+      onClick={() => toggleSection(section.id)}
+      className={`flex items-center justify-between w-full px-3 py-2 text-sm font-semibold rounded-md hover:bg-slate-100 dark:hover:bg-[var(--sidebar-accent)] ${
+        isCollapsed ? 'justify-center' : ''
+      }`}
+      style={!isCollapsed ? { paddingLeft: `${paddingLeft + 12}px` } : undefined}
+    >
+      <span className={`flex items-center gap-2 ${isCollapsed ? 'w-auto' : 'flex-1'}`}>
+        {section.icon && <span className="flex-shrink-0">{section.icon}</span>}
+        {!isCollapsed && <span className="truncate">{section.label}</span>}
+      </span>
+      {!isCollapsed && (
         <svg
-          className={`w-4 h-4 transition-transform ${
+          className={`w-4 h-4 transition-transform flex-shrink-0 ${
             isExpanded ? 'rotate-90' : ''
           }`}
           fill="none"
@@ -130,8 +189,20 @@ function SidebarSection({ section, pathname, expandedSections, toggleSection, de
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
-      </button>
-      {isExpanded && hasChildren && section.items && (
+      )}
+    </button>
+  )
+
+  return (
+    <div>
+      {isCollapsed && depth === 0 ? (
+        <Tooltip content={section.label} position="right">
+          {buttonContent}
+        </Tooltip>
+      ) : (
+        buttonContent
+      )}
+      {!isCollapsed && isExpanded && hasChildren && section.items && (
         <div className="mt-1 space-y-1">
           {section.items.map((item) => (
             <SidebarSection
@@ -141,6 +212,7 @@ function SidebarSection({ section, pathname, expandedSections, toggleSection, de
               expandedSections={expandedSections}
               toggleSection={toggleSection}
               depth={depth + 1}
+              isCollapsed={isCollapsed}
             />
           ))}
         </div>

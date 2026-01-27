@@ -38,7 +38,7 @@ The Registry is a system database containing information required to boot and co
  * Performance Monitor: Used to view performance counter logs and set alerts via Data Collector Sets.
  * Resource Monitor Utility: Shows a monitor of CPU, Disk, Network, and Memory usage.
 
-### Debugger
+## Debugger
 Debugger: Is a program that allows developers (and reversers) to observe their program while it is running. Most basic features of a debugger are the ability to set breakpoints and trace through code.
  * A Breakpoint allows users to select a certain function or address and instruct the debugger to pause program execution once that location is reached.
  * Most debuggers also allow you to trace through a program while it's running, called Single Stepping.
@@ -71,14 +71,14 @@ They allow old or poorly behaved applications (written for older Windows version
 Procedural-Based Design: A procedure is the most fundamental building block of a program. A piece of code with a well-defined purpose that can be called from anywhere in the program. They optionally receive input data from the caller and return data to the caller. This is the most commonly used form of encapsulation in any programming language.
 Object-Oriented Design (OOD): The OOD methodology defines an object as a program component that has both data and code associated with it. The code can be a set of procedures that is related to the object and can manipulate its data. The data is part of the object, usually private, and can be accessed only by the object's code but not from the outside world. Developers are forced to treat objects as completely isolated entities that can only be accessed through well-defined interfaces.
 
-### Data Management
+## Data Management
 To view a program and understand what is happening, you must understand how data is managed by the program.
  * Variables: The key to managing and storing data is usually named variables.
  * User-Defined Data Structures: Are simple constructs that represent a group of data fields, each with its own type.
  * Lists: Programs routinely use a variety of generic data structures for organizing their data:
    * Arrays  * Linked Lists  * Trees
 
-### Control Flow
+## Control Flow
 Control Flow: Are statements that affect the flow of execution of the program based on certain values and conditions:
  * Conditional Blocks: if, if-else statements.
  * Switch Blocks: Also known as multi-way conditions.
@@ -96,7 +96,9 @@ Virtual Memory is an abstract address space that includes all the memory address
  * Pages in the User Address Space are accessible from User Mode.
  * PAGING is a process whereby memory regions are temporarily flushed to the hard drive when they are not in use. This flushed data is stored in the system's page file or swap file
  * WORKING SET: Is a per-process data structure that lists the current physical pages that are in use in the process's address space/Virtual Memory
-Process Initialization Sequence Memory Areas
+
+#### Process Initialization Sequence Memory Areas
+
  * Pages (Number of Read-only pages in memory/RAM). Memory	management	is	done	in	distinct	chunks	called	pages.	This	is	because	the	hardware	memory management	unit	translates	virtual	to	physical	addresses	at	the	granularity	of	a	page.	Hence,	a	page	is	the smallest	unit	of	protection	at	the	hardware	level
 
  * Kernel Memory: Includes the PAGED and NON-PAGED Pools, HEAPS, SYSTEM CACHE, STACKS, PAGE TABLES, and HYPERSPACE.
@@ -105,14 +107,18 @@ Process Initialization Sequence Memory Areas
  * PRIVATE ALLOCATIONS
  * SYSTEM PAGE-TABLE ENTRIES
  * MAPPED VIEWS
-Memory Storage and Paging
+
+#### Memory Storage and Paging
+
  * Private Memory: Memory locations exclusive to a process, not to be shared with another process.
  * Shared Memory: Memory locations that are mapped into multiple processes' address spaces to allow resource sharing or Inter-Process Communication (IPC).
    * File Mapping Objects: A mechanism for creating shared memory by mapping a file (or part of one) into the virtual address space of one or more processes.
  * Working Set: A subset of the Virtual Memory that is currently used by the process and resides in physical RAM.
  * Page File / Swap File: A file on the hard drive (disk) that allows Virtual Memory to extend the limits of physical RAM. It stores less-used data and static data that has been paged out from RAM.
  * Page Fault: Occurs when a process needs to access a part of its virtual memory that's not in its Working Set (RAM). The Memory Manager therefore finds the page on the Hard Drive (Disk) and retrieves it.
-VM Management Components
+
+#### VM Management Components
+
  * Memory Management Unit (MMU): Hardware unit on the CPU that aids in translating a Virtual Address to a Physical Address.
  * Memory Manager: Software component (part of the OS kernel) that uses data structures like the VAD to manage the process's virtual address space.
  * VAD (Virtual Address Descriptor): Data structures that the Memory Manager uses to keep track of the Virtual Address Ranges the process is using.
@@ -123,26 +129,28 @@ Paging some of the contents of memory to disk when it becomes overcommitted—th
 running threads try to use more physical memory than is currently available—and bringing the
 contents back into physical memory when needed.
 
-Execution and Process Isolation
-Kernel and User Mode
+### Execution and Process Isolation
+
+#### Kernel and User Mode
  * Kernel Mode: The mode of execution in a processor that grants access to all system memory and CPU instructions.
  * User Mode: The restricted mode of execution where application code runs.
    * User Application Code runs in User Mode, whereas OS Code (i.e., system services and device drivers) runs in Kernel Mode.
  * User Applications switch from User Mode \rightarrow Kernel Mode when they make a System Service Call. This is a Mode Transition and is not a Context Switch.
    * When a user-mode program calls a system service, the processor executes a special instruction that switches the calling thread to Kernel Mode. When the system service completes, the O.S. switches the thread context back to User Mode.
 
-
-Resource Sharing and Security
+### Resource Sharing and Security
  * Each process has a security context (the Access Token).
  * A process has a list of Open Handles to Kernel Objects (Files, Shared Memory Sections, Sync Objects).
  * Although threads have their own security context, every thread within a process shares the process's Virtual Address Space and all resources belonging to the process. This means that all the threads in a process have full read-write access to the process's Virtual Address Space.
  * Threads cannot accidentally reference the address space of another process, unless the other process makes available part of its private address space as a shared memory section (File Mapping Object).
 
+#### Section Objects
 SECTION OBJECT: A special chunk of memory managed by the O.S. 
 Mapping a section object means that a virtual address range is allocated for the object and its content can become accessible through that range.
  * MAPPED ALLOCATIONS: Section Object also known as Memory-Mapped Files/Modules that are mapped into the process's address space.
  * PRIVATE ALLOCATIONS: : Are allocations that are process private and were allocated locally, typically from HEAPS and STACKS.
 
+#### Kernel Objects and Object Manager
 KERNEL OBJECTS:
 The Windows KERNEL manages its objects using a centralized OBJECT MANAGER(The Object Manager is a core executive component that lives inside the kernel mode part of Windows, specifically within the Executive layer of the Windows kernel) responsible for all Kernel Objects such as SECTIONS, Handles and Modules, Files, Device Objects(Named & Unnamed), Synchronization Objects, Processes, and Threads. 
 The O.S. tags each page of Virtual memory with the access mode the processor must be in to read or write the page. Pages in the system space can be accessed by the Kernel Mode, meanwhile, pages in the user address space are accessible from the user mode.
@@ -163,10 +171,9 @@ NAMED OBJECTS:
  * Some kernel objects can be named, which provides a way of uniquely identifying them throughout the system. 
  * Some Kernel Objects are unnamed and are only identified by their handle or Kernel Object Pointer.
 
+## Processes and Threads
 
-Processes and Threads
-
-Program and Process
+### Program and Process
  * Program: Static set of instructions. An executable program is basically low-level code/data on disk.
  * Process: A container for sets of resources used in executing an instance of a program (Thread).
    * Process Resources Include: A Private Virtual Address Space, a list of open handles to system/kernel resource objects (e.g., Semaphores, Sync Objects, Files), and a list of DLL/Memory-Mapped Files.
@@ -194,13 +201,16 @@ A THREAD is a primitive code execution unit.
    * The "Scheduler" decides which thread gets to run and for how long. The Dispatcher dispatches running or interrupted threads to wait or continue running.
    * The Dispatcher performs the context switching when it's time to change the currently running thread.
 
+### Thread Context Switching
+
 HOW & WHY A THREAD CONTEXT-SWITCHES?
 The truth is that threads frequently just give up the CPU on their own volition. This happens whenever a program is waiting for something external to finish (e.g., I/O).
  * Take for instance, when a program calls the Win32 GetMessage API. It's how applications ask the system if a user has generated any new input events. GetMessage accesses a message queue and just pulls out the next event. But in cases where the message queue is empty, GetMessage enters a waiting mode.
  * In cases where a thread runs complex algorithms involving billions of calculations that could take hours, to avoid congestion, Windows uses Preemptive Scheduling, which means the threads are given a limited amount of time to run before being interrupted by the Kernel.
  * Threads that are Blocked are put in a Wait State by the Kernel and are not Dispatched until the wait state is satisfied. The scheduler must be aware of them in order to know when a wait state has been satisfied and a specific thread can continue execution.
 
-Synchronization Objects
+### Synchronization Objects
+
 Windows supports several built-in Sync Objects, each related to a specific type of data structure that needs to be protected. All Synchronization Objects (except Critical Section) are managed by the Kernel Object Manager and are implemented in Kernel Mode, which means that the system must switch into the Kernel Mode for any operation that needs to be performed on them.
  * EVENT: A simple Boolean Sync Object that can be set to TRUE or FALSE.
  * MUTEX (from the word Mutually Exclusive): An object that can only be acquired by one thread at any given moment.
@@ -208,8 +218,8 @@ Windows supports several built-in Sync Objects, each related to a specific type 
  * Critical Section: An optimized implementation of a Mutex, logically identical to a Mutex, but with the difference that it is process private and that most of it is implemented in User-Mode.
 The basic design of all synchronization objects is that they allow two or more threads to compete for a single resource, and they help ensure that only a controlled number of threads actually access the resource at any given moment. Blocked threads are put in a special Wait State. Sync Objects are implemented by the O.S. The Scheduler must be aware of their existence in order to know when a wait state is satisfied and a specific thread can continue execution.
 
+## Application Programming Interfaces (APIs)
 
-Application Programming Interfaces (APIs)
 API's are a set of functions that the Operating System makes available to application programs for communicating with the Operating System.
  * NTDLL: NT Layer DLL in Windows (System32). The NATIVE API is the actual interface to the Windows NT System and the most direct interface into the Windows kernel, providing interfaces for direct interfacing with the memory manager, I/O System, Object Manager, Process, and Thread management, and so on.
 The Native API functions are a set of functions exported from the NTDLL.DLL (for user-mode callers) and from NTOSKRNL.EXE (for kernel-mode callers). They start with the prefix Nt or Zw.
@@ -240,22 +250,28 @@ responsible for higher-level GUI constructs such as windows and menus, and for p
 KERNEL32.DLL is implemented using direct calls into the native API, and has really nothing to do with the Win32 subsystem.
 The Win32 subsystem is implemented inside the WIN32K.SYS kernel component and is controlled by the USER32.DLL and GDI32.DLL user components. Communications between the user-mode DLLs and the kernel component is performed using conventional system calls (the same mechanism used throughout the system for calling into the kernel)
 
+### Process and Thread Security
 
-Process and Thread Security
  * LSA (Local Security Authority)
  * Users have a Full Token and a Filtered Token.
  * User Account Control (UAC) Elevation is required for programs that need administrative privileges. It can be triggered in multiple ways: Silent, Prompt for Consent, or Prompt for Credentials. If the parent process is already running with an Admin token, the child process implicitly inherits this token, and the UAC Elevation sequence is not required or needed.
-Core Definitions
+
+#### Core Definitions
+
  * A Program is an executable sequence of instructions.
  * A Process is a container for a set of resources belonging to the program.
  * Every thread in a process has full access to all the resources represented by the process.
  * A Process has:
    * A separate Virtual Address Space to store and reference data and code.
    * A security context called an Access Token that identifies the User, Security Groups, LSA Logon Session ID, and Remote Desktop Services Session ID. Each process has a record of the privileges granted to it, its UAC Virtualization State, and its Integrity Level.
-Job Object
+
+#### Job Object
+
  * A Job allows groups of processes to be managed and manipulated as a single unit.
  * A Job Object also allows control of certain attributes and provides limits for the processes within it.
-Thread Details
+
+#### Thread Details
+
  * A Thread is the entity within a process that Windows schedules for execution.
  * The Contents of a set of CPU Registers represents the state of the processor (CONTEXT).
  * Two Stacks: One for use when the thread is executing in Kernel Mode or User Mode.
@@ -267,13 +283,14 @@ Every thread within a process shares the process's Virtual Address Space.
  * Process's Secondary Storage: Disk storage (where the Page File resides).
  * Symbols: Debugging symbols are a map of memory addresses to source code line numbers, function names, and variable names, essential for human-readable debugging. http://msdl.microsoft.com/download/symbols is the official Microsoft symbol server URL.
 
+## System Calling Mechanism
 
-System Calling Mechanism
 A System Call takes place when user-mode code needs to call a kernel-mode function, which frequently happens when an application calls an Operating System API. The user-mode side of the API usually performs basic parameter validation checks and calls down into the Kernel to actually perform the requested operation. It's not possible to directly call a kernel function from user-mode, as this would be a serious vulnerability.
 The O.S. has a special mechanism for switching from User-Mode to Kernel Mode. The idea is that the user-mode code invokes a special CPU instruction that tells the processor to switch to its privileged mode and call a special dispatch routine. The dispatch routine then calls the specific system function requested from the user-mode.
  * Privileged Mode: CPU terminology for kernel-mode execution.
 
-Anatomy of a Windows System Call
+### Anatomy of a Windows System Call
+
 Executable(Library)!<Prefix><Operation><Object> + Offset, aligns perfectly with how analysts view function calls and addresses in a debugger:
  * Executable/Library! (The Module): This is the DLL or EXE where the function is located.
    * Example: NTDLL.DLL! (The primary user-mode interface to the kernel).
@@ -289,8 +306,8 @@ Example in a Debugger:
 NTDLL.DLL!NtAllocateVirtualMemory+0x14
 This tells the analyst: "A call was made from NTDLL.DLL to the Memory Manager (Nt/Mm) to Allocate Virtual Memory, and the instruction is located 14 bytes past the start of the function."
 
- 
-Prefixes
+### Prefixes
+
 | Prefix | Component | Notes |
 |---|---|---|
 | Alpc | Asynchronous Local Procedure Call | Communication mechanism. |
@@ -314,7 +331,8 @@ Prefixes
 | Wmi | Windows Management Instrumentation | Management/monitoring framework. |
 | Zw / Nt | Native System Services | Interface called from User Mode to Kernel Mode (NTDLL.DLL exports these). |
 
-Libraries(Modules) & Executables
+## Libraries (Modules) & Executables
+
 Static Libraries: Represent a certain component of a program, a feature, or area of functionality in the program. Static Libraries are added to a program while it's being built, adding certain functionality to it.
 Dynamic Link Libraries (DLLs) in Windows: Similar to static libraries, except that they are not embedded into the program. They remain in a separate file, even when the program is shipped to the end user. DLLs allow for upgrading individual components in a program without updating the entire program. The idea is that a program can be broken into more than one executable file where each is responsible for one feature or area of program functionality. The benefit is that overall memory consumption is reduced as executables are not loaded until the features they implement are required.
 DLLs are different from build-time Static Libraries (.lib). The latter are permanently embedded in an executable. The code in .lib files is statically linked into an executable while it's built, just as if the code in .lib files was part of the original program source code. Windows programs use two methods of loading and attaching to DLLs at runtime:
@@ -368,7 +386,8 @@ When the module is loaded, the loader loads every module listed in the Import Ta
 When the importing module needs to call into an imported function, the calling code typically looks like this: Call [Some Address], where Some Address is a pointer into the executable's Import Address Table (IAT).
 When the module is linked, the IAT is nothing but a list of empty values. But when the module is loaded, the linker resolves each entry in the IAT to point to the actual function in the exporting module. This way, when the calling code is executed, Some Address will point to the actual address of the imported function.
 
-PROGRAM EXECUTABLE Directories
+### Program Executable Directories
+
 PE Executables contain a list of special optional directories, which are essentially data structures that describe their contents.
 | Name | Associated Data Structure |
 | Export Directory | IMAGE_EXPORT_DIRECTORY |
@@ -382,21 +401,24 @@ PE Executables contain a list of special optional directories, which are essenti
 | Bound Import Table | Image_Bound_Import_Descriptor |
 | Delay Import Descriptor | Image_Delay_Load_Descriptor |
 
-Exception Handling
+## Exception Handling
+
 An Exception is a special condition in a program that initializes a special function called an Exception Handler. The exception handler either deals with the exception, corrects the problem, or terminates the program if the exception cannot be resolved.
  * Hardware Exceptions: Are generated by the processor.
  * Software Exceptions: Is generated when a program explicitly generates an exception in order to report an error/problem. In C++, we can use the throw keyword. However, in Windows, the throw keyword is implemented using the RaiseException API, which goes down into the kernel but follows a similar code path as a hardware exception, eventually returning to user mode to notify the program of the exception.
 
-Structured Exception Handling (SEH)
+### Structured Exception Handling (SEH)
+
 The O.S. provides a mechanism for distributing exceptions to applications in an organized manner, where each thread is assigned an Exception-Handler list (that deals with exceptions). This list is stored in the Thread Information Block (TIB) data structure, which is available from user mode. The TIB is stored in a regular, private-allocation, user-mode memory.
 
+## Virtualization and Security
 
-Virtualization and Security
-Hypervisor and Virtual Machines
+### Hypervisor and Virtual Machines
+
  * Virtualization Technologies (Hyper-V, XEN, KVM, VMWARE, VirtualBox, QEMU): Employ a Hypervisor, which is a specialized, highly privileged component that allows for the virtualization and isolation of all resources on the machine, from physical memory to virtual memory, device drivers, etc.
 
+### Virtualization-Based Security (VBS)
 
-Virtualization-Based Security (VBS)
 VBS is a security architecture that enhances the processor's natural privilege-based separation (User/Kernel) via the introduction of Virtual Trust Levels (VTLs), isolating access to memory, hardware, and the processor.
  * VTL 0/VTL 1: VBS capabilities introduce a new VTL 1 layer, which contains its own Secure Kernel (SecureKernel.exe) running in privileged processor mode. VTL 0 is the regular Windows OS.
  * Secure Kernel / Proxy Kernel: The VTL 1 Secure Kernel is its own secure binary.
@@ -410,10 +432,12 @@ VBS is a security architecture that enhances the processor's natural privilege-b
  * Host Guardian Service (HGS): Employs Virtual TPM (Trusted Platform Module) to protect the SHIELD Fabric VM from the infrastructure or host.
  * UEFI (Unified Extensible Firmware Interface): A secure boot implementation guaranteeing strong requirements around the signature quality of the boot-related software (firmware) must be present. This process guarantees that Windows Components (Operating System) loads securely from the beginning of boot.
 
+## Terminal Services
 
-Terminal Services
  * Terminal Services (Remote Desktop, mstsc.exe, Microsoft Terminal Services / Fast User Switching) refers to the support in Windows for multiple interactive sessions on a single system. A remote user can establish a connection/session on another machine, \log in, and run apps on the server. The server transmits audio, video, and clipboard data and the client transmits user input back to the server.
-Kernel Objects
+
+## Kernel Objects
+
  * A Kernel Object is a single, run-time instance of a statically defined object type.
  * An Object Type comprises a system-defined data type, functions that operate on instances of the data type, and a set of object attributes.
  * An Object Attribute is a field of data in an object that partially defines its state.
@@ -421,8 +445,11 @@ Kernel Objects
  * Object Methods: Means for manipulating objects, usually to read or change Object Attributes.
  * Object Manager: (Kernel Component) accomplishes the following OS tasks: Reference Counting (Allows system to recognize when an object is no longer in use \rightarrow memory space is automatically deallocated), Sharing Resources, and Protecting Resources from unauthorized access.
  * Not all data structures in Windows are objects (e.g., many internal data structures are not exposed to the Object Manager).
-Security and Access Control
-Core Security Capabilities
+
+## Security and Access Control
+
+### Core Security Capabilities
+
  * Privileged Access Control: Allows administrator access to protected objects.
  * Discretionary / Mandatory Access Control (DAC/MAC): Protection for all shareable system objects in DLLs, files, threads, processes, etc.
  * Need-to-Know: A method by which owners or creators of objects grant/deny access to others.
@@ -436,13 +463,16 @@ Windows Architecture -> Executive and Kernel
 ￼
 Windows achieves portability across hardware architectures by using a Layered Design and by using the C Language. Windows is a Symmetric Multi-Processing (SMP) O.S.
  * SMP has no master processor. The O.S./Kernel threads as well as User threads can be scheduled to run on any processor. All the processors share just one memory space. This model contrasts the Asymmetric Multi-Processing (ASMP), in which the O.S. typically selects one processor to execute O.S./Kernel-wide code, while others run only in User Mode.
-Multi-Processing Features
+
+### Multi-Processing Features
+
  * The ability to run O.S. Code on any available processor and on multiple processors at the same time.
  * Multiple threads of execution within a single process, each of which can execute simultaneously on different processors.
  * Fine-grained synchronization within the kernel, device drivers, and server processes, which allows more components to run concurrently on multiple processors.
  * Mechanisms that facilitate the efficient implementation of multi-threaded server processes that can scale well on multiprocessor systems.
 
-Executive Components
+### Executive Components
+
 The Executive is the upper layer of NTOSKRNL.EXE. The Kernel is the lower layer. 
 The Executive contains Base OS Services and is the internal component that exports the documented OS API to the Object Manager.
 | Executive Component | Role |
@@ -459,7 +489,8 @@ The Executive contains Base OS Services and is the internal component that expor
 Executive Support Functions: The Executive contains four main groups of support functions that are used by the Executive Components: Object Manager, Run Time Library Functions, Executive Support Routines, and Asynchronous Local Procedure Call (ALPC).
  * ALPC: Used as a transport for Remote Procedure Call (RPC). Windows implements an industry-standard communication facility for client and server processes across a network.
 
-Kernel Components
+### Kernel Components
+
 The Kernel provides fundamental mechanisms used by the Executive components and low-level hardware architecture.
 
 Kernel Objects : Help the kernel control CPU processing and support the creation of Executive objects. Most Executive-level Objects encapsulate one or more kernel objects, incorporating their defined attributes. Control Objects, Async Procedural Call (APC) Object, Deferred Procedure Call (DPC) Object, Interrupt Object, Dispatcher Object.
@@ -473,22 +504,25 @@ I/O Manager : Manages device-independent I/O operations and is responsible for d
 Device Drivers : Includes hardware device drivers, translating user I/O function calls into specific hardware requests. 
 HAL (Hardware Abstraction Layer) : Abstracts and isolates the kernel, drivers, and Executive from platform-specific hardware differences (e.g., differences in motherboards). 
 
+### Hardware Abstraction Layer (HAL)
 
-HARDWARE ABSTRACTION LAYER (HAL)
 The HAL is a loadable kernel-mode module that provides a low-level interface to the hardware platform on which Windows is running. It hides hardware-dependent details, multi-processor mechanisms, and any functions that are both architecture-specific and machine-dependent.
  * Rather than accessing hardware directly, Windows Internal components and user-written device drivers maintain portability by calling the HAL.DLL Routines whenever they need platform-dependent information.
  * All x64 and ARM machines have the same motherboard configuration; their processors require ACPI's and APIC support.
  * Windows supports modules known as HAL Extensions (additional DLLs on disk) that the boot loader may load if specific hardware requiring them is needed (usually through ACPI and Registry-based configuration).
 
-Input & Output (I/O)
+### Input & Output (I/O)
+
 I/O channels implemented with Windows can be divided into two groups: kernel-level and high-level.
  * The low-level layer is the I/O system responsible for communicating with the hardware, and so on.
  * The higher-level layer is the Win32 Subsystem responsible for implementing the GUI and for processing User Input.
 
-I/O System and Device Drivers
+#### I/O System and Device Drivers
+
 The I/O system is a combination of kernel components that manage the device drivers running in the system and the communication between applications and device drivers. Device drivers register with the I/O System, which enables applications to communicate with them and make generic or device-specific requests to or from the device. The I/O System is responsible for relaying such requests from the application to the device drivers that are responsible for performing the operation.
 The I/O system is layered, which means that for each device, there can be multiple device drivers stacked on top of each other.
 
+#### Device Driver Details
 
 DEVICE DRIVERS
 Device Drivers are loadable kernel-mode modules that interface between the I/O Manager and the relevant hardware. Drivers enable Windows to interact with various types of hardware, including displays, storage, smartcard readers, and human input devices. They are also used to monitor network traffic and file I/O by antivirus software (and by Sysinternals
@@ -500,7 +534,8 @@ They run in Kernel Mode in one of three contexts:
  * Device drivers in Windows don't manipulate Hardware directly. Rather, they call functions in the HAL.DLL to interface.
  * Drivers written in C/C++ use HAL routines, are source-code portable across the CPU architectures supported by Windows.
 
-Types of Drivers
+#### Types of Drivers
+
  * Hardware Device Drivers: These use the HAL to manipulate hardware to write output/retrieve input from a device/network.
  * File System Drivers (FSDs): These accept file-oriented I/O requests and translate them into I/O Requests bound for a device.
  * File System Filter Drivers: These include drivers that perform Disk Mirroring / Encryption / Scans and intercept I/O Requests and perform some value-added processing before passing the I/O Request to the next layer.
@@ -535,8 +570,7 @@ Universal Windows Drivers (UWD)
  * Device Drivers and Windows Service processes are both defined in \rightarrow HKLM\SYSTEM\CurrentControlSet\Services.
  * Looking at the list of functions in NTDLL/HAL/NTOSKRNL gives you a list of all the system services that Windows provides to user-mode subsystem DLLs versus the subset that each subsystem exposes.
 
-
-System Processes and Boot Structure
+## System Processes and Boot Structure
 
 | Process Name | Process ID (PID) | Notes |
 | Idle Process | 0 | (1 thread per CPU) to account for idle CPU time. |
@@ -582,7 +616,7 @@ When a Pico Provider calls the registration API, it receives a set of function p
 * Request for pico process termination.
 It now becomes clear that with such unparalleled access to any possible user-kernel transition and interactions between a Pico Process/Thread and the O.S., can be fully encapsulated by a Pico Provider to wrap a completely different kernel implementation than that of Windows. Pico Providers are custom-written Kernel Modules that implement callbacks to respond to the list of possible events that a pico process can cause. This is how WSL is capable of running unmodified Linux $\text{ELF}$ binaries in User-Mode.
 
-TRUSTLETS (Secure System Process)
+### TRUSTLETS (Secure System Process)
 
 Trustlets are regular Windows Portable Executables ($\text{PE}$) files that contain some IUM-specific properties and can import only a limited set of Windows System DLLs due to the restricted number of system calls that are available to them. The IUM-specific system DLL is jumbase.dll, which provides the base IUM system API. This library ends up calling into jumaal.dll (the VTL 1 version of NTDLL.DLL).
 They are signed with a certificate that contains the Isolated User Mode EKU ($\text{1.3.6.1.4.1.311.10.3.37}$).
@@ -601,7 +635,8 @@ The benefits of running as a Trustlet include access to privileged and protected
 Secure processes can be identified in the kernel debugger by their names, Secure PID, and
 
 
-Session Manager (SMSS.EXE)
+### Session Manager (SMSS.EXE)
+
 The Session Manager (smss.exe) is the first user-mode process created in the system, launched by the kernel-mode system thread that performs the final phase of initialization of the Executive & KERNEL.
  * When started, smss.exe checks whether it's the first instance or an instance of itself launched to create a session. If command-line arguments are present, it was therefore not the first instance. This permits creating concurrent sessions, enhancing logon performance on Terminal Server Systems where multiple users can log on at the same time.
  * Once a session finalizes initialization, the copy of smss.exe terminates.
@@ -617,7 +652,8 @@ The Session Manager (smss.exe) is the first user-mode process created in the sys
  * The intermediate smss.exe process then exits, leaving the subsystem & Winlogon with the master smss.exe as their parent/owner.
 
 
-Windows Initialization Process (WININIT.EXE)
+### Windows Initialization Process (WININIT.EXE)
+
 The Windows Initialization Process (wininit.exe) also marks itself and its main thread as Critical, thereby treating certain errors as fatal.
  * It creates an event named GLOBAL\FIRST LOGON CHECK for use by Winlogon processes to detect if a logon is the first one.
  * It creates a Winlogon Log Off event in the Based Named Objects object manager's directory to be used by Winlogon. This event is signaled (set) when a logoff operation starts.
@@ -633,7 +669,8 @@ The Windows Initialization Process (wininit.exe) also marks itself and its main 
  * If Credential Guard is enabled, it launches the Isolated LSA Trustlet (lsaiso.exe), which requires querying the VBS provisioning key from UEFI.
  * If setup is pending (the first boot during a fresh install or an update to a new build), it launches the setup program and waits forever for a request for system shutdown.
 
-Service Control Manager (SERVICES.EXE)
+### Service Control Manager (SERVICES.EXE)
+
 Windows services run in noninteractive, user-mode processes that can be configured to start independently of any user logging on, and that are controlled through a standard interface with the Service Control Manager. Multiple services can be configured to share a single process. A common example of this can be seen in Svchost.exe (Host Process for Windows Services), which is specifically
 designed to host multiple services implemented in separate DLLs. Services are configured in the subkeys of HKLM\System\CurrentControlSet\Services. 
  * Services can refer to a server process or a device driver.
@@ -645,7 +682,8 @@ designed to host multiple services implemented in separate DLLs. Services are co
  * A service has three names: the process name you see running, the internal name in the Registry, and the Display name in the Services Admin tool, plus a description field that further details what the service does.
  * There isn't a 1-to-1 mapping between service processes running services, as some services share processes (using svchost.exe). In the registry, the Type value under the service's key indicates whether the service runs in its own process or with others.
 
-Logon Process (WINLOGON.EXE)
+### Logon Process (WINLOGON.EXE)
+
 The Winlogon tab displays entries that hook into Winlogon.exe, which manages the Windows interactive-logon user interface. Introduced in Windows Vista, the Credential Provider interface manages the user authentication interface. Today, Windows includes many credential providers that handle password, PIN, picture-password, smartcard, and biometric logon.
 The Winlogon process handles interactive user logons & logoffs. It is notified that a User Logon is required when the user enters the Secure Attention Sequence (SAS) keystroke combination: \text{Ctrl}+\text{Alt}+\text{Delete}.
  * The Identification & Authentication aspects of the logon process are implemented through DLLs called CREDENTIAL PROVIDERS, which implement authentication interfaces (e.g., password, smartcard, or biometrics).
@@ -662,7 +700,8 @@ The Winlogon process handles interactive user logons & logoffs. It is notified t
 (Client/Server Runtime Subsystem Services - CSRSS.exe)
 
 
-Windows Boot Sequence and Process Hierarchy
+### Windows Boot Sequence and Process Hierarchy
+
 The Windows boot sequence transitions from low-level firmware and boot loaders to the complex world of the Operating System's process structure.
 
 The System process starts an instance of Smss.exe (the Session Manager), which remains running until system shutdown. That Smss.exe launches two new instances of Smss.exe, one in session 0 and one in session 1, which create processes in their respective sessions. Both of these instances end up exiting before a user logs on, so the initial Smss.exe always appears not to have child processes. The instance of Smss.exe in session 0 starts an instance of Csrss.exe (the “client-server runtime” Windows subsystem) in session 0 and Wininit.exe. Wininit.exe starts Services.exe (the Service Control Manager process) and Lsass.exe (the Local Security Authority subsystem). In session 1, Smss.exe starts a new instance of Csrss.exe and Winlogon.exe. Winlogon starts LogonUI.exe to prompt the interactive user for credentials, and then it starts Userinit.exe (which starts Explorer) after the user has authenticated. Both LogonUI and Userinit typically exit before the shell initializes and theuser can start Procexp. Most services are descendants of Services.exe; Services.exe does not host any services itself.
@@ -689,7 +728,9 @@ The boot trace correctly moves to wininit.exe, which focuses on getting the syst
  * WININIT (The Service Starter): wininit.exe does two crucial things:
    * It launches SERVICES.EXE (The Services Control Manager - SCM): The SCM is the central authority for managing all Windows services (starting, stopping, pausing, etc.). The SCM then reads the registry to determine which services should be started and launches them.
    * It launches LSASS.EXE (Local Security Authority Subsystem Service): lsass.exe is fundamental for enforcing the local security policy, handling user logons, creating access tokens, and managing Active Directory interactions.
-The Services Host and User Apps
+
+#### The Services Host and User Apps
+
  * SERVICES.EXE launches the first instance of SVCHOST.EXE (Service Host): Since DLLs are more memory-efficient than creating a new .exe process for every service, Microsoft groups multiple related services into a single svchost.exe process. This is why you see many svchost.exe instances running, each hosting a bundle of different services.
  * User Apps and the Final Chain: After the SCM launches necessary services (many hosted within svchost.exe), the final pieces of the UI environment are set up.
    * The SCM starts the Explorer Process (explorer.exe), which manages the desktop, taskbar, and shell.
@@ -708,14 +749,15 @@ A description of the steps taken by the system in an average process creation se
  * At this point, control is passed to LDRP_Initialize_TLS_Routines, which is an internal NTDLL.DLL routine responsible for initializing all statically linked DLLs currently loaded into the address space.
  * Once all DLLs are initialized, LDRpInitialize calls the thread's Real Initialization Routine, which is the BaseProcessStart function from Kernel32.DLL. This function in turn calls the executable's WinMain entry point, at which point the process has completed its initialization sequence.
 
-Native Component
+## Native Component
+
 NTDLL.DLL contains two function types:
  * System Service Dispatch Stubs to the Windows Executive System Services. These functions are exposed to the User Mode. Each of these functions contains the architecture-specific instruction that can cause a transition into Kernel Mode to invoke the system service dispatcher, which then calls the actual kernel-mode system service that contains the real code inside NTOSKRNL.EXE.
  * Internal Support Functions used by subsystems, subsystem DLLs, and other native images.
    * Support functions include: The Image Loader (functions that start with Ldr), Heap Manager functions, and common general Runtime Library Routines (functions that start with Rtl), support for User-Mode Asynchronous Procedure Calls (APC), and a subset of Client Runtime (CRT) Routines.
 Native in this context refers to images that are not tied to any particular subsystem. Some images (executables) don't belong to any subsystem. They don't link against a set of subsystem DLLs. Instead, they are exposed via NTDLL.
 
-The Environment Subsystem's Role
+## The Environment Subsystem's Role
 
 The role of an Environment Subsystem is to expose a subset of the bare Windows Executive system services to application programs. Each Executable Image ($\text{.exe}$) is bound to one and only one subsystem, indicated in the $\text{PE}$ Image header. When an Image is run, the process creation routine examines the subsystem type and notifies the proper subsystem of the new process.
 The libraries that programs link to do not call Windows kernel services directly. Instead, their high-level function calls are routed through one or more Subsystem DLLs (the API libraries), which then make the documented native system calls (e.g., through $\text{ntdll.dll}$). Subsystems are started by the Session Manager ($\text{smss.exe}$).
@@ -754,7 +796,7 @@ The main confusion stems from three related but distinct layers:
 Standard Windows applications using the CreateProcess (or its internal CreateProcessInternal) API cannot directly create processes that use the native subsystem image type (which typically includes system processes like the initial boot process or certain driver-loading processes). The high-level Windows API is designed to create standard Win32 user-mode processes, To bypass this restriction and allow certain system-level components to create a native process, the native library, Ntdll.dll, provides the RtlCreateUserProcess helper function. This function is essentially a user-mode wrapper that calls the lower-level, non-public kernel-mode function NtCreateUserProcess to successfully create a process with the native subsystem type. As its name suggests, NtCreateUserProcess is used for the creation of user-mode processes [there is a function with the same name (NtCreateUserProcess), part of the Executive; Kernel Mode]
 
 
-PROCESSES & JOBS
+## PROCESSES & JOBS
 
 The Windows API provides several functions for creating a process:
 * CreateProcess - which attempts to create a process with the same access token as the creating process.
@@ -772,7 +814,7 @@ The kernel debugger !process command displays a subset of info on a process obje
 The $\text{PEB}$ (Process Environment Block) resides in the user-mode address space of the process it describes. It contains information needed by the Image Loader, Heap Manager, and other Windows Components that need to access it from User Mode. It would be too expensive to expose all that info through system calls. The $\text{KPROCESS}$ and $\text{EPROCESS}$ structures are in Kernel Mode.
 The CSR_PROCESS structure contains info about processes that is specific to the Windows Subsystem ($\text{CSRSS}$). As such, only Windows applications have a CSR_PROCESS structure associated with them (for example, smss.exe does not). Because each session has its own instance of the subsystem, the CSR_PROCESS structures are maintained by the $\text{CSRSS}$ process within each individual session. The W32_PROCESS structure contains all the info that the Windows Graphics & Management code in the Kernel ($\text{Win32k.sys}$) needs to maintain state information about all processes that use at least one USER/GDI system call.
 
-PROTECTED PROCESSES
+## PROTECTED PROCESSES
 
 Protected Processes add significant access limitations to the access rights that other processes on the system can request, even when the process is running as a system privileged user. The Operating System will allow a process to be protected only if the Image file has been digitally signed with a special Windows Media Certificate. The Audio, Video, Graphics Processes, Windows Error Reporting ($\text{WER}$), and the System process itself are protected to preserve integrity. $\text{wmplayer.exe}$ is a protected process because protected music content can be decoded through it.
 At the kernel level, support for protected processes is twofold. The bulk of process creation occurs in Kernel Mode to avoid Injection Attacks. Protected processes have special bits set in their $\text{EPROCESS}$ structure—"Protection Locks"—that modify the behavior of security-related routines in the Process Manager to deny certain access rights that would normally be granted to Administrators. The only access rights that are granted for protected processes are PROCESS_QUERY_INFORMATION, PROCESS_TERMINATE, and PROCESS_SUSPEND_RESUME.
@@ -785,7 +827,7 @@ One possible way malware can attack a system is by injecting code inside a proce
 
 
 
-FLOW OF CREATE Process
+## FLOW OF CREATE Process
 
 Creating a Windows process consists of several stages carried out in three parts of the Operating System:
 1. Validate parameters and Subsystem flags, converting them to their native counterparts.
@@ -816,7 +858,7 @@ The PspCreateThread routine is responsible for all aspects of thread creation an
 1. PspAllocateThread handles the actual creation and initialization of the Executive Thread Object itself.
 2. PspInsertThread handles the creation of the thread handle and security attributes, and also calls KeStartThread to turn the Executive Thread Object ($\text{ETHREAD}$) into a schedulable thread.
 
-Process Completion, Termination, and Image Loader
+### Process Completion, Termination, and Image Loader
 
 Once NtCreateUserProcess returns a success code, the necessary Executive process and thread objects have been created, and CreateProcessInternalW then performs subsequent operations related to Windows Subsystem-specific initialization to finish initializing the process.
 Among many of these operations:
@@ -829,14 +871,14 @@ Among many of these operations:
 At this point, the process has been allocated, the process has a thread, and the Windows Subsystem knows about the new process.
 The new thread begins life running the kernel-mode thread startup routine KeStartUserThread, which lowers the thread's IRQL (Interrupt Request Level) from DPC (Deferred Procedure Call) level to an APC (Asynchronous Procedure Call) level and then calls the system initial thread routine PspUserThreadStart. The user-specified thread start address is passed as a parameter to the routine. PspUserThreadStart uses the address of the actual image entry point and start parameter and calls the application's entry point. These two parameters have also already been pushed onto the stack by the kernel.
 
-Terminating a Process
+#### Terminating a Process
 
 A process can exit gracefully by calling the ExitProcess function. The process startup code for the first thread calls ExitProcess on the process's behalf when the thread returns from its main function. Graceful Termination means that DLLs loaded into the process get a chance to do some work by getting notified of the process exit using a call to their DllMain function with the DLL_PROCESS_DETACH reason.
 * ExitProcess can be called only by the process itself asking to exit.
 Ungraceful Termination of a process is possible using the TerminateProcess function, which can be called from outside the process. TerminateProcess requires a handle to the process that is opened with the PROCESS_TERMINATE access mask, which may or may not be granted. That's why it's not easy (or impossible) to terminate some processes (e.g., csrss.exe) because the handle with the required access mask cannot be obtained by the requesting user. "Ungraceful" means DLLs don't get a chance to execute code ($\text{DLL_PROCESS_DETACH}$ is not sent) and all threads are terminated abruptly. This can lead to data loss in some cases.
 In whatever way a process ceases to exist, there can never be memory leaks because all the process's private memory is freed automatically by the kernel, the address space is destroyed, and all handles to kernel objects are closed. If open handles to the process still exist, then other processes can still get access to some process-related info (e.g., GetExitCodeProcess). Once these handles are closed, the $\text{EPROCESS}$ structure is properly killed.
 
-Image Loader (LDR)
+### Image Loader (LDR)
 
 Most of the actual initialization work is done outside the kernel by the Image Loader, internally referred to as LDR, which lives in the User-Mode system DLL ($\text{NTDLL.DLL}$). What makes it special is the guarantee that it will always be present in the running process (i.e., $\text{NTDLL}$ is always loaded). LDR is the first piece of code to run in user mode as part of a new process. Although the loader runs before the actual application code, its initialization tasks are hidden. A program typically does interact with its interfaces during the runtime of a program via loading/unloading of DLLs.
 The tasks performed by LDR are critical:
@@ -851,7 +893,7 @@ The tasks performed by LDR are critical:
 Most of these tasks are critical to enabling an application to actually run its code.
 
 
-Binary Planting & DLL Preload Attack $\rightarrow$ Safe Search Mode
+#### Binary Planting & DLL Preload Attack $\rightarrow$ Safe Search Mode
 
 To prevent security risks associated with DLL Preload Attacks (or Binary Planting), Windows checks directories in a specific order to find the DLL file it needs.
 The traditional "DLL Name Resolution & Redirection Search Path" is a list of locations that is searched sequentially for a file with a matching name. To mitigate the security risks associated with this behavior, Safe Search Mode was introduced to the path search component.
@@ -868,7 +910,7 @@ Callers can also modify the DLL Search path for specific load operations by supp
 These flags can be set globally using the SetDefaultDllDirectories API, which will affect all library loads from that point on globally.
 The search-path order can also be affected if the application is a packaged application ($\text{UWP}$). In this case, the LoadPackagedLibrary API is used. The package-based search graph is computed based on the <packageDependency> entries in the UWP App Manifest file's <Dependencies> section, guaranteeing that no arbitrary DLL can accidentally load in the package before doing the normal search.
 
-DLL Name Redirection
+#### DLL Name Redirection
 
 DLL Name Redirection is Windows' way of intercepting or re-routing loading to a different file or location.
 1. WinAPI Set Redirection: This mechanism allowed different versions/editions of Windows to change the binary exports for a given API in a manner that is transparent to applications, by introducing the concept of "contracts" (e.g., modern apps target specific API contracts).
@@ -876,7 +918,7 @@ DLL Name Redirection is Windows' way of intercepting or re-routing loading to a 
 3. Fusion ($\text{SxS}$) Redirection: This allows components to express more detailed binary dependency information (versioning info) by embedding binary resources known as manifests. Since multiple versions of the same DLL often exist, Fusion lets each app specify which version it needs using a manifest (a small $\text{XML}$ file embedded inside the $\text{EXE}$). Windows then loads the exact version from the Win SxS (Side-by-Side) Store.
 4. Known DLL Redirection: This is a mechanism that maps specific DLL base names to files in the system directory, preventing the DLL from being replaced with an alternate version in a different location.
 
-Loader Module Database
+#### Loader Module Database
 
 The loader maintains a list of all modules that have been loaded by a process—the "Loaded Modules Database".
 This information is stored in the $\text{PEB}$ (Process Environment Block) in a substructure identified by LDR and called PEB_LDR_DATA. The routine maintains three doubly linked lists containing structures called Loader Data Table Entries ($\text{LDR_DATA_TABLE_ENTRY}$) that store information about each module.
@@ -884,7 +926,7 @@ The kernel also employs its own loader for drivers and dependent DLLs, with a si
 To dump the kernel's module database, you can use the kernel debugger command: dt nt!_KLDR_DATA_TABLE_ENTRY nt!PsActiveModuleList.
 
 
-Import Parsing
+#### Import Parsing
 
 The Image Loader (LDR), which is the first piece of User-Mode code to run, performs critical steps to get the application ready:
 1. Load each DLL referenced in the Import Table of the process's executable Image.
@@ -899,7 +941,7 @@ The Image Loader (LDR), which is the first piece of User-Mode code to run, perfo
 The complete recursive process flow for the LDR is:
 1. Load each DLL in the Import Table $\rightarrow$ 2. Check if the DLL is already loaded $\rightarrow$ 3. Find the DLL (Search path/Known DLLs) $\rightarrow$ 4. Relocation $\rightarrow$ 5. Add to loader's database $\rightarrow$ 6. Recursing Imports $\rightarrow$ 7. Fill in $\text{IAT}$ $\rightarrow$ 8. Bound Imports $\rightarrow$ 9. Forwarders.
 
-Post-Import Process Initialization
+#### Post-Import Process Initialization
 
 Once all imports are loaded ($\text{LdrInitState} \rightarrow 2$), the process proceeds through final initialization steps ($\text{LdrInitState} \rightarrow 3, 4$):
 1. Debugger Breakpoint triggered (if present).
@@ -911,7 +953,7 @@ Once all imports are loaded ($\text{LdrInitState} \rightarrow 2$), the process p
 7. $\text{ETW}$ event logged.
 8. Stack Memory Committed.
 
-Switchback and API Sets
+### Switchback and API Sets
 
 SWITCHBACK: A Compatibility Time Machine
 
@@ -952,19 +994,19 @@ The following are some of the CPU, memory, Disk, and I/O-related limits you can 
 A Job Object is created using the CreateJobObject API; it's initially created empty of any processes. To add processes to a Job, call the AssignProcessToJobObject API, which can be called multiple times to add multiple processes to the Job.
 The SetInformationJobObject API allows setting of the limits and contains internal Information Classes used for management. These values can be read back with QueryInformationJobObject, which provides interested parties with the limits set on a Job. TerminateJobObject terminates all processes in the Job, similar to calling TerminateProcess on each process.
 
-Nested Jobs
+#### Nested Jobs
 
 Starting with Windows 8 and Server 2012, a process can be associated with multiple Jobs, effectively creating a hierarchy known as Nested Jobs, where a child Job holds a subset of processes of its parent Job. Once a process is added to more than one Job, the system tries to form a hierarchy, if possible.
 A current restriction is that Jobs cannot form a hierarchy if any of them set User-Interface limits.
 Job limits for a child Job cannot be more permissive than its parent, but they can be more restrictive.
 
-Job Notifications
+#### Job Notifications
 
 Jobs can be associated with an I/O Completion Port Object, which other threads might be waiting for. This allows interested parties (typically the Job creator) to monitor for limit violations and events that would affect the Job's security (e.g., a new process being created or abnormally exiting).
 Any notification that targets the I/O Completion Port of a Job will be sent to the Job and all its ancestors (the Job itself does not have to have the I/O Completion Port for the notification to be sent to its ancestors).
 You can view unnamed Jobs with the kernel debugger command $\rightarrow$ !job or dt nt!_ejob.
 
-Windows Containers (Server Silos)
+### Windows Containers (Server Silos)
 
 Windows Containers (Server Silos)—unlike Hyper-V Containers, which leverage a full virtualized environment—provide a second "instance" of all User-Mode components while running on top of the same kernel and drivers. At the cost of some security, this provides a much more lightweight container environment which Microsoft Windows uses to implement containerization at the OS level, similarly to Linux namespaces and cgroups but adapted for the NT Kernel.
 For simplicity, this is a Docker-like container environment on Windows, but instead of full virtualization, it uses a deep isolation layer built into the Windows Kernel. Therefore, Windows Containers fill the same role as Docker but for Windows-based apps (e.g., $\text{IIS}$ server, .NET, COM+ server, $\text{WCF}$).
@@ -981,7 +1023,7 @@ A Silo represents an isolation boundary in the Windows Kernel where each contain
 This results in the Silo Flag being set inside the $\text{EJOB}$ object, and the allocation of the SLS (Silo Local Storage) slots are triggered by the Job creation. The CreateJobObject API, specifically the SetInformationJobObject API, is used with the JobObjectCreateSiloInformation class to initiate the creation of a Silo.
 A Silo can actually host two types of silos: App Silos and Server Silos.
 
-Server Silo Components
+#### Server Silo Components
 
 The first element that defines a Server Silo is the existence of a custom Object Manager Namespace. All application-visible named objects (files, registry keys, events, mutexes, $\text{RPC}$ ports, and more) reside in a Root Namespace, which allows applications to create, locate, and share these objects among themselves.
 The ability for a Server Silo to have its own Root Namespace means that all access to any named object can be controlled in three ways:
@@ -1001,7 +1043,7 @@ It's important to create additional isolation boundaries, which the kernel provi
 4. Logon Session.
 5. $\text{ETW}$ Tracing and logger context.
 
-Silo Context Mechanism
+#### Silo Context Mechanism
 
 Each Server Silo gets its own copy of certain Kernel State which is stored and tracked using the Silo Context Mechanism.
 A Silo Context refers to a storage slot inside the kernel that holds data specific to that container. When a new Server Silo (container) is created:
@@ -1011,11 +1053,11 @@ A Silo Context refers to a storage slot inside the kernel that holds data specif
 The kernel API PsCreateSiloContext lets a component register or attach a silo-specific data pointer: $\text{NTSTATUS PsCreateSiloContext}(\text{ULONG SiloIndex}, \text{PVOID ContextData})$.
 Silo Contexts make kernel-level multi-tenancy possible, acting as an internal data partitioning system.
 
-Root Host Silo
+#### Root Host Silo
 
 What happens with the Network driver that runs on the Host itself? Windows defines a "Root Host Silo". Even though the host system ($\text{Session 0}$) isn't a container, it pretends to be one and will be represented internally by the global structure PspHostSiloGlobals. Every time the kernel asks, "What's the current Silo context?" and finds a NULL, it just defaults to the Host's Silo context. This ensures all code paths—both for containers and the Host—can use the same logic.
 
-Silo Monitors
+#### Silo Monitors
 
 Silo Monitors is a notification or registration mechanism built into the Windows kernel that lets drivers "subscribe" to Silo lifecycle events. Drivers can register as silo monitors using the following APIs: PsRegisterSiloMonitor, PsStartSiloMonitor, and PsUnregisterSiloMonitor. When you register, the kernel immediately informs you of:
 * All existing Silos.

@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { getDocBySlug, getDocsInDirectory, getAdjacentDocs, getGitHubUrl, getAllStaticPaths } from '@/lib/content'
 import dynamic from 'next/dynamic'
 import rehypeHighlight from 'rehype-highlight'
@@ -14,12 +14,12 @@ import 'highlight.js/styles/github-dark.css'
 
 // Lazy load heavy components
 const ReactMarkdown = dynamic(() => import('react-markdown'), {
-  loading: () => <div className="animate-pulse bg-gray-100 dark:bg-gray-800 rounded h-96" />,
+  loading: () => <div className="animate-pulse bg-slate-100 dark:bg-slate-800 rounded h-96" />,
   ssr: true,
 })
 
 const Mermaid = dynamic(() => import('@/components/Mermaid'), {
-  loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-800 animate-pulse rounded" />,
+  loading: () => <div className="h-64 bg-slate-100 dark:bg-slate-800 animate-pulse rounded" />,
   ssr: false,
 })
 
@@ -31,6 +31,11 @@ interface DocPageProps {
 
 export default async function DocPage({ params }: DocPageProps) {
   const normalizedSlug = params.slug.map(segment => segment.replace(/\.md$/i, ''))
+  const lastSegment = normalizedSlug[normalizedSlug.length - 1]
+  if (lastSegment && /^readme$/i.test(lastSegment)) {
+    const redirectSlug = normalizedSlug.slice(0, -1)
+    redirect(`/docs/${redirectSlug.join('/')}`)
+  }
   const doc = getDocBySlug(normalizedSlug)
   
   // If not a file, check if it's a directory and show index
@@ -41,7 +46,7 @@ export default async function DocPage({ params }: DocPageProps) {
       // Render directory index
       return (
         <div className="w-full">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl py-8 lg:py-12">
+          <div className="container mx-0 px-4 sm:px-6 lg:px-6 max-w-4xl py-8 lg:py-12">
             <Breadcrumb slug={normalizedSlug} />
             <h1 className="text-3xl md:text-4xl font-bold mb-8">
               {normalizedSlug[normalizedSlug.length - 1]
@@ -58,13 +63,13 @@ export default async function DocPage({ params }: DocPageProps) {
                 <Link
                   key={doc.slug.join('/')}
                   href={`/docs/${doc.slug.join('/')}`}
-                  className="block p-6 border border-gray-200 dark:border-gray-800 rounded-lg hover:border-blue-500 dark:hover:border-blue-500 transition-colors"
+                  className="block p-6 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-blue-500 dark:hover:border-blue-500 transition-colors"
                 >
                   <h2 className="text-xl font-semibold mb-2">
                     {doc.meta.title || doc.slug[doc.slug.length - 1]}
                   </h2>
                   {doc.meta.description && (
-                    <p className="text-gray-600 dark:text-gray-400">
+                    <p className="text-slate-600 dark:text-slate-400">
                       {doc.meta.description}
                     </p>
                   )}
@@ -108,8 +113,8 @@ export default async function DocPage({ params }: DocPageProps) {
 
   return (
     <div className="w-full">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-        <div className="flex gap-8 py-8 lg:py-12">
+      <div className="container mx-0 px-4 sm:px-6 lg:px-6 max-w-7xl">
+        <div className="flex gap-6 py-8 lg:py-12">
           {/* Main Content */}
           <div className="flex-1 min-w-0 max-w-4xl">
             <Breadcrumb slug={normalizedSlug} />
@@ -117,7 +122,7 @@ export default async function DocPage({ params }: DocPageProps) {
             <article className="prose prose-slate dark:prose-invert max-w-none prose-headings:scroll-mt-24 prose-img:rounded-lg">
               <h1>{title}</h1>
               {doc.meta.description && (
-                <p className="text-xl text-gray-600 dark:text-gray-400">
+                <p className="text-xl text-slate-600 dark:text-slate-400">
                   {doc.meta.description}
                 </p>
               )}

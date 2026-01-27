@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Sidebar from '@/components/Sidebar'
 import TopNav from '@/components/TopNav'
 import type { SidebarItem } from '@/lib/sidebar'
@@ -12,6 +12,20 @@ interface LayoutClientProps {
 
 export default function LayoutClient({ children, sidebarData }: LayoutClientProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(false)
+
+  // Load collapsed state from localStorage on mount
+  useEffect(() => {
+    const savedCollapsed = localStorage.getItem('academy-sidebar-collapsed')
+    if (savedCollapsed !== null) {
+      setIsCollapsed(savedCollapsed === 'true')
+    }
+  }, [])
+
+  // Save collapsed state to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('academy-sidebar-collapsed', String(isCollapsed))
+  }, [isCollapsed])
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen)
@@ -19,6 +33,10 @@ export default function LayoutClient({ children, sidebarData }: LayoutClientProp
 
   const closeSidebar = () => {
     setIsSidebarOpen(false)
+  }
+
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed)
   }
 
   return (
@@ -29,8 +47,10 @@ export default function LayoutClient({ children, sidebarData }: LayoutClientProp
           data={sidebarData} 
           isOpen={isSidebarOpen} 
           onClose={closeSidebar}
+          isCollapsed={isCollapsed}
+          onToggleCollapse={toggleCollapse}
         />
-        <main className="flex-1 min-w-0 lg:ml-0">
+        <main className={`flex-1 min-w-0 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-72'}`}>
           {children}
         </main>
       </div>

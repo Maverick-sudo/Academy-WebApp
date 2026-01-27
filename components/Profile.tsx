@@ -2,16 +2,17 @@ import { Code2, Briefcase, GraduationCap, Award, Wrench } from 'lucide-react'
 
 export default function Profile() {
   return (
-    <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-gradient-to-br from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 overflow-hidden">
+    <div className="rounded-lg border border-slate-200 dark:border-[var(--border)] bg-[var(--card)] overflow-hidden">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-700 dark:to-indigo-700 px-8 py-10">
-        <h2 className="text-3xl font-bold text-white mb-3">Professional Summary</h2>
-        <div className="h-1 w-24 bg-white/30 rounded-full"></div>
+      <div className="bg-[var(--card)] px-8 py-5 border-b border-slate-200 dark:border-[var(--border)] text-center">
+        <h2 className="text-xl sm:text-2xl font-semibold tracking-tight bg-gradient-to-r from-blue-500 via-blue-400 to-blue-500 bg-clip-text text-transparent after:content-[''] after:block after:mx-auto after:mt-2 after:h-0.5 after:w-14 after:rounded-full after:bg-blue-500/70">
+          Professional Summary
+        </h2>
       </div>
 
-      <div className="p-8 space-y-8">
+      <div className="p-8 space-y-6">
         {/* Summary */}
-        <div className="space-y-4 text-gray-700 dark:text-gray-300 leading-relaxed">
+        <div className="space-y-4 text-slate-700 dark:text-slate-300 leading-relaxed">
           <p>
             I&apos;m a multi-disciplinary <strong>Full-Stack Software Engineer</strong> with 7+ years of hands-on experience building scalable, secure, and reliable systems. My journey started in network engineering and cybersecurity, which gave me something most developers don&apos;t have: an instinct for thinking like an attacker while building like a defender. That foundation taught me to design systems that are secure-by-design, not as an afterthought.
           </p>
@@ -21,7 +22,7 @@ export default function Profile() {
           <p>
             I&apos;m known for combining deep technical rigor with practical execution. What sets me apart is my belief in the power of <strong>&apos;Engineering Excellence.&apos;</strong> By leveraging AI-assisted development (Cursor, Claude, Copilot)—not as a crutch, but as a force multiplier. I&apos;ve accelerated development cycles by 40% while maintaining code quality, because I understand that velocity without reliability is just technical debt in motion.
           </p>
-          <p className="text-lg font-semibold text-gray-900 dark:text-gray-100 italic border-l-4 border-blue-500 pl-4">
+          <p className="text-lg font-semibold text-slate-900 dark:text-slate-100 italic border-l-4 border-blue-600 pl-4">
             Bottom line: I don&apos;t just build applications; I engineer resilient digital ecosystems. I build software that solves real problems, scales with your growth, and doesn&apos;t wake you up at night.
           </p>
         </div>
@@ -30,7 +31,9 @@ export default function Profile() {
         <div>
           <div className="flex items-center gap-3 mb-4">
             <Briefcase className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Experience Highlights</h3>
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100 relative inline-block after:absolute after:left-0 after:-bottom-2 after:h-0.5 after:w-full after:bg-blue-600/60 dark:after:bg-blue-400/50">
+              Experience Highlights
+            </h3>
           </div>
           <div className="grid gap-3">
             {[
@@ -45,9 +48,9 @@ export default function Profile() {
               "Mentor junior developers and conduct code reviews",
               "Architect cloud-native solutions on AWS and Azure"
             ].map((item, idx) => (
-              <div key={idx} className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors">
-                <span className="text-blue-500 dark:text-blue-400 mt-1 flex-shrink-0">▸</span>
-                <span className="text-gray-700 dark:text-gray-300">{item}</span>
+              <div key={idx} className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors">
+                <span className="text-blue-600 dark:text-blue-400 mt-1 flex-shrink-0">▸</span>
+                <span className="text-slate-700 dark:text-slate-300">{item}</span>
               </div>
             ))}
           </div>
@@ -57,7 +60,9 @@ export default function Profile() {
         <div>
           <div className="flex items-center gap-3 mb-4">
             <Wrench className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Technical Skills</h3>
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100 relative inline-block after:absolute after:left-0 after:-bottom-2 after:h-0.5 after:w-full after:bg-blue-600/60 dark:after:bg-blue-400/50">
+              Technical Skills
+            </h3>
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             <SkillCategory 
@@ -91,7 +96,9 @@ export default function Profile() {
         <div>
           <div className="flex items-center gap-3 mb-6">
             <Code2 className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Professional Experience</h3>
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100 relative inline-block after:absolute after:left-0 after:-bottom-2 after:h-0.5 after:w-full after:bg-blue-600/60 dark:after:bg-blue-400/50">
+              Professional Experience
+            </h3>
           </div>
           <div className="space-y-6">
             <ExperienceCard
@@ -140,12 +147,14 @@ export default function Profile() {
           <div>
             <div className="flex items-center gap-3 mb-4">
               <GraduationCap className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Education</h3>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 relative inline-block after:absolute after:left-0 after:-bottom-2 after:h-0.5 after:w-full after:bg-blue-600/50 dark:after:bg-blue-400/40">
+                Education
+              </h3>
             </div>
-            <div className="p-4 rounded-lg bg-gray-100 dark:bg-gray-800/50">
-              <p className="font-semibold text-gray-900 dark:text-gray-100">Bachelor of Science in Computer Science</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">2017</p>
-              <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">
+            <div className="p-4 rounded-lg bg-slate-100 dark:bg-slate-800/50">
+              <p className="font-semibold text-slate-900 dark:text-slate-100">Bachelor of Science in Computer Science</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">2017</p>
+              <p className="text-sm text-slate-700 dark:text-slate-300 mt-2">
                 Focus: Data Structures, Algorithms, Network Security, and Distributed Systems
               </p>
             </div>
@@ -154,7 +163,9 @@ export default function Profile() {
           <div>
             <div className="flex items-center gap-3 mb-4">
               <Award className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Key Achievements</h3>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 relative inline-block after:absolute after:left-0 after:-bottom-2 after:h-0.5 after:w-full after:bg-blue-600/50 dark:after:bg-blue-400/40">
+                Key Achievements
+              </h3>
             </div>
             <div className="space-y-3">
               <AchievementBadge text="Migrated monolithic apps to microservices — 10x deployment frequency" />
@@ -171,8 +182,8 @@ export default function Profile() {
 // Utility Components
 function SkillCategory({ title, skills }: { title: string; skills: string[] }) {
   return (
-    <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/30 border border-gray-200 dark:border-gray-700">
-      <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 text-sm uppercase tracking-wide">
+    <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700">
+      <h4 className="font-semibold text-slate-900 dark:text-slate-100 mb-3 text-sm uppercase tracking-wide">
         {title}
       </h4>
       <div className="flex flex-wrap gap-2">
@@ -201,18 +212,18 @@ function ExperienceCard({
   achievements: string[]
 }) {
   return (
-    <div className="p-5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/30 hover:shadow-lg dark:hover:shadow-blue-900/20 transition-shadow">
+    <div className="p-5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/30 hover:border-blue-600 dark:hover:border-blue-500 transition-colors">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-3">
         <div>
-          <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100">{title}</h4>
+          <h4 className="text-lg font-bold text-slate-900 dark:text-slate-100">{title}</h4>
           <p className="text-blue-600 dark:text-blue-400 font-medium">{company}</p>
         </div>
-        <span className="text-sm text-gray-600 dark:text-gray-400 mt-1 md:mt-0">{period}</span>
+        <span className="text-sm text-slate-600 dark:text-slate-400 mt-1 md:mt-0">{period}</span>
       </div>
       <ul className="space-y-2 mt-3">
         {achievements.map((achievement, idx) => (
-          <li key={idx} className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
-            <span className="text-blue-500 dark:text-blue-400 mt-0.5 flex-shrink-0">●</span>
+          <li key={idx} className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300">
+            <span className="text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0">●</span>
             <span>{achievement}</span>
           </li>
         ))}
@@ -223,9 +234,9 @@ function ExperienceCard({
 
 function AchievementBadge({ text }: { text: string }) {
   return (
-    <div className="flex items-start gap-2 p-3 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800">
+    <div className="flex items-start gap-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
       <span className="text-blue-600 dark:text-blue-400 text-lg flex-shrink-0">✓</span>
-      <span className="text-sm text-gray-700 dark:text-gray-300">{text}</span>
+      <span className="text-sm text-slate-700 dark:text-slate-300">{text}</span>
     </div>
   )
 }

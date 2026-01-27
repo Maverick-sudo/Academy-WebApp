@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { ThemeToggle } from './ThemeProvider'
 import Search from './Search'
 import { Menu } from 'lucide-react'
@@ -11,18 +12,19 @@ interface TopNavProps {
 
 export default function TopNav({ onMenuClick }: TopNavProps) {
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-950/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-gray-950/60">
+    <header className="sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--sidebar)]">
       <div className="container flex h-16 items-center px-4 md:px-8">
         {/* Mobile menu button - More visible */}
         <button
           onClick={onMenuClick}
-          className="lg:hidden mr-3 p-2.5 rounded-lg bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white shadow-md transition-all hover:shadow-lg active:scale-95"
+          className="lg:hidden mr-3 p-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400 text-white transition-colors"
           aria-label="Toggle sidebar"
         >
           <Menu className="w-5 h-5" />
         </button>
-        <Link href="/" className="flex items-center space-x-2">
-          <span className="text-xl font-bold">Academy</span>
+        <Link href="/" className="flex items-center">
+          <Image src="/favicon.ico" alt="Academy" width={24} height={24} className="w-6 h-6 rounded" />
+          <span className="sr-only">Academy</span>
         </Link>
 
         <div className="flex flex-1 items-center justify-end space-x-4">

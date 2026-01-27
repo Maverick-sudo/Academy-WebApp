@@ -31,14 +31,14 @@ export default function Breadcrumb({ slug }: BreadcrumbProps) {
   return (
     <div className="mb-6">
       <div className="flex items-center justify-between gap-3 mb-2">
-        <nav className={`flex flex-wrap items-center gap-2 text-sm text-gray-600 dark:text-gray-400 transition-all ${
+        <nav className={`flex flex-wrap items-center gap-2 text-sm text-slate-600 dark:text-slate-400 transition-all ${
           isCollapsed ? 'opacity-50' : 'opacity-100'
         }`}>
           {isCollapsed ? (
             // Show only last item when collapsed
             <div className="flex items-center">
-              <span className="text-gray-400 dark:text-gray-600 mr-2">...</span>
-              <span className="font-medium text-gray-900 dark:text-gray-100 truncate max-w-[200px] md:max-w-none">
+              <span className="text-slate-400 dark:text-slate-600 mr-2">...</span>
+              <span className="font-medium text-slate-900 dark:text-slate-100 truncate max-w-[200px] md:max-w-none">
                 {breadcrumbs[breadcrumbs.length - 1].label}
               </span>
             </div>
@@ -57,7 +57,7 @@ export default function Breadcrumb({ slug }: BreadcrumbProps) {
                   </svg>
                 )}
                 {index === breadcrumbs.length - 1 ? (
-                  <span className="font-medium text-gray-900 dark:text-gray-100 truncate max-w-[150px] md:max-w-none">
+                  <span className="font-medium text-slate-900 dark:text-slate-100 truncate max-w-[150px] md:max-w-none">
                     {crumb.label}
                   </span>
                 ) : (
@@ -76,7 +76,7 @@ export default function Breadcrumb({ slug }: BreadcrumbProps) {
         {/* Breadcrumb Toggle Button */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="flex-shrink-0 p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+          className="flex-shrink-0 p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
           aria-label={isCollapsed ? 'Expand breadcrumb' : 'Collapse breadcrumb'}
           title={isCollapsed ? 'Expand breadcrumb' : 'Collapse breadcrumb'}
         >

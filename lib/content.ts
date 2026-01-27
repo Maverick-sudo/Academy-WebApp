@@ -4,9 +4,22 @@ import matter from 'gray-matter'
 
 const contentDir = path.join(process.cwd(), 'content')
 
-// In-memory cache for parsed content (dev only)
+// In-memory cache for parsed content (enabled outside development)
+const shouldCache = process.env.NODE_ENV !== 'development'
 const contentCache = new Map<string, Doc>()
-const shouldCache = process.env.NODE_ENV === 'development'
+const fileParseCache = new Map<string, { data: DocMeta; content: string }>()
+const markdownFilesCache = new Map<string, string[]>()
+const fileTreeCache = new Map<string, FileTreeNode[]>()
+const docsInDirCache = new Map<string, Doc[]>()
+const allDocsCache = new Map<string, Doc[]>()
+let allDocsForSearchCache: Array<{
+  slug: string[]
+  title: string
+  description?: string
+  content: string
+}> | null = null
+let staticPathsCache: string[][] | null = null
+let contentHealthCache: ContentHealth | null = null
 
 function parseMatterSafe(raw: string, filePath: string) {
   try {
@@ -15,6 +28,22 @@ function parseMatterSafe(raw: string, filePath: string) {
     console.error(`Frontmatter parse failed for ${filePath}:`, error)
     return { data: {}, content: raw }
   }
+}
+
+function readAndParseFile(filePath: string): { data: DocMeta; content: string } {
+  if (shouldCache && fileParseCache.has(filePath)) {
+    return fileParseCache.get(filePath)!
+  }
+
+  const fileContents = fs.readFileSync(filePath, 'utf8')
+  const { data, content } = parseMatterSafe(fileContents, filePath)
+  const result = { data: data as DocMeta, content }
+
+  if (shouldCache) {
+    fileParseCache.set(filePath, result)
+  }
+
+  return result
 }
 
 export interface DocMeta {
@@ -40,7 +69,25 @@ export interface FileTreeNode {
   meta?: DocMeta
 }
 
+export interface ContentHealthRepo {
+  name: string
+  exists: boolean
+  docCount: number
+  readmeExists: boolean
+}
+
+export interface ContentHealth {
+  ok: boolean
+  totalDocs: number
+  repos: ContentHealthRepo[]
+  errors: string[]
+}
+
 export function getMarkdownFiles(dir: string, baseDir: string = dir): string[] {
+  if (shouldCache && baseDir === dir && markdownFilesCache.has(dir)) {
+    return markdownFilesCache.get(dir)!
+  }
+
   const files: string[] = []
   
   if (!fs.existsSync(dir)) {
@@ -62,10 +109,19 @@ export function getMarkdownFiles(dir: string, baseDir: string = dir): string[] {
     }
   }
 
+  if (shouldCache && baseDir === dir) {
+    markdownFilesCache.set(dir, files)
+  }
+
   return files
 }
 
 export function buildFileTree(dir: string, relativePath: string = ''): FileTreeNode[] {
+  const cacheKey = `${dir}:${relativePath}`
+  if (shouldCache && fileTreeCache.has(cacheKey)) {
+    return fileTreeCache.get(cacheKey)!
+  }
+
   const tree: FileTreeNode[] = []
   
   if (!fs.existsSync(dir)) {
@@ -100,8 +156,7 @@ export function buildFileTree(dir: string, relativePath: string = ''): FileTreeN
       }
     } else if (item.endsWith('.md')) {
       try {
-        const fileContents = fs.readFileSync(fullPath, 'utf8')
-        const { data } = parseMatterSafe(fileContents, fullPath)
+        const { data } = readAndParseFile(fullPath)
         
         tree.push({
           name: item.replace(/\.md$/, ''),
@@ -115,13 +170,17 @@ export function buildFileTree(dir: string, relativePath: string = ''): FileTreeN
     }
   }
 
+  if (shouldCache) {
+    fileTreeCache.set(cacheKey, tree)
+  }
+
   return tree
 }
 
 export function getDocBySlug(slug: string[]): Doc | null {
   const cacheKey = slug.join('/')
   
-  // Check cache first (dev only)
+  // Check cache first
   if (shouldCache && contentCache.has(cacheKey)) {
     return contentCache.get(cacheKey)!
   }
@@ -135,8 +194,7 @@ export function getDocBySlug(slug: string[]): Doc | null {
 
   for (const filePath of possiblePaths) {
     if (fs.existsSync(filePath)) {
-      const fileContents = fs.readFileSync(filePath, 'utf8')
-      const { data, content } = parseMatterSafe(fileContents, filePath)
+      const { data, content } = readAndParseFile(filePath)
 
       const doc = {
         slug,
@@ -145,7 +203,7 @@ export function getDocBySlug(slug: string[]): Doc | null {
         filePath,
       }
       
-      // Cache the result (dev only)
+      // Cache the result
       if (shouldCache) {
         contentCache.set(cacheKey, doc)
       }
@@ -158,6 +216,10 @@ export function getDocBySlug(slug: string[]): Doc | null {
 }
 
 export function getAllDocs(folder: string): Doc[] {
+  if (shouldCache && allDocsCache.has(folder)) {
+    return allDocsCache.get(folder)!
+  }
+
   const docsDir = path.join(contentDir, folder)
   
   if (!fs.existsSync(docsDir)) {
@@ -169,13 +231,12 @@ export function getAllDocs(folder: string): Doc[] {
 
   for (const file of files) {
     const fullPath = path.join(docsDir, file)
-    const fileContents = fs.readFileSync(fullPath, 'utf8')
-    const { data, content } = parseMatterSafe(fileContents, fullPath)
+    const { data, content } = readAndParseFile(fullPath)
     
-    const slug = file
+    const normalized = file
       .replace(/\.md$/, '')
       .replace(/\/README$/i, '')
-      .split('/')
+    const slug = /^README$/i.test(normalized) ? [] : normalized.split('/')
 
     docs.push({
       slug: [folder, ...slug],
@@ -185,12 +246,20 @@ export function getAllDocs(folder: string): Doc[] {
     })
   }
 
+  if (shouldCache) {
+    allDocsCache.set(folder, docs)
+  }
+
   return docs
 }
 /**
  * Get all possible slug paths for static generation
  */
 export function getAllStaticPaths(): string[][] {
+  if (shouldCache && staticPathsCache) {
+    return staticPathsCache
+  }
+
   const paths: string[][] = []
   
   // Get all docs from all repositories
@@ -207,10 +276,10 @@ export function getAllStaticPaths(): string[][] {
     const files = getMarkdownFiles(repoPath)
     
     for (const file of files) {
-      const slug = file
+      const normalized = file
         .replace(/\.md$/, '')
         .replace(/\/README$/i, '')
-        .split('/')
+      const slug = /^README$/i.test(normalized) ? [] : normalized.split('/')
       
       paths.push([repo, ...slug])
     }
@@ -228,10 +297,19 @@ export function getAllStaticPaths(): string[][] {
     addDirectoryPaths(tree)
   }
   
+  if (shouldCache) {
+    staticPathsCache = paths
+  }
+
   return paths
 }
 export function getDocsInDirectory(slug: string[]): Doc[] {
   const dirPath = path.join(contentDir, ...slug)
+  const cacheKey = slug.join('/')
+
+  if (shouldCache && docsInDirCache.has(cacheKey)) {
+    return docsInDirCache.get(cacheKey)!
+  }
   
   if (!fs.existsSync(dirPath) || !fs.statSync(dirPath).isDirectory()) {
     return []
@@ -245,8 +323,7 @@ export function getDocsInDirectory(slug: string[]): Doc[] {
     const stat = fs.statSync(itemPath)
 
     if (stat.isFile() && item.endsWith('.md')) {
-      const fileContents = fs.readFileSync(itemPath, 'utf8')
-      const { data, content } = parseMatterSafe(fileContents, itemPath)
+      const { data, content } = readAndParseFile(itemPath)
       const itemSlug = [...slug, item.replace(/\.md$/, '')]
 
       docs.push({
@@ -258,8 +335,7 @@ export function getDocsInDirectory(slug: string[]): Doc[] {
     } else if (stat.isDirectory() && !item.startsWith('.')) {
       const readmePath = path.join(itemPath, 'README.md')
       if (fs.existsSync(readmePath)) {
-        const fileContents = fs.readFileSync(readmePath, 'utf8')
-        const { data, content } = parseMatterSafe(fileContents, readmePath)
+        const { data, content } = readAndParseFile(readmePath)
         const itemSlug = [...slug, item]
 
         docs.push({
@@ -270,6 +346,10 @@ export function getDocsInDirectory(slug: string[]): Doc[] {
         })
       }
     }
+  }
+
+  if (shouldCache) {
+    docsInDirCache.set(cacheKey, docs)
   }
 
   return docs
@@ -290,6 +370,10 @@ export function getAllDocsForSearch(): Array<{
   description?: string
   content: string
 }> {
+  if (shouldCache && allDocsForSearchCache) {
+    return allDocsForSearchCache
+  }
+
   const repos = ['automation', 'CCNA-Labs', 'Python-Projects', 'study-notes']
   const allDocs: Array<{
     slug: string[]
@@ -308,6 +392,10 @@ export function getAllDocsForSearch(): Array<{
         content: doc.content,
       }))
     )
+  }
+
+  if (shouldCache) {
+    allDocsForSearchCache = allDocs
   }
 
   return allDocs
@@ -336,6 +424,55 @@ export function getAdjacentDocs(currentSlug: string[]): {
   }
 }
 
+export function getContentHealth(): ContentHealth {
+  if (shouldCache && contentHealthCache) {
+    return contentHealthCache
+  }
+
+  const repos = ['study-notes', 'automation', 'Python-Projects', 'CCNA-Labs']
+  const errors: string[] = []
+  let totalDocs = 0
+
+  const repoStats: ContentHealthRepo[] = repos.map(repo => {
+    const repoPath = path.join(contentDir, repo)
+    const exists = fs.existsSync(repoPath)
+    const readmeExists = exists && (
+      fs.existsSync(path.join(repoPath, 'README.md')) ||
+      fs.existsSync(path.join(repoPath, 'Readme.md')) ||
+      fs.existsSync(path.join(repoPath, 'readme.md'))
+    )
+    const docCount = exists ? getAllDocs(repo).length : 0
+
+    if (!exists) {
+      errors.push(`Missing content repository: ${repo}`)
+    } else if (docCount === 0) {
+      errors.push(`No markdown docs found in ${repo}`)
+    }
+
+    totalDocs += docCount
+
+    return {
+      name: repo,
+      exists,
+      docCount,
+      readmeExists,
+    }
+  })
+
+  const health: ContentHealth = {
+    ok: errors.length === 0,
+    totalDocs,
+    repos: repoStats,
+    errors,
+  }
+
+  if (shouldCache) {
+    contentHealthCache = health
+  }
+
+  return health
+}
+
 export function getGitHubUrl(slug: string[]): string | null {
   if (slug.length === 0) return null
 
@@ -352,5 +489,13 @@ export function getGitHubUrl(slug: string[]): string | null {
   if (!repoName) return null
 
   const filePath = slug.slice(1).join('/')
+  if (!filePath) {
+    return `https://github.com/Maverick-sudo/${repoName}/blob/main/README.md`
+  }
+  if (/\/README$/i.test(filePath) || /^README$/i.test(filePath)) {
+    const basePath = filePath.replace(/\/?README$/i, '')
+    const readmePath = basePath ? `${basePath}/README.md` : 'README.md'
+    return `https://github.com/Maverick-sudo/${repoName}/blob/main/${readmePath}`
+  }
   return `https://github.com/Maverick-sudo/${repoName}/blob/main/${filePath}.md`
 }

@@ -136,13 +136,13 @@ export default function Search() {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-700 rounded-md hover:border-gray-400 dark:hover:border-gray-600 transition-colors"
+        className="flex items-center gap-2 px-3 py-1.5 text-sm text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700 rounded-md hover:border-slate-400 dark:hover:border-slate-600 transition-colors"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <span>Search</span>
-        <kbd className="hidden sm:inline-block px-2 py-0.5 text-xs font-semibold bg-gray-100 dark:bg-gray-800 rounded">
+        <kbd className="hidden sm:inline-block px-2 py-0.5 text-xs font-semibold bg-slate-100 dark:bg-slate-800 rounded">
           ⌘K
         </kbd>
       </button>
@@ -162,10 +162,10 @@ export default function Search() {
 
       {/* Search modal */}
       <div className="fixed top-20 left-1/2 -translate-x-1/2 w-full max-w-2xl z-50 px-4">
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
           {/* Search input */}
-          <div className="flex items-center px-4 border-b border-gray-200 dark:border-gray-800">
-            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="flex items-center px-4 border-b border-slate-200 dark:border-slate-800">
+            <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
@@ -175,10 +175,10 @@ export default function Search() {
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Search documentation..."
-              className="flex-1 px-4 py-4 bg-transparent outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400"
+              className="flex-1 px-4 py-4 bg-transparent outline-none text-slate-900 dark:text-slate-100 placeholder-slate-400"
             />
             {isLoading && (
-              <div className="animate-spin rounded-full h-5 w-5 border-2 border-gray-300 border-t-blue-600" />
+              <div className="animate-spin rounded-full h-5 w-5 border-2 border-slate-300 border-t-blue-600" />
             )}
           </div>
 
@@ -193,21 +193,21 @@ export default function Search() {
                     setIsOpen(false)
                     setQuery('')
                   }}
-                  className={`block px-4 py-3 border-b border-gray-100 dark:border-gray-800 last:border-0 ${
+                  className={`block px-4 py-3 border-b border-slate-100 dark:border-slate-800 last:border-0 ${
                     index === selectedIndex
                       ? 'bg-blue-50 dark:bg-blue-900/20'
-                      : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                      : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
                   }`}
                 >
-                  <div className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                  <div className="font-semibold text-slate-900 dark:text-slate-100 mb-1">
                     {result.title}
                   </div>
                   {result.description && (
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                    <div className="text-sm text-slate-600 dark:text-slate-400 mb-1">
                       {result.description}
                     </div>
                   )}
-                  <div className="text-xs text-gray-500 dark:text-gray-500">
+                  <div className="text-xs text-slate-500 dark:text-slate-500">
                     {result.excerpt}
                   </div>
                 </Link>
@@ -217,25 +217,25 @@ export default function Search() {
 
           {/* Empty state */}
           {query.length >= 2 && !isLoading && results.length === 0 && (
-            <div className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+            <div className="px-4 py-8 text-center text-slate-500 dark:text-slate-400">
               No results found for &quot;{query}&quot;
             </div>
           )}
 
           {/* Help text */}
-          <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
-            <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+          <div className="px-4 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
               <div className="flex items-center gap-4">
                 <span className="flex items-center gap-1">
-                  <kbd className="px-2 py-0.5 bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-700">↑↓</kbd>
+                  <kbd className="px-2 py-0.5 bg-white dark:bg-slate-800 rounded border border-slate-300 dark:border-slate-700">↑↓</kbd>
                   Navigate
                 </span>
                 <span className="flex items-center gap-1">
-                  <kbd className="px-2 py-0.5 bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-700">Enter</kbd>
+                  <kbd className="px-2 py-0.5 bg-white dark:bg-slate-800 rounded border border-slate-300 dark:border-slate-700">Enter</kbd>
                   Select
                 </span>
                 <span className="flex items-center gap-1">
-                  <kbd className="px-2 py-0.5 bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-700">Esc</kbd>
+                  <kbd className="px-2 py-0.5 bg-white dark:bg-slate-800 rounded border border-slate-300 dark:border-slate-700">Esc</kbd>
                   Close
                 </span>
               </div>

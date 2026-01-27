@@ -65,7 +65,7 @@ export default function Mermaid({ code }: MermaidProps) {
   return (
     <div className="relative">
       {isLoading && (
-        <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800 animate-pulse rounded h-32" />
+        <div className="absolute inset-0 bg-slate-100 dark:bg-slate-800 animate-pulse rounded h-32" />
       )}
       <div ref={containerRef} className="mermaid-diagram" />
     </div>

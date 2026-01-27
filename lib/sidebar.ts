@@ -17,25 +17,25 @@ const contentDir = path.join(process.cwd(), 'content')
 const repositories = [
   {
     id: 'study-notes',
-    label: '📚 Study Notes',
+    label: 'Study Notes',
     path: 'study-notes',
     icon: '📚',
   },
   {
     id: 'automation',
-    label: '🤖 Automation',
+    label: 'Automation',
     path: 'automation',
     icon: '🤖',
   },
   {
     id: 'ccna-labs',
-    label: '🌐 CCNA Labs',
+    label: 'CCNA Labs',
     path: 'CCNA-Labs',
     icon: '🌐',
   },
   {
     id: 'python-projects',
-    label: '🐍 Python Projects',
+    label: 'Python Projects',
     path: 'Python-Projects',
     icon: '🐍',
   },
@@ -46,7 +46,9 @@ const repositories = [
  */
 function treeNodeToSidebarItem(node: FileTreeNode, parentPath: string): SidebarItem {
   const fullPath = parentPath ? `${parentPath}/${node.path}` : node.path
-  const href = node.type === 'file' ? `/docs/${fullPath}` : undefined
+  const href = node.type === 'file'
+    ? `/docs/${fullPath.replace(/\/?README$/i, '')}`
+    : undefined
 
   return {
     id: fullPath,
@@ -81,9 +83,10 @@ export async function generateSidebarStructure(): Promise<SidebarItem[]> {
   const sidebar: SidebarItem[] = [
     {
       id: 'home',
-      label: '🏠 Home',
+      label: 'Home',
       href: '/',
       type: 'file',
+      icon: '🏠',
     },
   ]
 
