@@ -82,6 +82,7 @@ export default function Sidebar({
               toggleSection={toggleSection}
               depth={0}
               isCollapsed={isCollapsed}
+              onClose={onClose}
             />
           ))}
         </nav>
@@ -120,6 +121,7 @@ interface SidebarSectionProps {
   toggleSection: (id: string) => void
   depth: number
   isCollapsed: boolean
+  onClose: () => void
 }
 
 function SidebarSection({ 
@@ -128,7 +130,8 @@ function SidebarSection({
   expandedSections, 
   toggleSection, 
   depth,
-  isCollapsed 
+  isCollapsed,
+  onClose
 }: SidebarSectionProps) {
   const isExpanded = expandedSections.has(section.id)
   const isActive = pathname === section.href
@@ -141,6 +144,12 @@ function SidebarSection({
     const linkContent = (
       <Link
         href={section.href}
+        onClick={() => {
+          // Close sidebar on mobile when link is clicked
+          if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+            onClose()
+          }
+        }}
         className={`flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors ${
           isActive
             ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium'
@@ -213,6 +222,7 @@ function SidebarSection({
               toggleSection={toggleSection}
               depth={depth + 1}
               isCollapsed={isCollapsed}
+              onClose={onClose}
             />
           ))}
         </div>

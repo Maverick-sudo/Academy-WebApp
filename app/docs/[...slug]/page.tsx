@@ -46,7 +46,7 @@ export default async function DocPage({ params }: DocPageProps) {
       // Render directory index
       return (
         <div className="w-full">
-          <div className="container mx-0 px-4 sm:px-6 lg:px-6 max-w-4xl py-8 lg:py-12">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl py-8 lg:py-12">
             <Breadcrumb slug={normalizedSlug} />
             <h1 className="text-3xl md:text-4xl font-bold mb-8">
               {normalizedSlug[normalizedSlug.length - 1]
@@ -113,10 +113,10 @@ export default async function DocPage({ params }: DocPageProps) {
 
   return (
     <div className="w-full">
-      <div className="container mx-0 px-4 sm:px-6 lg:px-6 max-w-7xl">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         <div className="flex gap-6 py-8 lg:py-12">
           {/* Main Content */}
-          <div className="flex-1 min-w-0 max-w-4xl">
+          <div className="flex-1 min-w-0 max-w-4xl mx-auto lg:mx-0">
             <Breadcrumb slug={normalizedSlug} />
             
             <article className="prose prose-slate dark:prose-invert max-w-none prose-headings:scroll-mt-24 prose-img:rounded-lg">
