@@ -4,6 +4,10 @@ import matter from 'gray-matter'
 
 const contentDir = path.join(process.cwd(), 'content')
 
+// In-memory cache for parsed content (dev only)
+const contentCache = new Map<string, Doc>()
+const shouldCache = process.env.NODE_ENV === 'development'
+
 function parseMatterSafe(raw: string, filePath: string) {
   try {
     return matter(raw)
@@ -115,6 +119,13 @@ export function buildFileTree(dir: string, relativePath: string = ''): FileTreeN
 }
 
 export function getDocBySlug(slug: string[]): Doc | null {
+  const cacheKey = slug.join('/')
+  
+  // Check cache first (dev only)
+  if (shouldCache && contentCache.has(cacheKey)) {
+    return contentCache.get(cacheKey)!
+  }
+
   const possiblePaths = [
     path.join(contentDir, ...slug) + '.md',
     path.join(contentDir, ...slug, 'README.md'),
@@ -127,12 +138,19 @@ export function getDocBySlug(slug: string[]): Doc | null {
       const fileContents = fs.readFileSync(filePath, 'utf8')
       const { data, content } = parseMatterSafe(fileContents, filePath)
 
-      return {
+      const doc = {
         slug,
         content,
         meta: data as DocMeta,
         filePath,
       }
+      
+      // Cache the result (dev only)
+      if (shouldCache) {
+        contentCache.set(cacheKey, doc)
+      }
+
+      return doc
     }
   }
 

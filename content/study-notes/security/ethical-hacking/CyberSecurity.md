@@ -1,4 +1,6 @@
-## INFORMATION SECURITY (INFOSEC "Popularly known as Cybersec")
+# Cybersecurity and Information Security
+
+## Information Security (InfoSec)
 
 **Information Security (InfoSec)** refers to the protection of data resources from unauthorized access, attack, theft, or damage. Systems used to store, transmit, or process data must demonstrate the properties of security—the **CIA Triad**. Some security model researchers identify other properties that secure systems should exhibit; the most important of these is **Non-Repudiation**.
 

@@ -1,17 +1,27 @@
 import { notFound } from 'next/navigation'
 import { getDocBySlug, getDocsInDirectory, getAdjacentDocs, getGitHubUrl, getAllStaticPaths } from '@/lib/content'
-import ReactMarkdown from 'react-markdown'
+import dynamic from 'next/dynamic'
 import rehypeHighlight from 'rehype-highlight'
 import rehypeSlug from 'rehype-slug'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import remarkGfm from 'remark-gfm'
-import Mermaid from '@/components/Mermaid'
 import TableOfContents from '@/components/Toc'
 import Breadcrumb from '@/components/Breadcrumb'
 import PrevNextNav from '@/components/PrevNextNav'
 import EditOnGitHub from '@/components/EditOnGitHub'
 import Link from 'next/link'
 import 'highlight.js/styles/github-dark.css'
+
+// Lazy load heavy components
+const ReactMarkdown = dynamic(() => import('react-markdown'), {
+  loading: () => <div className="animate-pulse bg-gray-100 dark:bg-gray-800 rounded h-96" />,
+  ssr: true,
+})
+
+const Mermaid = dynamic(() => import('@/components/Mermaid'), {
+  loading: () => <div className="h-64 bg-gray-100 dark:bg-gray-800 animate-pulse rounded" />,
+  ssr: false,
+})
 
 interface DocPageProps {
   params: {

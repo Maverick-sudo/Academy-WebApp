@@ -1,45 +1,31 @@
-1. CHAPTER 1: OSI & TCP/IP IMPLEMENTATION OF NETWORKING PROTOCOLS
+# Networking Protocols - CCNA/CCNP Study Guide
 
-2. CHAPTER 2: TCP/IP NETWORK MODEL AND IMPLEMENTATION
+## Table of Contents
 
-3. CHAPTER 3: INTERNET PROTOCOL ADDRESSING TECHNIQUES
+1. OSI & TCP/IP Implementation of Networking Protocols
+2. TCP/IP Network Model and Implementation
+3. Internet Protocol Addressing Techniques
+4. Transport Layer
+5. Application Layer
+6. Voice and Video Protocols
+7. Cabling Standards (Ethernet & Fibre)
+8. Device Categorization
+9. Device Configuration
+10. Switches (Layer 2)
+11. Routers (Layer 3)
+12. Management Plane/Layer Protocols
+13. Control Plane/Layer Protocols
+14. Network Device Security
+15. Architecture, Design, Topology
+16. Troubleshooting & Information Gathering Tools
+17. Network Troubleshooting Methodology
+18. Wireless Standard & Wireless Security
+19. Software Defined Networking
+20. Infrastructure as Code (IaC): Automation & Orchestration
 
-4. CHAPTER 4: TRANSPORT LAYER
-
-5. CHAPTER 5: APPLICATION LAYER
-
-6. CHAPTER 6: VOICE AND VIDEO PROTOCOLS
-
-7. CHAPTER 7: CABLING STANDARDS (ETHERNET && FIBRE)
-
-8. CHAPTER 8: DEVICE CATEGORIZATION
-
-9. CHAPTER 9: DEVICE CONFIGURATION
-
-10. CHAPTER 10: SWITCHES (LAYER 2)
-
-11. CHAPTER 11: ROUTERS (LAYER 3)
-
-12. CHAPTER 12: MANAGEMENT PLANE/LAYER PROTOCOLS
-
-13. CHAPTER 13: CONTROL PLANE/LAYER PROTOCOLS
-
-14. CHAPTER 14: NETWORK DEVICE SECURITY
-
-15. CHAPTER 15: ARCHITECTURE, DESIGN, TOPOLOGY
-
-16. CHAPTER 16: TROUBLESHOOTING & INFORMATION GATHERING TOOLS
-
-17. CHAPTER 17: NETWORK TROUBLESHOOTING METHODOLOGY
-
-18. CHAPTER 18: WIRELESS STANDARD & WIRELESS SECURITY
-
-19. CHAPTER 19: SOFTWARE DEFINED NETWORKING
-
-20. CHAPTER 20: INFRASTRUCTURE AS CODE (IAC): AUTOMATION & ORCHESTRATION
 ---
 
-# CHAPTER 1: OSI & TCP/IP IMPLEMENTATION OF NETWORKING PROTOCOLS
+## Chapter 1: OSI & TCP/IP Implementation of Networking Protocols
 
 A NETWORK is two or more computers or devices that are linked in order to share information. Networks are broken into different subsets based on their size and function. The OSI (Open Systems Interconnection) model provides a conceptual framework for understanding network functions.
 The OSI Model was developed in the 1970s and 1980s, and it is a conceptual model that breaks networking into seven separate layers. Each layer refers to a set of functions that are responsible for specific tasks. In the OSI model, the definition of the application layer is narrower in scope. The OSI model defines the application layer as only the interface responsible for communicating with host-based and user-facing applications. OSI then explicitly distinguishes the functionality of two additional layers, the session layer and presentation layer, as separate levels below the application layer and above the transport layer. OSI specifies a strict modular separation of functionality at these layers and provides protocol implementations for each. In contrast, the Internet Protocol Suite compiles these functions into a single layer.
