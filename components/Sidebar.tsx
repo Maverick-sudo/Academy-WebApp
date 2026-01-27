@@ -64,11 +64,11 @@ export default function Sidebar({
       {/* Sidebar */}
       <aside
         className={`
-          fixed lg:sticky top-16 left-0 h-[calc(100vh-4rem)]
+          fixed lg:sticky top-16 left-0 h-[calc(100dvh-4rem)]
           bg-white dark:bg-[var(--sidebar)] border-r border-slate-200 dark:border-[var(--sidebar-border)]
-          overflow-y-auto z-40 relative
+          overflow-y-auto z-40
           transition-[width,transform] duration-150 ease-in-out
-          ${isCollapsed ? 'lg:w-16' : 'w-64 lg:w-72'}
+          ${isCollapsed ? 'lg:w-16' : 'w-[85vw] max-w-xs lg:w-72'}
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
       >

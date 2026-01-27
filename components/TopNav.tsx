@@ -12,8 +12,8 @@ interface TopNavProps {
 
 export default function TopNav({ onMenuClick }: TopNavProps) {
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--sidebar)]">
-      <div className="container flex h-16 items-center px-4 md:px-8">
+    <header className="sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--sidebar)] backdrop-blur-sm">
+      <div className="container flex h-16 items-center px-3 sm:px-4 md:px-6 lg:px-8">
         {/* Mobile menu button - More visible */}
         <button
           onClick={onMenuClick}

@@ -44,7 +44,7 @@ export default function TableOfContents({ content }: { content: string }) {
   if (headings.length === 0) return null
 
   return (
-    <aside className="hidden xl:block sticky top-20 w-64 shrink-0 h-[calc(100vh-6rem)] overflow-y-auto">
+    <aside className="hidden xl:block sticky top-20 w-64 shrink-0 h-[calc(100dvh-6rem)] overflow-y-auto">
       <nav className="py-4">
         <p className="font-semibold text-sm text-slate-900 dark:text-slate-100 mb-4 px-2 relative inline-block after:absolute after:left-0 after:-bottom-2 after:h-0.5 after:w-full after:bg-blue-600/60 dark:after:bg-blue-400/50">
           On this page
