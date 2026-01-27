@@ -1,0 +1,140 @@
+[
+  {
+    "title": "README",
+    "description": "",
+    "slug": "study-notes/README",
+    "content": "# study-notes\n\nCurated study notes across programming languages, web development, system architecture, networking, and security.\n\n## Notes\n\n### Programming Languages\n\n- JavaScript: [programming-languages/Javascript/Javascript_Intro.md](programming-languages/Javascript/Javascript_Intro.md)\n- PHP: [programming-languages/PHP/PHP_Docs.md](programming-languages/PHP/PHP_Docs.md)\n- Python: [programming-languages/python/Python_intro.md](programming-languages/python/Python_intro.md)\n\n### Web Development\n\n- CSS: [web-development/frontend/css/Cascading_Style_Sheet.md](web-development/frontend/css/Cascading_Style_Sheet.md)\n- React: [web-development/frontend/react/React_JSFramework.md](web-development/frontend/react/React_JSFramework.md)\n- SQL: [web-development/frontend/SQL/SQL.md](web-development/frontend/SQL/SQL.md)\n\n### Systems & Architecture\n\n- Azure & AWS: [system-architecture/system-administration/Azure_AWS.md](system-architecture/system-administration/Azure_AWS.md)\n- Reverse engineering & sy"
+  },
+  {
+    "title": "NetworkingProtcols",
+    "description": "",
+    "slug": "study-notes/networking-ccna-ccnp/NetworkingProtcols",
+    "content": "1. CHAPTER 1: OSI & TCP/IP IMPLEMENTATION OF NETWORKING PROTOCOLS\n\n2. CHAPTER 2: TCP/IP NETWORK MODEL AND IMPLEMENTATION\n\n3. CHAPTER 3: INTERNET PROTOCOL ADDRESSING TECHNIQUES\n\n4. CHAPTER 4: TRANSPORT LAYER\n\n5. CHAPTER 5: APPLICATION LAYER\n\n6. CHAPTER 6: VOICE AND VIDEO PROTOCOLS\n\n7. CHAPTER 7: CABLING STANDARDS (ETHERNET && FIBRE)\n\n8. CHAPTER 8: DEVICE CATEGORIZATION\n\n9. CHAPTER 9: DEVICE CONFIGURATION\n\n10. CHAPTER 10: SWITCHES (LAYER 2)\n\n11. CHAPTER 11: ROUTERS (LAYER 3)\n\n12. CHAPTER 12: MANAGEMENT PLANE/LAYER PROTOCOLS\n\n13. CHAPTER 13: CONTROL PLANE/LAYER PROTOCOLS\n\n14. CHAPTER 14: NETWORK DEVICE SECURITY\n\n15. CHAPTER 15: ARCHITECTURE, DESIGN, TOPOLOGY\n\n16. CHAPTER 16: TROUBLESHOOTING & INFORMATION GATHERING TOOLS\n\n17. CHAPTER 17: NETWORK TROUBLESHOOTING METHODOLOGY\n\n18. CHAPTER 18: WIRELESS STANDARD & WIRELESS SECURITY\n\n19. CHAPTER 19: SOFTWARE DEFINED NETWORKING\n\n20. CHAPTER 20: INFRASTRUCTURE AS CODE (IAC): AUTOMATION & ORCHESTRATION\n---\n\n# CHAPTER 1: OSI & TCP/IP IMPLEMENTATION "
+  },
+  {
+    "title": "PacketTracer_EveNG_GNS3",
+    "description": "",
+    "slug": "study-notes/networking-ccna-ccnp/PacketTracer_EveNG_GNS3",
+    "content": "# From Packet Tracer to Multi-Vendor Labs: Understanding Virtual Images and Device Roles\n\nMany networking learners begin with Cisco Packet Tracer, which is excellent for CCNA-level switching and routing. But once you step into more advanced labs — using EVE-NG or GNS3 or PNETLABs (virtualization platforms based on QEMU/KVM running on Ubuntu/Debian, technically Type 2 hypervisors that run on top of a Linux OS) — you’re suddenly faced with dozens of mysterious file names like:\n\n- i86bi-linux-l2-adventerprisek9-15.1.201.bin\n- asav981.qcow2\n- fortios6.2.ova\n- PA-VM-10.1.8.ova\n\nIt can be confusing at first, especially when you're unsure which is a router, which is a switch, or how ASA differs from Fortinet or Palo Alto.\n\nThis blog is your step-by-step map to understanding these appliances — especially how to recognize and classify them — using real images\n\n## The Missing Link: \"The Client Side Pack\"\n\nRegardless of which app you choose, clicking a router in EVE-NG won't open it automatically"
+  },
+  {
+    "title": "Javascript_Intro",
+    "description": "",
+    "slug": "study-notes/programming-languages/Javascript/Javascript_Intro",
+    "content": "# JavaScript Introduction\n\n## JavaScript in HTML\nInternal JavaScript in HTML is the default scripting language in HTML.\n\nIn HTML, JavaScript code is inserted between `<script>` and `</script>` tags. Scripts can be placed in the `<body>`, in the `<head>`, or in both.\n\nJavaScript can \"display\" data in different ways:\n- Using `.innerHTML`: `document.getElementById(\"id\").innerHTML` (the `id` attribute identifies the element; `innerHTML` sets the element’s HTML content)\n- Using `document.write()`: using `document.write()` after an HTML document is loaded will delete all existing HTML. The `document.write()` method should only be used for testing.\n- Using `window.alert()`: `window` is the global scope object in browsers (so specifying `window` is optional)\n- Using `console.log()`: for debugging, call `console.log()` to print to the browser console\n\nWhen JavaScript is used in HTML pages, JavaScript can react to EVENTS (things that happen to HTML elements, e.g. page load, button click, input f"
+  },
+  {
+    "title": "PHP_Docs",
+    "description": "",
+    "slug": "study-notes/programming-languages/PHP/PHP_Docs",
+    "content": "# PHP Documentation\n\n## Variables\n\n### Variable Declaration Rules\n1.  Start with a dollar sign (`$`).\n2.  The first letter must be `a-z`, `A-Z`, or `_`.\n3.  Subsequent letters can be `a-z`, `A-Z`, `0-9`, or `_`.\n4.  No spaces or special characters are allowed.\n\n### Classification of Variables\n-   **Predefined Variables/Constants**\n-   **User-Defined Variables**\n    1.  Variable Scope\n    2.  Variable Variables\n    3.  Reference Variables / Variables From External Sources\n\n### Variable Scope\n-   Local Scope\n-   Global Scope\n-   Static Variable\n\n## PHP Basics\n\nPHP can be used in three main fields:\n\n-   Websites and web applications (server-side scripting)\n-   Command-line scripting\n-   Desktop (GUI) applications\n\nPHP was designed to work closely with HTML for dynamic behavior. PHP content is executed on the server and added to the HTML to form one HTML document before being sent to the client.\n\n### PHP Tags\nThree types of tags are available in PHP:\n\n1.  **Normal Tag**: `<?php ?>`\n2.  **S"
+  },
+  {
+    "title": "Python_intro",
+    "description": "",
+    "slug": "study-notes/programming-languages/python/Python_intro",
+    "content": "# Python\nReference: [Python 3 Reference](https://docs.python.org/3/reference/index.html#reference-index)\n\n## Getting Started\n\nPython is an interpreted programming language. As a developer you write Python (`.py`) files in a text editor and then put those files into the python interpreter to be executed. The way to run a python file is like this on the command line:\n```bash\n$ python name-of-script.py\n```\n\nA Python program is read by a parser. Input to the parser is a stream of tokens, generated by the lexical analyzer: `Lexical_Analyzer —> Stream of Tokens —> Parser`.\n\nTo test a short amount of code in python sometimes it is quickest and easiest not to write the code in a file. This is made possible because Python can be run as a command line itself. Type the following on the Windows, Mac or Linux command line:\n- `python` (for MacBook)\n- `py` (for Windows)\n\nWhenever you are done in the python command line, you can simply type the following to quit the python command line interface: `exi"
+  },
+  {
+    "title": "ActiveDirectoryPentest",
+    "description": "",
+    "slug": "study-notes/security/ethical-hacking/ActiveDirectoryPentest",
+    "content": "\n# ACTIVE DIRECTORY PENETRATION TESTING\n\n---\n\n## LAB ENVIRONMENT SETUP\n\n### INSTALL & CONFIGURE DHCP ROLES FOR THE DOMAIN CONTROLLER\n\n- ADD Lease Duration, Config DHCP options\n- CREATE DHCP Server Scope, ADD Exclusions\n- Specify the parent domain you want the client computers on your network to use for DNS name Resolution\n\n---\n\n### Joining a Domain - Lab Setup\n\n**Domain: web.app.com**\n\n| Component | Details |\n|-----------|---------|\n| **DC Windows Server 2019** | |\n| Hostname | Server1 |\n| IP Address | 192.168.1.101 |\n| Subnet Mask | 255.255.255.0 |\n| Gateway | 192.168.1.254 |\n| DNS | 127.0.0.1 (DC's own loopback) |\n\n| Component | Details |\n|-----------|---------|\n| **Win 10 Workstation** | Windows 10 Enterprise Workstation |\n| Hostname | Station1 |\n| IP Address | 192.168.1.120 |\n| Subnet Mask | 255.255.255.0 |\n| Gateway | 192.168.1.254 |\n| DNS | 192.168.1.101 |\n\nRemember to change Computer Name to Server1. Domain will be having a DNS server Role.\n\n**Lab Network Architecture:**\n\n```mer"
+  },
+  {
+    "title": "CyberSecurity",
+    "description": "",
+    "slug": "study-notes/security/ethical-hacking/CyberSecurity",
+    "content": "## INFORMATION SECURITY (INFOSEC \"Popularly known as Cybersec\")\n\n**Information Security (InfoSec)** refers to the protection of data resources from unauthorized access, attack, theft, or damage. Systems used to store, transmit, or process data must demonstrate the properties of security—the **CIA Triad**. Some security model researchers identify other properties that secure systems should exhibit; the most important of these is **Non-Repudiation**.\n\n**Non-Repudiation** means that a subject cannot deny doing something, such as modifying, creating, or sending a resource. A secure information processing system must demonstrate all properties within the goal of ensuring information security. Within the goal of ensuring Information Security, **Cybersecurity** refers specifically to provisioning secure/hardened processing hardware and software. InfoSec and CyberSec tasks can be classified as having functions following the framework developed by the **National Institute of Standards and Techn"
+  },
+  {
+    "title": "EthicalHacking",
+    "description": "",
+    "slug": "study-notes/security/ethical-hacking/EthicalHacking",
+    "content": "# CyberSecurity & Ethical Hacking\n\n## Cryptography and Encryption\n\nCryptography & Encryption is the science of hiding data and making it available again. In cryptography, hiding data is called encryption and unhiding it is called decryption. When data is securely exchanged, it is first encrypted by the sender, and then decrypted by the receiver using a special key. For Instance, Computers encrypt using XOR is an operation that compares two bits and returns True (1) if only one of the bits is 1, and returns False (0), if the bits are the same value (both 0’s or both 1’s).\n\n- **Symmetric encryption** uses the same key to both encrypt and decrypt data.\n- **Asymmetric encryption** uses two different keys to encrypt and decrypt data. Asymmetric encryption is the most secure way to transmit data; however, it is slower and more complex than symmetric encryption. Therefore, it is primarily used to exchange smaller pieces of data. Encryption is the most powerful single tool for protecting netwo"
+  },
+  {
+    "title": "Owasp_Top10",
+    "description": "",
+    "slug": "study-notes/security/web-security/Owasp_Top10",
+    "content": "# OWASP - Open Web Application Security Project TOP-10 Vulnerabilities\nSource: https://portswigger.net/web-security/learning-path\n\n| Term | Definition |\n| --- | --- |\n| Vulnerability | A vulnerability is defined as a weakness or flaw in the design, implementation or behaviours of a system or application. |\n| Exploit | An exploit is something such as an action or behaviour that utilises a vulnerability on a system or application. |\n| Proof of Concept (PoC) | A PoC is a technique or tool (script/executable) that often demonstrates the exploitation of a vulnerability. |\n\n## Browser Rendering Basics\n\nA browser engine, also known as a rendering or layout engine, is the core component of a web browser responsible for transforming HTML, CSS, and other web resources into a visual representation on the screen.\nThe Critical Rendering Path is the sequence of steps the browser goes through to convert the HTML, CSS, and JavaScript into pixels on the screen. Optimizing the critical render path impro"
+  },
+  {
+    "title": "Reverse_Engineering_System_Architecture",
+    "description": "",
+    "slug": "study-notes/system-architecture/reverse-engineering/Reverse_Engineering_System_Architecture",
+    "content": "# Reverse Engineering & System Architecture\n\n## Fundamentals\n\nAssembly language is a class of languages, not one single language. Every compiler platform has its own assembly language. It is a low-level language that is a human-readable representation of machine code. If a software performs an operation, it must be visible in the assembly language code.\n\n### Machine Code / Binary Code / Object Code\nMachine Code / Binary code or Object code are not the same thing. They are two different representations of low-level program instructions.\n * Machine Code: CPU reads Machine Code Op Codes, a sequence of bits that contains a list of instructions for the processor to execute.\n * Assembly Language: A textual representation of those bits that is more easily understood by humans.\nEach assembly language command is represented by a number called an Operation Code (Opcode)\nObject code is a sequence of Op Codes used to perform an Operation.\nThe CPU reads Object Code from memory, decodes it, and acts"
+  },
+  {
+    "title": "Azure_AWS",
+    "description": "",
+    "slug": "study-notes/system-architecture/system-administration/Azure_AWS",
+    "content": "# AZ-700 (Azure Network Engineer Associate) && AWS Certified Advanced Networking – Specialty\n\n> “Mens et manus\" is a Latin phrase that translates to \"mind and hand,\" and it's the motto of the Massachusetts Institute of Technology (MIT). It embodies the philosophy of combining theoretical knowledge with practical application, which is central to MIT's educational approach. The motto reflects the idea that problem-solving requires both intellectual understanding and hands-on experience.\n\n\n## AWS Well-Architected Framework\n\nThe AWS Well-Architected Framework(opens in a new tab) helps you understand how to design and operate reliable, secure, efficient, and cost-effective systems in the AWS Cloud. It provides a way for you to consistently measure your architecture against best practices and design principles and identify areas for improvement.\nThe Well-Architected Framework is based on six pillars: \n\n1. Operational excellence is the ability to run and monitor systems to deliver business va"
+  },
+  {
+    "title": "SQL",
+    "description": "",
+    "slug": "study-notes/web-development/frontend/SQL/SQL",
+    "content": "# SQL and SQL Injection\n\nSQL (Structured Query Language) is the most common solution for storing and interacting with data in a relational database. A relational database management system (RDBMS) organizes information into one or more tables, which are collections of data organized into rows and columns.\n\n-   **Table**: A collection of data organized into rows and columns, also referred to as a relation.\n-   **Column/Field**: A set of data values of a particular type.\n-   **Row**: A single record in a table.\n\n## Data Definition Language (DDL)\n\n### CREATE DATABASE\nThe `CREATE DATABASE` statement is used to create a new SQL database.\n\n```sql\nCREATE DATABASE databasename;\n```\n\n### DROP DATABASE\nThe `DROP DATABASE` statement is used to drop an existing SQL database.\n\n```sql\nDROP DATABASE databasename;\n```\n> **Note**: Be careful before dropping a database. Deleting a database will result in the loss of all information stored in it.\n\n### BACKUP DATABASE\nThe `BACKUP DATABASE` statement is us"
+  },
+  {
+    "title": "Cascading_Style_Sheet",
+    "description": "",
+    "slug": "study-notes/web-development/frontend/css/Cascading_Style_Sheet",
+    "content": "# Cascading Style Sheet\n\n## Summary\nCascading Style Sheets (CSS) is used to format the layout of a webpage. It handles variations in display for different devices and screen sizes (desktops, tablets, and phones). With CSS, you can control the color, font, the size of text, the spacing between elements, how elements are positioned and laid out, what background images or background colors are to be used, different displays for different devices and screen sizes, and much more.\n\n---\n\n## Introduction\n\nCascading Style Sheets (CSS) is used to format the layout of a webpage.\n\nResponsive Web Design is about using HTML and CSS to automatically resize, hide, shrink, or enlarge a website, to make it look good on all devices (desktops, tablets, and phones). It handles variations in display for different devices and screen sizes.\n\nWith CSS, you can control the color, font, the size of text, the spacing between elements, how elements are positioned and laid out, what background images or background "
+  },
+  {
+    "title": "React_JSFramework",
+    "description": "",
+    "slug": "study-notes/web-development/frontend/react/React_JSFramework",
+    "content": "# React JS Framework\n\n## What is React?\n\nReact is a JavaScript Framework for building user interfaces. React is used to build single-page applications and allows us to build and create reusable UI components.\n\nInstead of manipulating the browser's DOM directly, React creates a virtual DOM in memory. It performs all necessary manipulations there before applying the final changes to the browser's DOM, thus changing only what needs to be changed.\n\n### The Virtual DOM\n\nThe Virtual DOM (VDOM) is an abstraction of the HTML DOM. It is lightweight and detached from the browser-specific implementation details. Since the DOM is already an abstraction, the virtual DOM is an abstraction of an abstraction. Think of the virtual DOM as React’s local and simplified copy of the HTML DOM. It allows React to do its computations within this abstract world.\n\nIn React, for every DOM object, there is a corresponding “virtual DOM object.” A virtual DOM object is a representation of a DOM object, like a lightw"
+  },
+  {
+    "title": "ospf-lab",
+    "description": "",
+    "slug": "automation/Ansible Cisco Lab/3-Router OSPF Design/ospf-lab",
+    "content": "# Lab 2A: OSPF Dynamic Routing - Step-by-Step Guide\n\n## Phase 2 Topology: 3-Router OSPF Design\n\n```\n                    [Cloud0 - Management]\n                            |\n                    [Switch - Unmanaged]\n                    (192.168.33.0/24)\n                            |\n        +-------------------+-------------------+\n        |                   |                   |\n   [R1 - ABR]          [R2 - Core]         [R3 - Edge]\n Gi0/0:.201          Gi0/0:.202          Gi0/0:.203\n        |                   |                   |\n        |    10.1.12.0/30   |   10.1.23.0/30   |\n        |    (Area 0)       |    (Area 1)      |\n        +-------[Gi0/1]-----+-----[Gi0/1]------+\n        \n    Lo0: 1.1.1.1/32    Lo0: 2.2.2.2/32    Lo0: 3.3.3.3/32\n    Lo1: 10.10.1.0/24  Lo1: 10.10.2.0/24  Lo1: 10.10.3.0/24\n```\n\n### Network Design Details\n\n| Router | Role | OSPF Areas | Management IP | Router ID |\n|--------|------|------------|---------------|-----------|\n| R1 | ABR (Area Border Router) | Are"
+  },
+  {
+    "title": "Cisco vIOS Day 0 Template",
+    "description": "",
+    "slug": "automation/Ansible Cisco Lab/Cisco vIOS Day 0 Template",
+    "content": "# Ansible Network Automation Project - Cisco IOS Lab\n## Complete Working Setup for Python 3.7+ Systems\n\n---\n\n## 📋 Overview\n\nThis guide provides a **complete, tested setup** for Ansible network automation with Cisco IOS devices in EVE-NG, specifically addressing common authentication and connection issues.\n\n**Lab Topology:**\n- Control Node: Ubuntu/Debian Linux\n- R1: 192.168.33.201\n- R2: 192.168.33.141\n- R3: 192.168.33.140\n\n**Credentials:**\n- Username: `ansible`\n- Password: `cisco`\n- Enable Secret: `cisco`\n\n---\n\n## ⚠️ Known Issues & Solutions\n\nThis setup addresses these common problems:\n1. **\"No authentication methods available\"** - Paramiko authentication configuration\n2. **Ansible Galaxy API errors on Python 3.7** - Manual collection installation\n3. **Persistent connection authentication failures** - Proper environment variables and config\n\n---\n\n## 🚀 Complete Installation & Configuration\n\n### **Step 1: Create Python Virtual Environment**\n\nUsing a virtual environment prevents conflict"
+  },
+  {
+    "title": "multi-site-ospf",
+    "description": "",
+    "slug": "automation/Ansible Cisco Lab/multi-site-ospf",
+    "content": "# Multi-Site OSPF Lab - Copilot Instructions\n\n## Project Overview\n\n**Goal:** Build a production-grade multi-area OSPF network across two geographically separated sites (Area 0 and Area 1) connected via Area Border Routers (ABRs), using Ansible automation with phased deployment to solve bootstrap connectivity challenges.\n\n---\n\n## Network Architecture\n\n### Three-Network Design\n\n**PNet0 (192.168.33.0/24)** - Management Network (NAT)\n- Purpose: Ansible SSH management, internet access\n- Connected routers: R4, R6, R7, R9\n- EVE-NG interface: 192.168.33.130\n\n**PNet1 (172.16.47.0/24)** - Site A / Area 0 Campus (Host-only with DHCP)\n- Purpose: Area 0 data plane\n- Connected routers: R4, R6\n- EVE-NG gateway: 172.16.47.129\n\n**PNet2 (10.200.200.0/24)** - Site B / Area 1 Campus (Host-only without DHCP)\n- Purpose: Area 1 data plane\n- Connected routers: R7, R9\n- EVE-NG gateway: 10.200.200.129\n\n### Topology Summary\n\n```\nSite A (Area 0):          ABRs:              Site B (Area 1):\nR4 ←→ R6              "
+  },
+  {
+    "title": "ospf-lab-6r",
+    "description": "",
+    "slug": "automation/Ansible Cisco Lab/ospf-lab-6r",
+    "content": "# Complete 6-Router OSPF Lab - Production-Grade Setup\n\n## Step 1: Create Directory Structure (One-Liner)\n\n```bash\nmkdir -p ospf-lab-6r/{inventory/{group_vars,host_vars},roles/{base_interfaces/{tasks,templates},ospf/{tasks,templates,defaults}},playbooks} && cd ospf-lab-6r && touch ansible.cfg inventory/{hosts.yml,group_vars/{all.yml,hq_routers.yml,branch_routers.yml,routers.yml},host_vars/{R3.yml,R4.yml,R5.yml,R6.yml,R7.yml,R8.yml}} roles/base_interfaces/{tasks/main.yml,templates/interfaces.j2} roles/ospf/{tasks/main.yml,templates/ospf.j2,defaults/main.yml} playbooks/{deploy_ospf.yml,verify_ospf.yml,rollback.yml}\n```\n\n---\n\n## Step 2: Network Design Documentation\n\n### Management Networks\n\n| Segment | Network | Gateway | Devices |\n|---------|---------|---------|---------|\n| HQ/Core | 192.168.33.0/24 | 192.168.33.1 | R3, R4, R5, Linux(e0) |\n| Branches | 192.168.33.0/24 | 192.168.33.1 | R6, R7, R8, Linux(e1) |\n\n### OSPF Area Assignment\n\n| Router | Role | OSPF Areas | Router ID | Management "
+  },
+  {
+    "title": "Readme",
+    "description": "",
+    "slug": "automation/Readme",
+    "content": "# Cisco OSPF Network Automation - Copilot Instructions\n\nThis repository contains Ansible-based automation for deploying OSPF (Open Shortest Path First) dynamic routing configurations on Cisco routers in lab environments. All projects target Cisco IOS devices (vIOS, IOSv) managed via SSH.\n\n## Architecture Overview\n\n### Multi-Project Structure\n- **3-Router OSPF Design** (`ospf-lab/`): Simple 3-router topology with 2 OSPF areas\n- **multi-site-ospf/**: Production-grade 6-router setup with phased deployments\n- **ospf-lab-6r/**: Advanced 6-router lab with HQ/Branch structure and ABR (Area Border Router) roles\n- **Cisco vIOS Day 0 Template**: Base connectivity verification template\n\n### Data Flow Pattern\n1. **Inventory Layer** (`inventory/hosts.yml`): Defines router groups (hq_routers, branch_routers, routers)\n2. **Variable Layer** (`inventory/group_vars/`, `host_vars/`): Stores interface and OSPF configs per router/group\n3. **Role Layer** (`roles/`): Two core roles - `base_interfaces` (layer"
+  },
+  {
+    "title": "Network_Analyzer",
+    "description": "",
+    "slug": "Python-Projects/Network_Analyzer",
+    "content": "\n# Network Traffic Analyzer\n# Suspicious Packet Detection\n\n## Description\nThis Python script is designed to monitor network traffic and detect suspicious activities like data exfiltration, SYN scanning, FIN scanning, DNS poisoning, and ARP spoofing. It uses the Scapy library for packet sniffing and manipulation.\n\nThe script provides real-time monitoring of all inbound and outbound network packets. It logs the source and destination IP addresses, as well as the protocol used for each packet. This information is then used to identify patterns that could indicate malicious activity.\n\nIn addition to logging suspicious activities, alerts are sent via email and Telegram when a potential threat is detected.\n\n## Features\n- Packet-level visibility\n- Real-time monitoring of network traffic\n- Detection of various types of network threats\n- Alerts via email and Telegram\n- Logging of suspicious activities\n\n## Usage\nPlease replace placeholders in the code with your actual data:\n- `'youremail@gmail.c"
+  },
+  {
+    "title": "README",
+    "description": "",
+    "slug": "Python-Projects/README",
+    "content": "# Python-Projects Repository\n\nA curated collection of Python tools and scripts for cybersecurity, networking, encryption, and vulnerability analysis. This repository is organized into specialized folders, each targeting a distinct area of security research and practical application.\n\n## Table of Contents\n- [Overview](#overview)\n- [Folder Structure](#folder-structure)\n- [Usage](#usage)\n- [Contributing](#contributing)\n- [License](#license)\n\n## Overview\nThis repository brings together multiple Python projects designed for:\n- Network analysis and scanning\n- Encryption and secure content handling\n- Malware simulation and reporting\n- Backdoor connection and listener setup\n- Vulnerability assessment\n- Network hacking and packet manipulation\n\nEach folder contains scripts and modules focused on a specific domain, making it easy to explore, learn, and extend security-related Python programming.\n\n## Folder Structure\n\n### B4CK_D00R_PRACTICAL\n- **backdoor_connect.py**: Establishes a backdoor connec"
+  },
+  {
+    "title": "Vulnerability_Scanner",
+    "description": "",
+    "slug": "Python-Projects/Vulnerability_Scanner",
+    "content": "# Network Vulnerability Scanner\n\nThis is a Python script that uses the `nmap` network scanner to identify vulnerabilities in specified targets. It supports TCP SYN scan, UDP scan, and TCP connect scan.\n\n## How to Use\n\n1. **Run the script:** You can run this script on any system with Python installed. Navigate to the directory containing the script and type `python filename.py` in your terminal or command prompt, replacing `filename.py` with the actual name of your script.\n\n2. **Enter target(s):** When prompted, enter the IP address(es) of the target machine(s). If there are multiple targets, separate them with commas. The script also supports CIDR notation for subnet scanning.\n\n3. **Specify ports:** Next, specify the port(s) to be scanned. If there are multiple ports, separate them with commas. You can also specify a range, such as 22-443.\n\n4. **Choose scan type:** Choose the type of scan you want to perform. Enter 1 for TCP SYN scan, 2 for UDP scan, or 3 for TCP connect scan.\n\n5. **Vi"
+  }
+]

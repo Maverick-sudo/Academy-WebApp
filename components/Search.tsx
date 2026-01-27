@@ -53,12 +53,57 @@ export default function Search() {
 
     setIsLoading(true)
     
-    // Debounced search
+    // Debounced search - client-side using static JSON
     const timer = setTimeout(async () => {
       try {
-        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`)
-        const data = await response.json()
-        setResults(data.results || [])
+        const response = await fetch('/search-index.json')
+        const allDocs = await response.json()
+        
+        const queryLower = query.toLowerCase()
+        const searchResults = allDocs
+          .map((doc: any) => {
+            const titleMatch = doc.title.toLowerCase().includes(queryLower)
+            const descriptionMatch = doc.description?.toLowerCase().includes(queryLower)
+            const contentMatch = doc.content.toLowerCase().includes(queryLower)
+            
+            if (!titleMatch && !descriptionMatch && !contentMatch) {
+              return null
+            }
+
+            // Calculate relevance score
+            let score = 0
+            if (titleMatch) score += 10
+            if (descriptionMatch) score += 5
+            if (contentMatch) score += 1
+
+            // Extract excerpt
+            const contentLower = doc.content.toLowerCase()
+            const queryIndex = contentLower.indexOf(queryLower)
+            let excerpt = ''
+            
+            if (queryIndex !== -1) {
+              const start = Math.max(0, queryIndex - 50)
+              const end = Math.min(doc.content.length, queryIndex + 100)
+              excerpt = (start > 0 ? '...' : '') + 
+                       doc.content.slice(start, end).trim() + 
+                       (end < doc.content.length ? '...' : '')
+            } else {
+              excerpt = doc.content.slice(0, 150).trim() + '...'
+            }
+
+            return {
+              title: doc.title,
+              description: doc.description,
+              slug: doc.slug,
+              excerpt,
+              score,
+            }
+          })
+          .filter(Boolean)
+          .sort((a: any, b: any) => b.score - a.score)
+          .slice(0, 10)
+        
+        setResults(searchResults)
         setSelectedIndex(0)
       } catch (error) {
         console.error('Search failed:', error)
