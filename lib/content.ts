@@ -3,6 +3,23 @@ import path from 'path'
 import matter from 'gray-matter'
 
 const contentDir = path.join(process.cwd(), 'content')
+const EXCLUDED_DIRS = new Set([
+  'node_modules',
+  'out',
+  'build',
+  'inventory',
+  'roles',
+  'playbooks',
+  'group_vars',
+  'host_vars',
+  'templates',
+  'defaults',
+  'tasks',
+])
+
+function shouldSkipDir(name: string): boolean {
+  return name.startsWith('.') || EXCLUDED_DIRS.has(name)
+}
 
 // In-memory cache for parsed content (enabled outside development)
 const shouldCache = process.env.NODE_ENV !== 'development'
@@ -101,7 +118,7 @@ export function getMarkdownFiles(dir: string, baseDir: string = dir): string[] {
     const stat = fs.statSync(fullPath)
 
     if (stat.isDirectory()) {
-      if (!item.startsWith('.') && item !== 'node_modules') {
+      if (!shouldSkipDir(item)) {
         files.push(...getMarkdownFiles(fullPath, baseDir))
       }
     } else if (item.endsWith('.md')) {
@@ -131,7 +148,7 @@ export function buildFileTree(dir: string, relativePath: string = ''): FileTreeN
   const items = fs.readdirSync(dir)
 
   for (const item of items) {
-    if (item.startsWith('.') || item === 'node_modules' || item === 'out' || item === 'build') {
+    if (shouldSkipDir(item)) {
       continue
     }
 
@@ -332,17 +349,22 @@ export function getDocsInDirectory(slug: string[]): Doc[] {
         meta: data as DocMeta,
         filePath: itemPath,
       })
-    } else if (stat.isDirectory() && !item.startsWith('.')) {
-      const readmePath = path.join(itemPath, 'README.md')
-      if (fs.existsSync(readmePath)) {
-        const { data, content } = readAndParseFile(readmePath)
+    } else if (stat.isDirectory() && !shouldSkipDir(item)) {
+      const readmePaths = [
+        path.join(itemPath, 'README.md'),
+        path.join(itemPath, 'Readme.md'),
+        path.join(itemPath, 'readme.md'),
+      ]
+      const existingReadme = readmePaths.find(candidate => fs.existsSync(candidate))
+      if (existingReadme) {
+        const { data, content } = readAndParseFile(existingReadme)
         const itemSlug = [...slug, item]
 
         docs.push({
           slug: itemSlug,
           content,
           meta: data as DocMeta,
-          filePath: readmePath,
+          filePath: existingReadme,
         })
       }
     }

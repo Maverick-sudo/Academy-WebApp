@@ -46,7 +46,7 @@ export default async function DocPage({ params }: DocPageProps) {
       // Render directory index
       return (
         <div className="w-full">
-          <div className="container mx-0 px-4 sm:px-6 lg:px-6 max-w-4xl py-8 lg:py-12">
+          <div className="w-full max-w-none lg:max-w-4xl py-8 lg:py-12">
             <Breadcrumb slug={normalizedSlug} />
             <h1 className="text-3xl md:text-4xl font-bold mb-8">
               {normalizedSlug[normalizedSlug.length - 1]
@@ -97,6 +97,14 @@ export default async function DocPage({ params }: DocPageProps) {
   const adjacentDocs = getAdjacentDocs(normalizedSlug)
   const githubUrl = getGitHubUrl(normalizedSlug)
 
+  // If the markdown content starts with a top-level H1 and we already have a
+  // `meta.title`, strip the leading H1 from the markdown so we don't render
+  // duplicate titles. This is a conservative, local fix — more advanced
+  // parsing can be added later if needed.
+  const contentToRender = doc.meta.title
+    ? doc.content.replace(/^\s*#\s.*(\r?\n)*/i, '')
+    : doc.content
+
   const extractText = (node: unknown): string => {
     if (typeof node === 'string') {
       return node
@@ -113,30 +121,34 @@ export default async function DocPage({ params }: DocPageProps) {
 
   return (
     <div className="w-full">
-      <div className="container mx-0 px-4 sm:px-6 lg:px-6 max-w-7xl">
+      <div className="w-full">
         <div className="flex gap-6 py-8 lg:py-12">
           {/* Main Content */}
-          <div className="flex-1 min-w-0 max-w-4xl">
+          <div className="flex-1 min-w-0 max-w-none lg:max-w-4xl">
             <Breadcrumb slug={normalizedSlug} />
             
-            <article className="prose prose-slate dark:prose-invert max-w-none prose-headings:scroll-mt-24 prose-img:rounded-lg">
-              <h1>{title}</h1>
-              {doc.meta.description && (
-                <p className="text-xl text-slate-600 dark:text-slate-400">
-                  {doc.meta.description}
-                </p>
-              )}
-              {doc.meta.status && (
-                <div className="not-prose mb-6">
-                  <span className={`inline-block px-3 py-1 text-sm rounded ${
-                    doc.meta.status === 'draft' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' :
-                    doc.meta.status === 'updated' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
-                    'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                  }`}>
-                    {doc.meta.status.toUpperCase()}
-                  </span>
-                </div>
-              )}
+            <article className="prose prose-sm sm:prose lg:prose-lg prose-slate dark:prose-invert max-w-none prose-headings:scroll-mt-24 prose-img:rounded-lg leading-relaxed">
+              <div className="not-prose mb-8">
+                <h1 className="text-4xl font-bold leading-tight bg-gradient-to-r from-blue-600 to-slate-600 dark:from-blue-400 dark:to-slate-300 bg-clip-text text-transparent">
+                  {title}
+                </h1>
+                {doc.meta.description && (
+                  <p className="mt-3 text-xl text-slate-600 dark:text-slate-400">
+                    {doc.meta.description}
+                  </p>
+                )}
+                {doc.meta.status && (
+                  <div className="mt-4">
+                    <span className={`inline-block px-3 py-1 text-sm rounded ${
+                      doc.meta.status === 'draft' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' :
+                      doc.meta.status === 'updated' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
+                      'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                    }`}>
+                      {doc.meta.status.toUpperCase()}
+                    </span>
+                  </div>
+                )}
+              </div>
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             rehypePlugins={[
@@ -145,6 +157,7 @@ export default async function DocPage({ params }: DocPageProps) {
               rehypeHighlight,
             ]}
             components={{
+              h1: () => null,
               img: () => null,
               code({ className, children, ...props }) {
                 const languageMatch = className?.match(/language-([\w-]+)/)
@@ -161,7 +174,7 @@ export default async function DocPage({ params }: DocPageProps) {
               },
             }}
           >
-            {doc.content}
+              {contentToRender}
           </ReactMarkdown>
         </article>
         

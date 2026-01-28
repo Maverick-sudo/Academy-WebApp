@@ -17,7 +17,7 @@ export default function TopNav({ onMenuClick }: TopNavProps) {
         {/* Mobile menu button - More visible */}
         <button
           onClick={onMenuClick}
-          className="lg:hidden mr-3 p-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400 text-white transition-colors"
+          className="xl:hidden mr-3 p-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400 text-white transition-colors"
           aria-label="Toggle sidebar"
         >
           <Menu className="w-5 h-5" />

@@ -24,11 +24,33 @@ export default function Sidebar({
   onToggleCollapse 
 }: SidebarProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set())
+  const [isDesktop, setIsDesktop] = useState(false)
   const pathname = usePathname()
+
+  useEffect(() => {
+    // Treat widths >= 1280px as desktop; tablets (<1280px) will behave like mobile.
+    const mediaQuery = window.matchMedia('(min-width: 1280px)')
+    const updateIsDesktop = () => setIsDesktop(mediaQuery.matches)
+    updateIsDesktop()
+
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', updateIsDesktop)
+      return () => mediaQuery.removeEventListener('change', updateIsDesktop)
+    }
+
+    mediaQuery.addListener(updateIsDesktop)
+    return () => mediaQuery.removeListener(updateIsDesktop)
+  }, [])
+
+  const isCollapsedDesktop = isCollapsed && isDesktop
+
+  // Sidebar padding: match content rhythm when expanded, but use smaller
+  // horizontal padding when collapsed (desktop only).
+  const asidePadding = isCollapsedDesktop ? 'px-1 xl:px-1' : 'px-4 xl:px-6'
 
   const toggleSection = (sectionId: string) => {
     // Don't allow expanding sections when collapsed
-    if (isCollapsed) return
+    if (isCollapsedDesktop) return
     
     const newExpanded = new Set(expandedSections)
     if (newExpanded.has(sectionId)) {
@@ -41,7 +63,7 @@ export default function Sidebar({
 
   useEffect(() => {
     // Auto-expand sections containing active page (only when not collapsed)
-    if (!isCollapsed) {
+    if (!isCollapsedDesktop) {
       const activeSection = data.find(section =>
         section.items?.some(item => item.href && pathname.startsWith(item.href))
       )
@@ -49,30 +71,32 @@ export default function Sidebar({
         setExpandedSections(new Set([activeSection.id]))
       }
     }
-  }, [pathname, data, isCollapsed])
+  }, [pathname, data, isCollapsedDesktop])
 
   return (
     <>
       {/* Overlay for mobile */}
       {isOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/50 z-30"
+          className="xl:hidden fixed inset-0 bg-black/60 backdrop-blur-[2px] z-60"
           onClick={onClose}
         />
       )}
 
       {/* Sidebar */}
+      {(isOpen || isDesktop) && (
       <aside
         className={`
-          fixed lg:sticky top-16 left-0 h-[calc(100vh-4rem)]
+          fixed xl:sticky top-16 left-0 h-[calc(100vh-4rem)]
           bg-white dark:bg-[var(--sidebar)] border-r border-slate-200 dark:border-[var(--sidebar-border)]
-          overflow-y-auto z-40 relative
+          overflow-y-auto z-70 relative shadow-xl
           transition-[width,transform] duration-150 ease-in-out
-          ${isCollapsed ? 'lg:w-16' : 'w-64 lg:w-72'}
-          ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          ${isCollapsedDesktop ? 'w-[85vw] max-w-[20rem] sm:w-72 xl:w-16' : 'w-[85vw] max-w-[20rem] sm:w-72 xl:w-72'}
+          ${isOpen ? 'translate-x-0' : '-translate-x-full xl:translate-x-0'}
+          ${asidePadding}
         `}
       >
-        <nav className="p-4 space-y-1 pb-16">
+        <nav className="py-4 space-y-1 pb-16">
           {data.map((section) => (
             <SidebarSection 
               key={section.id} 
@@ -81,24 +105,26 @@ export default function Sidebar({
               expandedSections={expandedSections}
               toggleSection={toggleSection}
               depth={0}
-              isCollapsed={isCollapsed}
+              isCollapsed={isCollapsedDesktop}
+              onClose={onClose}
+              isDesktop={isDesktop}
             />
           ))}
         </nav>
 
         {/* Collapse toggle button (desktop only) */}
-        <div className="hidden lg:flex items-center justify-between px-2 py-2 border-t border-slate-200 dark:border-[var(--sidebar-border)] absolute bottom-0 left-0 right-0 bg-white dark:bg-[var(--sidebar)]">
+        <div className="hidden xl:flex items-center justify-between px-2 py-2 border-t border-slate-200 dark:border-[var(--sidebar-border)] absolute bottom-0 left-0 right-0 bg-white dark:bg-[var(--sidebar)]">
           <button
             onClick={onToggleCollapse}
             className={cn(
               "flex items-center gap-2 rounded-md transition-colors",
               "hover:bg-slate-100 dark:hover:bg-[var(--sidebar-accent)]",
               "text-slate-600 dark:text-[var(--sidebar-foreground)]",
-              isCollapsed ? "w-full justify-center p-1.5" : "w-full px-3 py-2"
+              isCollapsedDesktop ? "w-full justify-center p-1.5" : "w-full px-3 py-2"
             )}
-            aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            aria-label={isCollapsedDesktop ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            {isCollapsed ? (
+            {isCollapsedDesktop ? (
               <ChevronRight className="w-4 h-4" />
             ) : (
               <>
@@ -109,6 +135,7 @@ export default function Sidebar({
           </button>
         </div>
       </aside>
+      )}
     </>
   )
 }
@@ -120,6 +147,8 @@ interface SidebarSectionProps {
   toggleSection: (id: string) => void
   depth: number
   isCollapsed: boolean
+  onClose?: () => void
+  isDesktop?: boolean
 }
 
 function SidebarSection({ 
@@ -128,7 +157,9 @@ function SidebarSection({
   expandedSections, 
   toggleSection, 
   depth,
-  isCollapsed 
+  isCollapsed,
+  onClose,
+  isDesktop
 }: SidebarSectionProps) {
   const isExpanded = expandedSections.has(section.id)
   const isActive = pathname === section.href
@@ -138,10 +169,16 @@ function SidebarSection({
 
   // For leaf items (no children)
   if (!hasChildren && section.href) {
+    const handleClick = () => {
+      // Close the sidebar on mobile when a link is clicked
+      if (!isDesktop && onClose) onClose()
+    }
+
     const linkContent = (
       <Link
         href={section.href}
-        className={`flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors ${
+        onClick={handleClick}
+        className={`flex items-center gap-2 ${isCollapsed ? 'px-1 py-2' : 'px-3 py-2'} text-sm rounded-md transition-colors ${
           isActive
             ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium'
             : 'text-slate-700 dark:text-[var(--sidebar-foreground)] hover:bg-slate-100 dark:hover:bg-[var(--sidebar-accent)]'
@@ -169,7 +206,7 @@ function SidebarSection({
   const buttonContent = (
     <button
       onClick={() => toggleSection(section.id)}
-      className={`flex items-center justify-between w-full px-3 py-2 text-sm font-semibold rounded-md hover:bg-slate-100 dark:hover:bg-[var(--sidebar-accent)] ${
+      className={`flex items-center justify-between w-full ${isCollapsed ? 'px-1 py-2' : 'px-3 py-2'} text-sm font-semibold rounded-md hover:bg-slate-100 dark:hover:bg-[var(--sidebar-accent)] ${
         isCollapsed ? 'justify-center' : ''
       }`}
       style={!isCollapsed ? { paddingLeft: `${paddingLeft + 12}px` } : undefined}

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Sidebar from '@/components/Sidebar'
 import TopNav from '@/components/TopNav'
+import MobileNav from '@/components/MobileNav'
 import type { SidebarItem } from '@/lib/sidebar'
 
 interface LayoutClientProps {
@@ -12,7 +13,9 @@ interface LayoutClientProps {
 
 export default function LayoutClient({ children, sidebarData }: LayoutClientProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isMobileOpen, setIsMobileOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(false)
 
   // Load collapsed state from localStorage on mount
   useEffect(() => {
@@ -27,12 +30,45 @@ export default function LayoutClient({ children, sidebarData }: LayoutClientProp
     localStorage.setItem('academy-sidebar-collapsed', String(isCollapsed))
   }, [isCollapsed])
 
+  useEffect(() => {
+    // Only lock body scroll for mobile overlay (when sidebar is open and not desktop)
+    if (isSidebarOpen && !isDesktop) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isSidebarOpen, isDesktop])
+
+  // Detect desktop breakpoint so we can change main layout behavior accordingly
+  useEffect(() => {
+    // Treat widths >= 1280px as desktop so tablets (<1280px) are treated as mobile.
+    const mq = window.matchMedia('(min-width: 1280px)')
+    const update = () => setIsDesktop(mq.matches)
+    update()
+    if (mq.addEventListener) {
+      mq.addEventListener('change', update)
+      return () => mq.removeEventListener('change', update)
+    }
+    mq.addListener(update)
+    return () => mq.removeListener(update)
+  }, [])
+
   const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen)
+    // On desktop toggle the sidebar; on mobile open the mobile nav drawer.
+    if (isDesktop) {
+      setIsSidebarOpen(!isSidebarOpen)
+    } else {
+      setIsMobileOpen(!isMobileOpen)
+    }
   }
 
   const closeSidebar = () => {
     setIsSidebarOpen(false)
+    setIsMobileOpen(false)
   }
 
   const toggleCollapse = () => {
@@ -50,7 +86,9 @@ export default function LayoutClient({ children, sidebarData }: LayoutClientProp
           isCollapsed={isCollapsed}
           onToggleCollapse={toggleCollapse}
         />
-        <main className={`flex-1 min-w-0 ${isCollapsed ? 'lg:ml-16' : 'lg:ml-72'}`}>
+        {/* Mobile navigation menu inline above content (hidden on desktop). */}
+        <main className={`flex-1 min-w-0 px-4 xl:px-6 ${isDesktop ? (isCollapsed ? 'xl:ml-16' : 'xl:ml-72') : ''} ${isSidebarOpen ? 'pointer-events-none' : ''}`}>
+          <MobileNav open={isMobileOpen} onClose={() => setIsMobileOpen(false)} data={sidebarData} />
           {children}
         </main>
       </div>
