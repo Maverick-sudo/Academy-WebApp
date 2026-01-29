@@ -75,24 +75,15 @@ export default function Sidebar({
 
   return (
     <>
-      {/* Overlay for mobile */}
-      {isOpen && (
-        <div
-          className="xl:hidden fixed inset-0 bg-black/60 backdrop-blur-[2px] z-60"
-          onClick={onClose}
-        />
-      )}
-
-      {/* Sidebar */}
-      {(isOpen || isDesktop) && (
+      {/* Desktop Sidebar - Only visible at xl breakpoint (>=1280px) */}
       <aside
         className={`
-          fixed xl:sticky top-16 left-0 h-[calc(100vh-4rem)]
+          hidden xl:block
+          xl:sticky top-16 left-0 h-[calc(100vh-4rem)]
           bg-white dark:bg-[var(--sidebar)] border-r border-slate-200 dark:border-[var(--sidebar-border)]
           overflow-y-auto z-70 relative shadow-xl
-          transition-[width,transform] duration-150 ease-in-out
-          ${isCollapsedDesktop ? 'w-[85vw] max-w-[20rem] sm:w-72 xl:w-16' : 'w-[85vw] max-w-[20rem] sm:w-72 xl:w-72'}
-          ${isOpen ? 'translate-x-0' : '-translate-x-full xl:translate-x-0'}
+          transition-[width] duration-150 ease-in-out
+          ${isCollapsedDesktop ? 'xl:w-16' : 'xl:w-72'}
           ${asidePadding}
         `}
       >
@@ -135,7 +126,6 @@ export default function Sidebar({
           </button>
         </div>
       </aside>
-      )}
     </>
   )
 }

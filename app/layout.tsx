@@ -4,6 +4,8 @@ import { Inter } from 'next/font/google'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import { generateSidebarStructure } from '@/lib/sidebar'
 import LayoutClient from '@/components/LayoutClient'
+import NextTopLoader from 'nextjs-toploader'
+import { Toaster } from 'sonner'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -35,6 +37,17 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
+        <NextTopLoader
+          color="var(--loading-bar-color)"
+          initialPosition={0.08}
+          crawlSpeed={200}
+          height={3}
+          crawl={true}
+          showSpinner={false}
+          easing="ease"
+          speed={200}
+        />
+        <Toaster position="bottom-right" />
         <ThemeProvider>
           <LayoutClient sidebarData={sidebarData}>
             {children}

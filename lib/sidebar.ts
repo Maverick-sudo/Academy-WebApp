@@ -44,8 +44,10 @@ const repositories = [
 /**
  * Convert FileTreeNode to SidebarItem
  */
-function treeNodeToSidebarItem(node: FileTreeNode, parentPath: string): SidebarItem {
-  const fullPath = parentPath ? `${parentPath}/${node.path}` : node.path
+function treeNodeToSidebarItem(node: FileTreeNode, repoPath: string): SidebarItem {
+  const normalizedRepoPath = repoPath.replace(/\/$/, '')
+  const cleanNodePath = node.path.replace(/^\//, '')
+  const fullPath = [normalizedRepoPath, cleanNodePath].filter(Boolean).join('/')
   const href = node.type === 'file'
     ? `/docs/${fullPath.replace(/\/?README$/i, '')}`
     : undefined
@@ -56,9 +58,7 @@ function treeNodeToSidebarItem(node: FileTreeNode, parentPath: string): SidebarI
     href,
     type: node.type,
     status: node.meta?.status,
-    items: node.children?.map(child => 
-      treeNodeToSidebarItem(child, parentPath ? parentPath.split('/')[0] : node.path)
-    ),
+    items: node.children?.map(child => treeNodeToSidebarItem(child, repoPath)),
   }
 }
 

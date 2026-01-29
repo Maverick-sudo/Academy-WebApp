@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { ThemeToggle } from './ThemeProvider'
 import Search from './Search'
 import { Menu } from 'lucide-react'
+import SearchErrorBoundary from './SearchErrorBoundary'
 
 interface TopNavProps {
   onMenuClick?: () => void
@@ -28,7 +29,9 @@ export default function TopNav({ onMenuClick }: TopNavProps) {
         </Link>
 
         <div className="flex flex-1 items-center justify-end space-x-4">
-          <Search />
+          <SearchErrorBoundary>
+            <Search />
+          </SearchErrorBoundary>
           <nav className="flex items-center space-x-6 text-sm font-medium">
             <Link
               href="/docs/study-notes"

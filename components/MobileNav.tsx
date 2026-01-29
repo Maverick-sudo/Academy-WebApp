@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { SidebarItem } from '@/lib/sidebar'
 import { useState, useEffect, useRef } from 'react'
+import { toast } from 'sonner'
+import Spinner from './Spinner'
 
 interface ExpandedState {
   [id: string]: boolean
@@ -18,6 +20,7 @@ interface MobileNavProps {
 export default function MobileNav({ open, onClose, data }: MobileNavProps) {
   const router = useRouter()
   const [expanded, setExpanded] = useState<ExpandedState>({})
+  const [navigatingTo, setNavigatingTo] = useState<string | null>(null)
   const navRef = useRef<HTMLDivElement | null>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
   const FOCUSABLE_SELECTORS = 'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
@@ -92,6 +95,82 @@ export default function MobileNav({ open, onClose, data }: MobileNavProps) {
     setExpanded(prev => ({ ...prev, [id]: !prev[id] }))
   }
 
+  const renderItems = (items: SidebarItem[], depth = 0) => (
+    <div className={depth === 0 ? '' : 'pl-4 mt-1 space-y-1'}>
+      {items.map(item => {
+        const hasChildren = Boolean(item.items && item.items.length > 0)
+        const isExpanded = Boolean(expanded[item.id])
+
+        if (hasChildren) {
+          return (
+            <div key={item.id} className="mb-1">
+              <button
+                type="button"
+                onClick={() => toggleSection(item.id)}
+                className="w-full flex items-center justify-between px-2 py-1 rounded hover:bg-slate-50 dark:hover:bg-[var(--sidebar-accent)] text-sm font-medium"
+              >
+                <span>{item.label}</span>
+                <svg
+                  className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path d="M7 5l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+              <div className={`${isExpanded ? 'block' : 'hidden'} mt-1`}>
+                {item.items && renderItems(item.items, depth + 1)}
+              </div>
+            </div>
+          )
+        }
+
+        if (item.href) {
+          const isNavigating = navigatingTo === item.href
+          return (
+            <a
+              key={item.id}
+              href={item.href}
+              onClick={async (e) => {
+                e.preventDefault()
+                if (!item.href) return
+
+                console.log('[MobileNav] Navigating to:', item.href)
+                setNavigatingTo(item.href)
+
+                try {
+                  console.log('[MobileNav] Calling router.push...')
+                  await router.push(item.href)
+                  console.log('[MobileNav] Navigation successful')
+                } catch (error) {
+                  console.error('[MobileNav] Navigation error:', error)
+                  toast.error('Navigation failed. Please try again.')
+                } finally {
+                  console.log('[MobileNav] Cleaning up and closing menu')
+                  setNavigatingTo(null)
+                  onClose()
+                }
+              }}
+              className={`flex items-center px-2 py-1 rounded hover:bg-slate-50 dark:hover:bg-[var(--sidebar-accent)] text-sm ${isNavigating ? 'pointer-events-none opacity-50' : ''}`}
+            >
+              {item.label}
+              {isNavigating && (
+                <span className="ml-2"><Spinner size="sm" /></span>
+              )}
+            </a>
+          )
+        }
+
+        return (
+          <div key={item.id} className="px-2 py-1 text-sm text-slate-500">
+            {item.label}
+          </div>
+        )
+      })}
+    </div>
+  )
+
   // Rendered inline above the main content; hidden at xl
   return (
     <div
@@ -109,7 +188,7 @@ export default function MobileNav({ open, onClose, data }: MobileNavProps) {
               <div key={section.id} className="bg-transparent">
                 <button
                   type="button"
-                  aria-expanded={isOpen ? 'true' : 'false'}
+                  aria-expanded={isOpen}
                   aria-controls={`menu-${section.id}`}
                   onClick={() => toggleSection(section.id)}
                   className="w-full flex items-center justify-between px-2 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-[var(--sidebar-accent)]"
@@ -126,56 +205,7 @@ export default function MobileNav({ open, onClose, data }: MobileNavProps) {
                 </button>
 
                 <div id={`menu-${section.id}`} className={`${isOpen ? 'block' : 'hidden'} mt-2 pl-2`}>
-                  {section.items && section.items.map(item => (
-                    <div key={item.id} className="mb-1">
-                      {item.href ? (
-                        <a
-                          href={item.href}
-                          onClick={async (e) => {
-                            e.preventDefault()
-                            if (!item.href) return
-                            try {
-                              await router.push(item.href)
-                            } finally {
-                              onClose()
-                            }
-                          }}
-                          className="block px-2 py-1 rounded hover:bg-slate-50 dark:hover:bg-[var(--sidebar-accent)]"
-                        >
-                          {item.label}
-                        </a>
-                      ) : (
-                        <div className="px-2 py-1 text-sm">{item.label}</div>
-                      )}
-
-                      {item.items && (
-                        <div className="pl-4 mt-1 space-y-1">
-                          {item.items.map(child => (
-                            child.href ? (
-                              <a
-                                key={child.id}
-                                href={child.href}
-                                onClick={async (e) => {
-                                  e.preventDefault()
-                                  if (!child.href) return
-                                  try {
-                                    await router.push(child.href)
-                                  } finally {
-                                    onClose()
-                                  }
-                                }}
-                                className="block px-2 py-1 rounded hover:bg-slate-50 dark:hover:bg-[var(--sidebar-accent)] text-sm"
-                              >
-                                {child.label}
-                              </a>
-                            ) : (
-                              <div key={child.id} className="px-2 py-1 text-sm">{child.label}</div>
-                            )
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                  {section.items && renderItems(section.items)}
                 </div>
               </div>
             )

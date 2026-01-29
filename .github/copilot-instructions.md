@@ -38,6 +38,7 @@ Your responsibilities:
 - Hosting: Vercel (optimize for static generation and edge compatibility).
 - Styling: Tailwind CSS only (no component libraries unless explicitly requested).
 - Content source: Markdown / MDX files stored in the repository.
+- Tooling: The Markitdown MCP server stays global. Run it with a Python version that already has `onnxruntime` wheels (≤3.13 today) and never add it to repo dependencies.
 
 ## Core UX Principles (Non-Negotiable)
 - Left sidebar navigation with:

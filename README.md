@@ -12,6 +12,12 @@ A modern, GitBook-style documentation hub built with Next.js, deployed on Vercel
 - ⚡ **Fast**: Static generation with Next.js 14
 - 🚀 **Vercel-Ready**: Optimized for Vercel deployment
 
+## Developer Tooling
+
+- 🔧 **Markitdown MCP (Global Only)**: Install and run the Markitdown MCP server outside this repo (e.g., via `pipx install markitdown[all]`). Do not vendor it into `package.json` or project dependencies.
+- 🐍 **Python Version Requirement**: Run Markitdown under a Python version that already has published `onnxruntime` wheels (≤3.13 as of now). Python 3.14 (`cp314`) lacks compatible wheels, so the server will fail to start there.
+- 📎 **Docs Link**: Follow the official Markitdown and Magika release notes for updates; update this section if/when `onnxruntime` publishes cp314 wheels.
+
 ## Project Structure
 
 `content/study-notes/

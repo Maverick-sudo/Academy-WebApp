@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Sidebar from '@/components/Sidebar'
 import TopNav from '@/components/TopNav'
 import MobileNav from '@/components/MobileNav'
@@ -77,6 +77,17 @@ export default function LayoutClient({ children, sidebarData }: LayoutClientProp
     setIsCollapsed(!isCollapsed)
   }
 
+  const sidebarDebug = useMemo(() => {
+    if (process.env.NODE_ENV === 'production') {
+      return null
+    }
+    try {
+      return JSON.stringify(sidebarData).replace(/</g, '\\u003c')
+    } catch {
+      return null
+    }
+  }, [sidebarData])
+
   return (
     <div className="min-h-screen">
       <TopNav onMenuClick={toggleSidebar} />
@@ -89,11 +100,18 @@ export default function LayoutClient({ children, sidebarData }: LayoutClientProp
           onToggleCollapse={toggleCollapse}
         />
         {/* Mobile navigation menu inline above content (hidden on desktop). */}
-        <main className={`flex-1 min-w-0 px-4 xl:px-6 ${isDesktop ? (isCollapsed ? 'xl:ml-16' : 'xl:ml-48') : ''}`}> 
+        <main className={`flex-1 min-w-0 px-4 xl:px-6 ${isDesktop ? (isCollapsed ? 'xl:ml-16' : 'xl:ml-72') : ''}`}> 
           <MobileNav open={isMobileOpen} onClose={() => setIsMobileOpen(false)} data={sidebarData} />
           {children}
         </main>
       </div>
+      {sidebarDebug && (
+        <script
+          type="application/json"
+          data-sidebar-debug
+          dangerouslySetInnerHTML={{ __html: sidebarDebug }}
+        />
+      )}
     </div>
   )
 }
