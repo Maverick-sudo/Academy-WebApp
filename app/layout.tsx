@@ -19,7 +19,8 @@ export const metadata: Metadata = {
     apple: [
       { url: '/apple-touch-icon.svg', sizes: '180x180', type: 'image/svg+xml' },
     ],
-    shortcut: ['/favicon.ico'],
+    // Use the SVG shortcut to avoid serving a malformed or missing /favicon.ico
+    shortcut: ['/favicon-32x32.svg'],
   },
 }
 
