@@ -109,7 +109,7 @@ export default function MobileNav({ open, onClose, data }: MobileNavProps) {
               <div key={section.id} className="bg-transparent">
                 <button
                   type="button"
-                  aria-expanded={isOpen}
+                  aria-expanded={isOpen ? 'true' : 'false'}
                   aria-controls={`menu-${section.id}`}
                   onClick={() => toggleSection(section.id)}
                   className="w-full flex items-center justify-between px-2 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-[var(--sidebar-accent)]"
@@ -119,7 +119,7 @@ export default function MobileNav({ open, onClose, data }: MobileNavProps) {
                     className={`w-4 h-4 ml-2 transition-transform ${isOpen ? 'rotate-90' : ''}`}
                     viewBox="0 0 20 20"
                     fill="none"
-                    aria-hidden
+                    aria-hidden="true"
                   >
                     <path d="M7 5l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
@@ -133,6 +133,7 @@ export default function MobileNav({ open, onClose, data }: MobileNavProps) {
                           href={item.href}
                           onClick={async (e) => {
                             e.preventDefault()
+                            if (!item.href) return
                             try {
                               await router.push(item.href)
                             } finally {
@@ -156,6 +157,7 @@ export default function MobileNav({ open, onClose, data }: MobileNavProps) {
                                 href={child.href}
                                 onClick={async (e) => {
                                   e.preventDefault()
+                                  if (!child.href) return
                                   try {
                                     await router.push(child.href)
                                   } finally {

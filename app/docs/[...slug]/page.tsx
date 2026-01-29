@@ -31,6 +31,21 @@ interface DocPageProps {
 
 export default async function DocPage({ params }: DocPageProps) {
   const normalizedSlug = params.slug.map(segment => segment.replace(/\.md$/i, ''))
+  // Safe external redirect mappings for large binary/docs folders
+  const lower0 = normalizedSlug[0] && String(normalizedSlug[0]).toLowerCase()
+  // CCNA-Labs -> network-engineering repo
+  if (lower0 === 'ccna-labs' || lower0 === 'ccna-lab') {
+    const tail = normalizedSlug.slice(1).map(encodeURIComponent).join('/')
+    const target = `https://github.com/Maverick-sudo/network-engineering/tree/main/CCNA-LAB${tail ? '/' + tail : ''}`
+    // Server-side redirect for safety; render fallback if client-side
+    redirect(target)
+  }
+  // Ansible Cisco Lab under automation -> Automation repo
+  if (lower0 === 'automation' && normalizedSlug[1] && String(normalizedSlug[1]).toLowerCase() === 'ansible cisco lab') {
+    const tail = normalizedSlug.slice(2).map(encodeURIComponent).join('/')
+    const target = `https://github.com/Maverick-sudo/Automation/tree/main${tail ? '/' + tail : ''}`
+    redirect(target)
+  }
   const lastSegment = normalizedSlug[normalizedSlug.length - 1]
   if (lastSegment && /^readme$/i.test(lastSegment)) {
     const redirectSlug = normalizedSlug.slice(0, -1)
