@@ -127,21 +127,22 @@ export default function MobileNav({ open, onClose, data }: MobileNavProps) {
         }
 
         if (item.href) {
-          const isNavigating = navigatingTo === item.href
+          const normalizedHref = encodeURI(item.href)
+          const isNavigating = navigatingTo === item.href || navigatingTo === normalizedHref
           return (
             <a
               key={item.id}
-              href={item.href}
+              href={normalizedHref}
               onClick={async (e) => {
                 e.preventDefault()
                 if (!item.href) return
 
-                console.log('[MobileNav] Navigating to:', item.href)
-                setNavigatingTo(item.href)
+                console.log('[MobileNav] Navigating to:', normalizedHref)
+                setNavigatingTo(normalizedHref)
 
                 try {
                   console.log('[MobileNav] Calling router.push...')
-                  await router.push(item.href)
+                  await router.push(normalizedHref)
                   console.log('[MobileNav] Navigation successful')
                 } catch (error) {
                   console.error('[MobileNav] Navigation error:', error)

@@ -10,6 +10,7 @@ import Breadcrumb from '@/components/Breadcrumb'
 import PrevNextNav from '@/components/PrevNextNav'
 import EditOnGitHub from '@/components/EditOnGitHub'
 import Link from 'next/link'
+import { formatDisplayTitle } from '@/lib/title'
 import 'highlight.js/styles/github-dark.css'
 
 // Lazy load heavy components
@@ -30,22 +31,21 @@ interface DocPageProps {
 }
 
 export default async function DocPage({ params }: DocPageProps) {
-  const normalizedSlug = params.slug.map(segment => segment.replace(/\.md$/i, ''))
-  // Safe external redirect mappings for large binary/docs folders
-  const lower0 = normalizedSlug[0] && String(normalizedSlug[0]).toLowerCase()
-  // CCNA-Labs -> network-engineering repo
-  if (lower0 === 'ccna-labs' || lower0 === 'ccna-lab') {
-    const tail = normalizedSlug.slice(1).map(encodeURIComponent).join('/')
-    const target = `https://github.com/Maverick-sudo/network-engineering/tree/main/CCNA-LAB${tail ? '/' + tail : ''}`
-    // Server-side redirect for safety; render fallback if client-side
-    redirect(target)
+  const decodeSegment = (segment: string) => {
+    try {
+      return decodeURIComponent(segment)
+    } catch {
+      return segment
+    }
   }
-  // Ansible Cisco Lab under automation -> Automation repo
-  if (lower0 === 'automation' && normalizedSlug[1] && String(normalizedSlug[1]).toLowerCase() === 'ansible cisco lab') {
-    const tail = normalizedSlug.slice(2).map(encodeURIComponent).join('/')
-    const target = `https://github.com/Maverick-sudo/Automation/tree/main${tail ? '/' + tail : ''}`
-    redirect(target)
-  }
+  const normalizedSlug = params.slug.map(segment => decodeSegment(segment).replace(/\.md$/i, ''))
+  const repoRoot = normalizedSlug[0] ? String(normalizedSlug[0]).toLowerCase() : ''
+  const isAutomation = repoRoot === 'automation'
+  const isCcnaLabs = repoRoot === 'ccna-labs' || repoRoot === 'ccna-lab'
+  const isCcnaIndex = isCcnaLabs && normalizedSlug.length === 1
+  const automationRepoUrl = 'https://github.com/Maverick-sudo/Automation'
+  const ccnaDownloadUrl = 'https://github.com/Maverick-sudo/network-engineering'
+  const ccnaDownloadText = 'Download .pkt files'
   const lastSegment = normalizedSlug[normalizedSlug.length - 1]
   if (lastSegment && /^readme$/i.test(lastSegment)) {
     const redirectSlug = normalizedSlug.slice(0, -1)
@@ -63,14 +63,8 @@ export default async function DocPage({ params }: DocPageProps) {
         <div className="w-full">
           <div className="w-full max-w-none lg:max-w-4xl py-8 lg:py-12">
             <Breadcrumb slug={normalizedSlug} />
-            <h1 className="text-3xl md:text-4xl font-bold mb-8">
-              {normalizedSlug[normalizedSlug.length - 1]
-                .replace(/[-_]/g, ' ')
-                .replace(/([A-Z])/g, ' $1')
-                .trim()
-                .split(' ')
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(' ')}
+              <h1 className="text-3xl md:text-4xl font-bold mb-8 break-words">
+                {formatDisplayTitle(normalizedSlug[normalizedSlug.length - 1])}
             </h1>
             
             <div className="grid gap-4">
@@ -81,7 +75,7 @@ export default async function DocPage({ params }: DocPageProps) {
                   className="block p-6 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-blue-500 dark:hover:border-blue-500 transition-colors"
                 >
                   <h2 className="text-xl font-semibold mb-2">
-                    {doc.meta.title || doc.slug[doc.slug.length - 1]}
+                    {formatDisplayTitle(doc.meta.title || doc.slug[doc.slug.length - 1])}
                   </h2>
                   {doc.meta.description && (
                     <p className="text-slate-600 dark:text-slate-400">
@@ -100,6 +94,30 @@ export default async function DocPage({ params }: DocPageProps) {
                 </Link>
               ))}
             </div>
+            {isAutomation && (
+              <div className="mt-8 not-prose">
+                <a
+                  href={automationRepoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-500 text-sm font-medium"
+                >
+                  View configuration files on GitHub
+                </a>
+              </div>
+            )}
+            {isCcnaIndex && (
+              <div className="mt-8 not-prose">
+                <a
+                  href={ccnaDownloadUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-500 text-sm font-medium"
+                >
+                  {ccnaDownloadText}
+                </a>
+              </div>
+            )}
           </div>
         </div>
       )
@@ -109,6 +127,7 @@ export default async function DocPage({ params }: DocPageProps) {
   }
 
   const title = doc.meta.title || normalizedSlug[normalizedSlug.length - 1]
+  const displayTitle = formatDisplayTitle(title)
   const adjacentDocs = getAdjacentDocs(normalizedSlug)
   const githubUrl = getGitHubUrl(normalizedSlug)
 
@@ -144,8 +163,8 @@ export default async function DocPage({ params }: DocPageProps) {
             
             <article className="prose prose-sm sm:prose lg:prose-lg prose-slate dark:prose-invert max-w-none prose-headings:scroll-mt-24 prose-img:rounded-lg leading-relaxed">
               <div className="not-prose mb-8">
-                <h1 className="text-4xl font-bold leading-tight bg-gradient-to-r from-blue-600 to-slate-600 dark:from-blue-400 dark:to-slate-300 bg-clip-text text-transparent">
-                  {title}
+                <h1 className="text-4xl font-bold leading-tight break-words bg-gradient-to-r from-blue-600 to-slate-600 dark:from-blue-400 dark:to-slate-300 bg-clip-text text-transparent">
+                  {displayTitle}
                 </h1>
                 {doc.meta.description && (
                   <p className="mt-3 text-xl text-slate-600 dark:text-slate-400">
@@ -200,6 +219,18 @@ export default async function DocPage({ params }: DocPageProps) {
           </ReactMarkdown>
         </article>
         
+        {isAutomation && (
+          <div className="mt-6 not-prose">
+            <a
+              href={automationRepoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-500 text-sm font-medium"
+            >
+              View configuration files on GitHub
+            </a>
+          </div>
+        )}
         <EditOnGitHub githubUrl={githubUrl} />
         <PrevNextNav prev={adjacentDocs.prev} next={adjacentDocs.next} />
       </div>

@@ -5,10 +5,10 @@ This repository contains Ansible-based automation for deploying OSPF (Open Short
 ## Architecture Overview
 
 ### Multi-Project Structure
-- **3-Router OSPF Design** (`ospf-lab/`): Simple 3-router topology with 2 OSPF areas
+- **3-Router OSPF Design** (`3-Router OSPF Design/ospf-lab/`): Simple 3-router topology with 2 OSPF areas
 - **multi-site-ospf/**: Production-grade 6-router setup with phased deployments
-- **ospf-lab-6r/**: Advanced 6-router lab with HQ/Branch structure and ABR (Area Border Router) roles
-- **Cisco vIOS Day 0 Template**: Base connectivity verification template
+- **6-Router OSPF Design/**: Advanced 6-router lab with HQ/Branch structure and ABR (Area Border Router) roles
+- **Cisco Zero Day Template**: Base connectivity verification template
 
 ### Data Flow Pattern
 1. **Inventory Layer** (`inventory/hosts.yml`): Defines router groups (hq_routers, branch_routers, routers)
@@ -52,7 +52,7 @@ Variables define network statements as list of dicts with network, wildcard, and
 **Critical**: Passive interfaces declared separately. ABR routers require network statements in BOTH areas they connect.
 
 ### 3. Phased Deployment Pattern
-**Location**: `multi-site-ospf/` and `ospf-lab-6r/`
+**Location**: `multi-site-ospf/` and `6-Router OSPF Design/`
 
 - `phase1_deploy.yml`: Deploys base_interfaces + OSPF on all routers simultaneously
 - `phase2_abr_deploy.yml` (in multi-site-ospf): Optional second phase for ABR tuning
@@ -61,7 +61,7 @@ Variables define network statements as list of dicts with network, wildcard, and
 **Pattern**: Use handlers with `notify: save config` to persist configs only when changes occur. Include extensive `ios_command` tasks with `retries` to wait for OSPF convergence (typically 15-30 seconds).
 
 ### 4. Inventory Grouping Pattern
-- **hq_routers**: Core routers in Area 0 (R3, R4, R5 in ospf-lab-6r)
+- **hq_routers**: Core routers in Area 0 (R3, R4, R5 in 6-Router OSPF Design)
 - **branch_routers**: Edge routers in Area 1 (R6, R7, R8)
 - **routers**: Combines both for single-playbook deployment
 
@@ -91,7 +91,7 @@ ansible-playbook playbooks/deploy_ospf.yml --tags ospf
 ansible-playbook playbooks/verify_ospf.yml
 ```
 
-### Rollback (ospf-lab-6r only)
+### Rollback (6-Router OSPF Design only)
 ```bash
 ansible-playbook playbooks/rollback.yml
 ```
@@ -152,7 +152,7 @@ Avoid full `ios_facts` in production playbooks (slow). Use targeted commands:
 ### Playbooks
 - `playbooks/deploy_ospf.yml`: Main deployment (runs base_interfaces then ospf roles)
 - `playbooks/verify_ospf.yml`: Post-deployment verification
-- `playbooks/rollback.yml`: Config restore (ospf-lab-6r only)
+- `playbooks/rollback.yml`: Config restore (6-Router OSPF Design only)
 
 ## Debugging and Troubleshooting
 
@@ -189,10 +189,10 @@ This repository contains Ansible-based automation for deploying OSPF (Open Short
 ## Architecture Overview
 
 ### Multi-Project Structure
-- **3-Router OSPF Design** (`ospf-lab/`): Simple 3-router topology with 2 OSPF areas
+- **3-Router OSPF Design** (`3-Router OSPF Design/ospf-lab/`): Simple 3-router topology with 2 OSPF areas
 - **multi-site-ospf/**: Production-grade 6-router setup with phased deployments
-- **ospf-lab-6r/**: Advanced 6-router lab with HQ/Branch structure and ABR (Area Border Router) roles
-- **Cisco vIOS Day 0 Template**: Base connectivity verification template
+- **6-Router OSPF Design/**: Advanced 6-router lab with HQ/Branch structure and ABR (Area Border Router) roles
+- **Cisco Zero Day Template**: Base connectivity verification template
 
 ### Data Flow Pattern
 1. **Inventory Layer** (`inventory/hosts.yml`): Defines router groups (hq_routers, branch_routers, routers)
@@ -236,7 +236,7 @@ Variables define network statements as list of dicts with network, wildcard, and
 **Critical**: Passive interfaces declared separately. ABR routers require network statements in BOTH areas they connect.
 
 ### 3. Phased Deployment Pattern
-**Location**: `multi-site-ospf/` and `ospf-lab-6r/`
+**Location**: `multi-site-ospf/` and `6-Router OSPF Design/`
 
 - `phase1_deploy.yml`: Deploys base_interfaces + OSPF on all routers simultaneously
 - `phase2_abr_deploy.yml` (in multi-site-ospf): Optional second phase for ABR tuning
@@ -245,7 +245,7 @@ Variables define network statements as list of dicts with network, wildcard, and
 **Pattern**: Use handlers with `notify: save config` to persist configs only when changes occur. Include extensive `ios_command` tasks with `retries` to wait for OSPF convergence (typically 15-30 seconds).
 
 ### 4. Inventory Grouping Pattern
-- **hq_routers**: Core routers in Area 0 (R3, R4, R5 in ospf-lab-6r)
+- **hq_routers**: Core routers in Area 0 (R3, R4, R5 in 6-Router OSPF Design)
 - **branch_routers**: Edge routers in Area 1 (R6, R7, R8)
 - **routers**: Combines both for single-playbook deployment
 
@@ -275,7 +275,7 @@ ansible-playbook playbooks/deploy_ospf.yml --tags ospf
 ansible-playbook playbooks/verify_ospf.yml
 ```
 
-### Rollback (ospf-lab-6r only)
+### Rollback (6-Router OSPF Design only)
 ```bash
 ansible-playbook playbooks/rollback.yml
 ```
@@ -336,7 +336,7 @@ Avoid full `ios_facts` in production playbooks (slow). Use targeted commands:
 ### Playbooks
 - `playbooks/deploy_ospf.yml`: Main deployment (runs base_interfaces then ospf roles)
 - `playbooks/verify_ospf.yml`: Post-deployment verification
-- `playbooks/rollback.yml`: Config restore (ospf-lab-6r only)
+- `playbooks/rollback.yml`: Config restore (6-Router OSPF Design only)
 
 ## Debugging and Troubleshooting
 

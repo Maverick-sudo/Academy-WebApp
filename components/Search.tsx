@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { formatDisplayTitle } from '@/lib/title'
 
 interface SearchResult {
   title: string
@@ -200,7 +201,7 @@ export default function Search() {
                   }`}
                 >
                   <div className="font-semibold text-slate-900 dark:text-slate-100 mb-1">
-                    {result.title}
+                    {formatDisplayTitle(result.title)}
                   </div>
                   {result.description && (
                     <div className="text-sm text-slate-600 dark:text-slate-400 mb-1">

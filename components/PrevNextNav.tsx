@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { formatDisplayTitle } from '@/lib/title'
 
 interface PrevNextNavProps {
   prev: { slug: string[]; title: string } | null
@@ -22,7 +23,7 @@ export default function PrevNextNav({ prev, next }: PrevNextNavProps) {
               Previous
             </div>
             <div className="font-medium text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400">
-              {prev.title}
+              {formatDisplayTitle(prev.title)}
             </div>
           </Link>
         ) : (
@@ -38,7 +39,7 @@ export default function PrevNextNav({ prev, next }: PrevNextNavProps) {
               Next
             </div>
             <div className="font-medium text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400">
-              {next.title}
+              {formatDisplayTitle(next.title)}
             </div>
           </Link>
         )}
