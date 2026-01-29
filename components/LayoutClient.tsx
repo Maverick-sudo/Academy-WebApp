@@ -31,8 +31,8 @@ export default function LayoutClient({ children, sidebarData }: LayoutClientProp
   }, [isCollapsed])
 
   useEffect(() => {
-    // Only lock body scroll for mobile overlay (when sidebar is open and not desktop)
-    if (isSidebarOpen && !isDesktop) {
+    // Only lock body scroll for mobile overlay (when sidebar or mobile menu is open and not desktop)
+    if ((isSidebarOpen || isMobileOpen) && !isDesktop) {
       document.body.style.overflow = 'hidden'
     } else {
       document.body.style.overflow = ''
@@ -59,7 +59,9 @@ export default function LayoutClient({ children, sidebarData }: LayoutClientProp
 
   const toggleSidebar = () => {
     // On desktop toggle the sidebar; on mobile open the mobile nav drawer.
-    if (isDesktop) {
+    // Use a synchronous viewport check here to avoid stale `isDesktop` from effects.
+    const desktopNow = typeof window !== 'undefined' ? window.innerWidth >= 1280 : isDesktop
+    if (desktopNow) {
       setIsSidebarOpen(!isSidebarOpen)
     } else {
       setIsMobileOpen(!isMobileOpen)
@@ -87,7 +89,7 @@ export default function LayoutClient({ children, sidebarData }: LayoutClientProp
           onToggleCollapse={toggleCollapse}
         />
         {/* Mobile navigation menu inline above content (hidden on desktop). */}
-        <main className={`flex-1 min-w-0 px-4 xl:px-6 ${isDesktop ? (isCollapsed ? 'xl:ml-16' : 'xl:ml-72') : ''} ${isSidebarOpen ? 'pointer-events-none' : ''}`}>
+        <main className={`flex-1 min-w-0 px-4 xl:px-6 ${isDesktop ? (isCollapsed ? 'xl:ml-16' : 'xl:ml-48') : ''} ${isSidebarOpen ? 'pointer-events-none' : ''}`}>
           <MobileNav open={isMobileOpen} onClose={() => setIsMobileOpen(false)} data={sidebarData} />
           {children}
         </main>

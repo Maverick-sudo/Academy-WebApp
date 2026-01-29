@@ -162,10 +162,17 @@ export default async function DocPage({ params }: DocPageProps) {
               code({ className, children, ...props }) {
                 const languageMatch = className?.match(/language-([\w-]+)/)
                 const language = languageMatch?.[1]
-                if (language === 'mermaid') {
-                  const mermaidCode = extractText(children).trim()
-                  return <Mermaid code={mermaidCode} />
+                const text = extractText(children).trim()
+
+                // If explicitly marked as mermaid, render with Mermaid.
+                // Also, treat indented or missing className blocks as mermaid
+                // when the code starts with a known mermaid keyword.
+                const looksLikeMermaid = /^(?:graph|flowchart|sequenceDiagram|stateDiagram|classDiagram)\b/i.test(text)
+
+                if (language === 'mermaid' || (!language && looksLikeMermaid)) {
+                  return <Mermaid code={text} />
                 }
+
                 return (
                   <code className={className} {...props}>
                     {children}
