@@ -41,7 +41,7 @@ export default function LayoutClient({ children, sidebarData }: LayoutClientProp
     return () => {
       document.body.style.overflow = ''
     }
-  }, [isSidebarOpen, isDesktop])
+  }, [isSidebarOpen, isMobileOpen, isDesktop])
 
   // Detect desktop breakpoint so we can change main layout behavior accordingly
   useEffect(() => {
@@ -89,7 +89,7 @@ export default function LayoutClient({ children, sidebarData }: LayoutClientProp
           onToggleCollapse={toggleCollapse}
         />
         {/* Mobile navigation menu inline above content (hidden on desktop). */}
-        <main className={`flex-1 min-w-0 px-4 xl:px-6 ${isDesktop ? (isCollapsed ? 'xl:ml-16' : 'xl:ml-48') : ''} ${isSidebarOpen ? 'pointer-events-none' : ''}`}>
+        <main className={`flex-1 min-w-0 px-4 xl:px-6 ${isDesktop ? (isCollapsed ? 'xl:ml-16' : 'xl:ml-48') : ''} ${isSidebarOpen || isMobileOpen ? 'pointer-events-none' : ''}`}> 
           <MobileNav open={isMobileOpen} onClose={() => setIsMobileOpen(false)} data={sidebarData} />
           {children}
         </main>

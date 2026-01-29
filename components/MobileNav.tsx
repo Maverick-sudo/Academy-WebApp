@@ -1,6 +1,7 @@
 "use client"
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { SidebarItem } from '@/lib/sidebar'
 import { useState, useEffect, useRef } from 'react'
 
@@ -15,6 +16,7 @@ interface MobileNavProps {
 }
 
 export default function MobileNav({ open, onClose, data }: MobileNavProps) {
+  const router = useRouter()
   const [expanded, setExpanded] = useState<ExpandedState>({})
   const navRef = useRef<HTMLDivElement | null>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
@@ -127,9 +129,20 @@ export default function MobileNav({ open, onClose, data }: MobileNavProps) {
                   {section.items && section.items.map(item => (
                     <div key={item.id} className="mb-1">
                       {item.href ? (
-                        <Link href={item.href} onClick={onClose} className="block px-2 py-1 rounded hover:bg-slate-50 dark:hover:bg-[var(--sidebar-accent)]">
+                        <a
+                          href={item.href}
+                          onClick={async (e) => {
+                            e.preventDefault()
+                            try {
+                              await router.push(item.href)
+                            } finally {
+                              onClose()
+                            }
+                          }}
+                          className="block px-2 py-1 rounded hover:bg-slate-50 dark:hover:bg-[var(--sidebar-accent)]"
+                        >
                           {item.label}
-                        </Link>
+                        </a>
                       ) : (
                         <div className="px-2 py-1 text-sm">{item.label}</div>
                       )}
@@ -138,9 +151,21 @@ export default function MobileNav({ open, onClose, data }: MobileNavProps) {
                         <div className="pl-4 mt-1 space-y-1">
                           {item.items.map(child => (
                             child.href ? (
-                              <Link key={child.id} href={child.href} onClick={onClose} className="block px-2 py-1 rounded hover:bg-slate-50 dark:hover:bg-[var(--sidebar-accent)] text-sm">
+                              <a
+                                key={child.id}
+                                href={child.href}
+                                onClick={async (e) => {
+                                  e.preventDefault()
+                                  try {
+                                    await router.push(child.href)
+                                  } finally {
+                                    onClose()
+                                  }
+                                }}
+                                className="block px-2 py-1 rounded hover:bg-slate-50 dark:hover:bg-[var(--sidebar-accent)] text-sm"
+                              >
                                 {child.label}
-                              </Link>
+                              </a>
                             ) : (
                               <div key={child.id} className="px-2 py-1 text-sm">{child.label}</div>
                             )
