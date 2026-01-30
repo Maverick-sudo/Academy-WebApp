@@ -10,6 +10,11 @@ Curated study notes across programming languages, web development, system archit
 - PHP: [programming-languages/PHP/PHP_Docs.md](programming-languages/PHP/PHP_Docs.md)
 - Python: [programming-languages/python/Python_intro.md](programming-languages/python/Python_intro.md)
 
+### Low-Level Languages
+
+- Assembly Language: [low-level-languages/assembly-language/assembly-notes.md](low-level-languages/assembly-language/assembly-notes.md)
+- C/C++: [low-level-languages/c-cpp/c-cpp-notes.md](low-level-languages/c-cpp/c-cpp-notes.md)
+
 ### Web Development
 
 - CSS: [web-development/frontend/css/Cascading_Style_Sheet.md](web-development/frontend/css/Cascading_Style_Sheet.md)
