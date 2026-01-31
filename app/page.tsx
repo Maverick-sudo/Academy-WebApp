@@ -11,7 +11,7 @@ export default function HomePage() {
           {/* Hero Section */}
           <section className="space-y-6 text-center max-w-3xl mx-auto">
             <h1 className="text-4xl font-bold leading-tight bg-gradient-to-r from-blue-600 to-slate-600 dark:from-blue-400 dark:to-slate-300 bg-clip-text text-transparent">
-              Technical Documentation & Security Engineering
+              Technical Documentation
             </h1>
             <p className="text-lg leading-relaxed text-slate-700 dark:text-[var(--muted-foreground)]">
               Comprehensive knowledge base covering cybersecurity operations, network infrastructure automation, 

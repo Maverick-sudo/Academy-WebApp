@@ -3,7 +3,8 @@
 import { useState, useEffect, useMemo } from 'react'
 import Sidebar from '@/components/Sidebar'
 import TopNav from '@/components/TopNav'
-import MobileNav from '@/components/MobileNav'
+import CompactMobileTree from '@/components/CompactMobileTree'
+import ScrollControls from '@/components/ScrollControls'
 import type { SidebarItem } from '@/lib/sidebar'
 
 interface LayoutClientProps {
@@ -30,19 +31,6 @@ export default function LayoutClient({ children, sidebarData }: LayoutClientProp
     localStorage.setItem('academy-sidebar-collapsed', String(isCollapsed))
   }, [isCollapsed])
 
-  useEffect(() => {
-    // Only lock body scroll when mobile menu is actually open (not sidebar on desktop)
-    if (isMobileOpen && !isDesktop) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
-
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [isMobileOpen, isDesktop])
-
   // Detect desktop breakpoint so we can change main layout behavior accordingly
   useEffect(() => {
     // Treat widths >= 1280px as desktop so tablets (<1280px) are treated as mobile.
@@ -64,7 +52,7 @@ export default function LayoutClient({ children, sidebarData }: LayoutClientProp
     if (desktopNow) {
       setIsSidebarOpen(!isSidebarOpen)
     } else {
-      setIsMobileOpen(!isMobileOpen)
+      setIsMobileOpen(prev => !prev)
     }
   }
 
@@ -101,10 +89,11 @@ export default function LayoutClient({ children, sidebarData }: LayoutClientProp
         />
         {/* Mobile navigation menu inline above content (hidden on desktop). */}
         <main className={`flex-1 min-w-0 px-4 xl:px-6 ${isDesktop ? (isCollapsed ? 'xl:ml-16' : 'xl:ml-72') : ''}`}> 
-          <MobileNav open={isMobileOpen} onClose={() => setIsMobileOpen(false)} data={sidebarData} />
+          <CompactMobileTree open={isMobileOpen} onClose={() => setIsMobileOpen(false)} data={sidebarData} />
           {children}
         </main>
       </div>
+      <ScrollControls threshold={200} />
       {sidebarDebug && (
         <script
           type="application/json"
