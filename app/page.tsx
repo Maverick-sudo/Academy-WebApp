@@ -3,10 +3,13 @@ import Profile from '@/components/Profile'
 import Button from '@/components/ui/Button'
 import { ArrowRight, BookOpen, Shield, Network } from 'lucide-react'
 
+export const dynamic = 'force-static'
+export const revalidate = 3600
+
 export default function HomePage() {
   return (
     <div className="w-full">
-      <div className="container mx-0 px-4 sm:px-6 lg:px-6 max-w-6xl py-8 lg:py-12">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-6 max-w-6xl py-8 lg:py-12">
         <div className="space-y-12">
           {/* Hero Section */}
           <section className="space-y-6 text-center max-w-3xl mx-auto">

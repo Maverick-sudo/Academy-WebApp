@@ -1,11 +1,22 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
-import Sidebar from '@/components/Sidebar'
+import { useState, useEffect, useMemo, useCallback } from 'react'
+import dynamic from 'next/dynamic'
 import TopNav from '@/components/TopNav'
-import CompactMobileTree from '@/components/CompactMobileTree'
-import ScrollControls from '@/components/ScrollControls'
 import type { SidebarItem } from '@/lib/sidebar'
+import { usePathname } from 'next/navigation'
+
+const Sidebar = dynamic(() => import('@/components/Sidebar'), {
+  ssr: false,
+})
+
+const CompactMobileTree = dynamic(() => import('@/components/CompactMobileTree'), {
+  ssr: false,
+})
+
+const ScrollControls = dynamic(() => import('@/components/ScrollControls'), {
+  ssr: false,
+})
 
 interface LayoutClientProps {
   children: React.ReactNode
@@ -17,6 +28,8 @@ export default function LayoutClient({ children, sidebarData }: LayoutClientProp
   const [isMobileOpen, setIsMobileOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isDesktop, setIsDesktop] = useState(false)
+  const pathname = usePathname()
+  const isDocsRoute = pathname.startsWith('/docs')
 
   // Load collapsed state from localStorage on mount
   useEffect(() => {
@@ -45,7 +58,7 @@ export default function LayoutClient({ children, sidebarData }: LayoutClientProp
     return () => mq.removeListener(update)
   }, [])
 
-  const toggleSidebar = () => {
+  const toggleSidebar = useCallback(() => {
     // On desktop toggle the sidebar; on mobile open the mobile nav drawer.
     // Use a synchronous viewport check here to avoid stale `isDesktop` from effects.
     const desktopNow = typeof window !== 'undefined' ? window.innerWidth >= 1280 : isDesktop
@@ -54,7 +67,13 @@ export default function LayoutClient({ children, sidebarData }: LayoutClientProp
     } else {
       setIsMobileOpen(prev => !prev)
     }
-  }
+  }, [isDesktop, isSidebarOpen])
+
+  useEffect(() => {
+    const handler = () => toggleSidebar()
+    window.addEventListener('academy:toggle-sidebar', handler)
+    return () => window.removeEventListener('academy:toggle-sidebar', handler)
+  }, [toggleSidebar])
 
   const closeSidebar = () => {
     setIsSidebarOpen(false)
@@ -78,22 +97,26 @@ export default function LayoutClient({ children, sidebarData }: LayoutClientProp
 
   return (
     <div className="min-h-screen">
-      <TopNav onMenuClick={toggleSidebar} />
+      <TopNav />
       <div className="flex">
-        <Sidebar 
-          data={sidebarData} 
-          isOpen={isSidebarOpen} 
-          onClose={closeSidebar}
-          isCollapsed={isCollapsed}
-          onToggleCollapse={toggleCollapse}
-        />
+        {isDocsRoute && (
+          <Sidebar 
+            data={sidebarData} 
+            isOpen={isSidebarOpen} 
+            onClose={closeSidebar}
+            isCollapsed={isCollapsed}
+            onToggleCollapse={toggleCollapse}
+          />
+        )}
         {/* Mobile navigation menu inline above content (hidden on desktop). */}
-        <main className={`flex-1 min-w-0 px-4 xl:px-6 ${isDesktop ? (isCollapsed ? 'xl:ml-16' : 'xl:ml-72') : ''}`}> 
-          <CompactMobileTree open={isMobileOpen} onClose={() => setIsMobileOpen(false)} data={sidebarData} />
+        <main className={`flex-1 min-w-0 px-4 xl:px-6 ${isDesktop && isDocsRoute ? (isCollapsed ? 'xl:ml-16' : 'xl:ml-72') : ''}`}> 
+          {isDocsRoute && isMobileOpen && (
+            <CompactMobileTree open={isMobileOpen} onClose={() => setIsMobileOpen(false)} data={sidebarData} />
+          )}
           {children}
         </main>
       </div>
-      <ScrollControls threshold={200} />
+      {isDocsRoute && <ScrollControls threshold={200} />}
       {sidebarDebug && (
         <script
           type="application/json"

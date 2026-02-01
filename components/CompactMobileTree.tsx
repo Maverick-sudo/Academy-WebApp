@@ -77,6 +77,7 @@ export default function CompactMobileTree({ open, onClose, data }: CompactMobile
               <Link
                 href={item.href}
                 onClick={onClose}
+                prefetch={depth > 0 ? false : undefined}
                 className="block rounded-md px-2 py-1 text-sm hover:bg-slate-100 dark:hover:bg-[var(--sidebar-accent)]"
               >
                 {item.label}

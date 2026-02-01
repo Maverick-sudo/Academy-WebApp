@@ -1,17 +1,19 @@
 import { notFound, redirect } from 'next/navigation'
 import { getDocBySlug, getDocsInDirectory, getAdjacentDocs, getGitHubUrl, getAllStaticPaths } from '@/lib/content'
+import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import rehypeHighlight from 'rehype-highlight'
 import rehypeSlug from 'rehype-slug'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import remarkGfm from 'remark-gfm'
-import TableOfContents from '@/components/Toc'
+import TocContainer from '@/components/Toc/TocContainer'
+import { extractHeadings } from '@/lib/toc/extractHeadings'
 import Breadcrumb from '@/components/Breadcrumb'
 import PrevNextNav from '@/components/PrevNextNav'
 import EditOnGitHub from '@/components/EditOnGitHub'
 import Link from 'next/link'
 import { formatDisplayTitle } from '@/lib/title'
-import 'highlight.js/styles/github-dark.css'
+import Mermaid from '@/components/Mermaid'
 
 // Lazy load heavy components
 const ReactMarkdown = dynamic(() => import('react-markdown'), {
@@ -19,18 +21,14 @@ const ReactMarkdown = dynamic(() => import('react-markdown'), {
   ssr: true,
 })
 
-const Mermaid = dynamic(() => import('@/components/Mermaid'), {
-  loading: () => <div className="h-64 bg-slate-100 dark:bg-slate-800 animate-pulse rounded" />,
-  ssr: false,
-})
-
 interface DocPageProps {
-  params: {
+  params: Promise<{
     slug: string[]
-  }
+  }>
 }
 
 export default async function DocPage({ params }: DocPageProps) {
+  const resolvedParams = await params
   const decodeSegment = (segment: string) => {
     try {
       return decodeURIComponent(segment)
@@ -38,7 +36,7 @@ export default async function DocPage({ params }: DocPageProps) {
       return segment
     }
   }
-  const normalizedSlug = params.slug.map(segment => decodeSegment(segment).replace(/\.md$/i, ''))
+  const normalizedSlug = resolvedParams.slug.map(segment => decodeSegment(segment).replace(/\.md$/i, ''))
   const repoRoot = normalizedSlug[0] ? String(normalizedSlug[0]).toLowerCase() : ''
   const isAutomation = repoRoot === 'automation'
   const isCcnaLabs = repoRoot === 'ccna-labs' || repoRoot === 'ccna-lab'
@@ -131,6 +129,9 @@ export default async function DocPage({ params }: DocPageProps) {
   const adjacentDocs = getAdjacentDocs(normalizedSlug)
   const githubUrl = getGitHubUrl(normalizedSlug)
 
+  // Extract TOC headings server-side
+  const tocHeadings = extractHeadings(doc.content)
+
   // If the markdown content starts with a top-level H1 and we already have a
   // `meta.title`, strip the leading H1 from the markdown so we don't render
   // duplicate titles. This is a conservative, local fix — more advanced
@@ -162,27 +163,43 @@ export default async function DocPage({ params }: DocPageProps) {
             <Breadcrumb slug={normalizedSlug} />
             
             <article className="prose prose-sm sm:prose lg:prose-lg prose-slate dark:prose-invert max-w-none prose-headings:scroll-mt-24 prose-img:rounded-lg leading-relaxed">
-              <div className="not-prose mb-8">
-                <h1 className="text-4xl font-bold leading-tight break-words bg-gradient-to-r from-blue-600 to-slate-600 dark:from-blue-400 dark:to-slate-300 bg-clip-text text-transparent">
-                  {displayTitle}
-                </h1>
-                {doc.meta.description && (
-                  <p className="mt-3 text-xl text-slate-600 dark:text-slate-400">
-                    {doc.meta.description}
-                  </p>
-                )}
-                {doc.meta.status && (
-                  <div className="mt-4">
-                    <span className={`inline-block px-3 py-1 text-sm rounded ${
-                      doc.meta.status === 'draft' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' :
-                      doc.meta.status === 'updated' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
-                      'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
-                    }`}>
-                      {doc.meta.status.toUpperCase()}
-                    </span>
-                  </div>
-                )}
-              </div>
+              <Suspense fallback={
+                <div className="not-prose mb-8 animate-pulse">
+                  <div className="h-12 bg-slate-200 dark:bg-slate-800 rounded w-3/4 mb-4" />
+                  <div className="h-6 bg-slate-200 dark:bg-slate-800 rounded w-full mb-2" />
+                  <div className="h-6 bg-slate-200 dark:bg-slate-800 rounded w-5/6" />
+                </div>
+              }>
+                <div className="not-prose mb-8">
+                  <h1 className="text-4xl font-bold leading-tight break-words bg-gradient-to-r from-blue-600 to-slate-600 dark:from-blue-400 dark:to-slate-300 bg-clip-text text-transparent">
+                    {displayTitle}
+                  </h1>
+                  {doc.meta.description && (
+                    <p className="mt-3 text-xl text-slate-600 dark:text-slate-400">
+                      {doc.meta.description}
+                    </p>
+                  )}
+                  {doc.meta.status && (
+                    <div className="mt-4">
+                      <span className={`inline-block px-3 py-1 text-sm rounded ${
+                        doc.meta.status === 'draft' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' :
+                        doc.meta.status === 'updated' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
+                        'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400'
+                      }`}>
+                        {doc.meta.status.toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </Suspense>
+          <Suspense fallback={
+            <div className="animate-pulse space-y-4">
+              <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-full" />
+              <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-11/12" />
+              <div className="h-32 bg-slate-200 dark:bg-slate-800 rounded w-full" />
+              <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-10/12" />
+            </div>
+          }>
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             rehypePlugins={[
@@ -217,6 +234,7 @@ export default async function DocPage({ params }: DocPageProps) {
           >
               {contentToRender}
           </ReactMarkdown>
+          </Suspense>
         </article>
         
         {isAutomation && (
@@ -236,7 +254,20 @@ export default async function DocPage({ params }: DocPageProps) {
       </div>
       
       {/* Table of Contents - Hidden on mobile/tablet */}
-      <TableOfContents content={doc.content} />
+      <Suspense fallback={
+        <div className="hidden xl:block w-64 flex-shrink-0">
+          <div className="sticky top-4 animate-pulse">
+            <div className="h-5 bg-slate-200 dark:bg-slate-800 rounded w-32 mb-4" />
+            <div className="space-y-2">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="h-4 bg-slate-200 dark:bg-slate-800 rounded" style={{ width: `${60 + (i % 3) * 10}%` }} />
+              ))}
+            </div>
+          </div>
+        </div>
+      }>
+        <TocContainer headings={tocHeadings} />
+      </Suspense>
     </div>
   </div>
 </div>
@@ -252,3 +283,4 @@ export async function generateStaticParams() {
 }
 
 export const dynamicParams = true // Allow dynamic routes not in generateStaticParams
+export const revalidate = 3600 // ISR: Revalidate every hour (3600 seconds)

@@ -1,5 +1,3 @@
-'use client'
-
 import Link from 'next/link'
 import { formatDisplayTitle } from '@/lib/title'
 
@@ -17,6 +15,7 @@ export default function PrevNextNav({ prev, next }: PrevNextNavProps) {
         {prev ? (
           <Link
             href={`/docs/${prev.slug.join('/')}`}
+            prefetch={true}
             className="group p-4 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-blue-500 dark:hover:border-blue-500 transition-colors"
           >
             <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
@@ -33,6 +32,7 @@ export default function PrevNextNav({ prev, next }: PrevNextNavProps) {
         {next && (
           <Link
             href={`/docs/${next.slug.join('/')}`}
+            prefetch={true}
             className="group p-4 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-blue-500 dark:hover:border-blue-500 transition-colors md:text-right"
           >
             <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">

@@ -4,17 +4,20 @@
   "private": true,
   "scripts": {
     "dev": "next dev --hostname 0.0.0.0",
-    "build": "next build",
+    "prebuild": "node .github/scripts/generate-search-index.js && node scripts/pre-render-mermaid.ts",
+    "build": "next build --webpack",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "analyze": "ANALYZE=true next build --webpack",
+    "analyze:server": "ANALYZE=true BUNDLE_ANALYZE=server next build --webpack"
   },
   "dependencies": {
     "clsx": "^2.1.1",
     "flexsearch": "^0.7.43",
     "gray-matter": "^4.0.3",
     "lucide-react": "^0.563.0",
-    "mermaid": "^11.10.0",
-    "next": "^14.2.0",
+    "mermaid": "^10.9.5",
+    "next": "^16.1.6",
     "nextjs-toploader": "^3.9.17",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
@@ -27,16 +30,20 @@
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^14.2.35",
     "@tailwindcss/typography": "^0.5.10",
     "@types/node": "^20.11.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.17",
-    "eslint": "^8.56.0",
-    "eslint-config-next": "^14.2.0",
+    "eslint": "^9.39.2",
+    "eslint-config-next": "^16.1.6",
+    "next-pwa": "^5.6.0",
+    "p-limit": "^5.0.0",
     "playwright": "^1.58.0",
     "postcss": "^8.4.33",
     "tailwindcss": "^3.4.1",
+    "tsx": "^4.21.0",
     "typescript": "^5.3.3"
   }
 }

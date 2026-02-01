@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { buildFileTree, FileTreeNode } from './content'
 import path from 'path'
 
@@ -107,3 +108,7 @@ export async function generateSidebarStructure(): Promise<SidebarItem[]> {
 
   return sidebar
 }
+
+export const getSidebarStructure = cache(async (): Promise<SidebarItem[]> => {
+  return generateSidebarStructure()
+})

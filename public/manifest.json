@@ -1,0 +1,50 @@
+{
+  "name": "Academy Documentation Hub",
+  "short_name": "Academy",
+  "description": "Technical documentation for cybersecurity, networking, and development projects",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "/favicon-16x16.svg",
+      "sizes": "16x16",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/favicon-32x32.svg",
+      "sizes": "32x32",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/android-chrome-512x512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.svg",
+      "sizes": "180x180",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["education", "documentation", "reference"],
+  "shortcuts": [
+    {
+      "name": "Study Notes",
+      "url": "/docs/study-notes",
+      "description": "Security and networking study notes"
+    },
+    {
+      "name": "Automation",
+      "url": "/docs/automation",
+      "description": "Network automation scripts"
+    },
+    {
+      "name": "Python Projects",
+      "url": "/docs/Python-Projects",
+      "description": "Python security projects"
+    }
+  ]
+}

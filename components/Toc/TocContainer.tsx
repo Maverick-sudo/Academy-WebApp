@@ -1,50 +1,26 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import TocTracker from './TocTracker.client'
 
-interface TocItem {
+interface TocHeading {
   id: string
   text: string
   level: number
 }
 
-export default function TableOfContents({ content }: { content: string }) {
-  const [headings, setHeadings] = useState<TocItem[]>([])
+interface TocContainerProps {
+  headings: TocHeading[]
+}
+
+export default function TocContainer({ headings }: TocContainerProps) {
   const [activeId, setActiveId] = useState<string>('')
-
-  useEffect(() => {
-    const headingElements = Array.from(
-      document.querySelectorAll('article h2, article h3, article h4')
-    )
-
-    const items: TocItem[] = headingElements.map((heading) => ({
-      id: heading.id,
-      text: heading.textContent || '',
-      level: parseInt(heading.tagName[1]),
-    }))
-
-    setHeadings(items)
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveId(entry.target.id)
-          }
-        })
-      },
-      { rootMargin: '-100px 0px -66%' }
-    )
-
-    headingElements.forEach((el) => observer.observe(el))
-
-    return () => observer.disconnect()
-  }, [content])
 
   if (headings.length === 0) return null
 
   return (
     <aside className="hidden xl:block sticky top-20 w-64 shrink-0 h-[calc(100vh-6rem)] overflow-y-auto">
+      <TocTracker headings={headings} onActiveChange={setActiveId} />
       <nav className="py-4">
         <p className="font-semibold text-sm text-slate-900 dark:text-slate-100 mb-4 px-2 relative inline-block after:absolute after:left-0 after:-bottom-2 after:h-0.5 after:w-full after:bg-blue-600/60 dark:after:bg-blue-400/50">
           On this page

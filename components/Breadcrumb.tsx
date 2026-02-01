@@ -63,6 +63,7 @@ export default function Breadcrumb({ slug }: BreadcrumbProps) {
                 ) : (
                   <Link
                     href={crumb.href}
+                    prefetch={true}
                     className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors truncate max-w-[100px] md:max-w-none"
                   >
                     {crumb.label}

@@ -1,8 +1,8 @@
-export default function DocsLoading() {
+export default function RootLoading() {
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen">
       {/* Left Sidebar Skeleton */}
-      <aside className="hidden lg:block w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex-shrink-0">
+      <aside className="hidden lg:block w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
         <div className="p-6 animate-pulse">
           {/* Search bar skeleton */}
           <div className="h-10 bg-slate-200 dark:bg-slate-800 rounded-lg mb-6" />
@@ -25,8 +25,8 @@ export default function DocsLoading() {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 min-w-0">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 animate-pulse">
+      <main className="flex-1 overflow-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 animate-pulse">
           {/* Breadcrumb skeleton */}
           <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-64 mb-8" />
           
@@ -50,8 +50,8 @@ export default function DocsLoading() {
         </div>
       </main>
 
-      {/* Right TOC Skeleton */}
-      <aside className="hidden xl:block w-64 border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex-shrink-0">
+      {/* Right TOC Skeleton (hidden on smaller screens) */}
+      <aside className="hidden xl:block w-64 border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
         <div className="sticky top-4 p-6 animate-pulse">
           <div className="h-5 bg-slate-200 dark:bg-slate-800 rounded w-32 mb-4" />
           <div className="space-y-2">

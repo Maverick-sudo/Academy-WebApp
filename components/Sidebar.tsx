@@ -1,12 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo, memo } from 'react'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import Tooltip from '@/components/ui/Tooltip'
 import { cn } from '@/lib/utils'
 import type { SidebarItem } from '@/lib/sidebar'
+
+const Tooltip = dynamic(() => import('@/components/ui/Tooltip'), { ssr: false })
 
 interface SidebarProps {
   data: SidebarItem[]
@@ -48,30 +50,35 @@ export default function Sidebar({
   // horizontal padding when collapsed (desktop only).
   const asidePadding = isCollapsedDesktop ? 'px-1 xl:px-1' : 'px-4 xl:px-6'
 
-  const toggleSection = (sectionId: string) => {
+  const toggleSection = useCallback((sectionId: string) => {
     // Don't allow expanding sections when collapsed
     if (isCollapsedDesktop) return
-    
-    const newExpanded = new Set(expandedSections)
-    if (newExpanded.has(sectionId)) {
-      newExpanded.delete(sectionId)
-    } else {
-      newExpanded.add(sectionId)
-    }
-    setExpandedSections(newExpanded)
-  }
+
+    setExpandedSections(prev => {
+      const newExpanded = new Set(prev)
+      if (newExpanded.has(sectionId)) {
+        newExpanded.delete(sectionId)
+      } else {
+        newExpanded.add(sectionId)
+      }
+      return newExpanded
+    })
+  }, [isCollapsedDesktop])
+
+  const activeSectionId = useMemo(() => {
+    if (!pathname.startsWith('/docs/')) return 'home'
+    const repoSlug = pathname.split('/')[2]
+    return repoSlug ? repoSlug.toLowerCase() : 'home'
+  }, [pathname])
+
+  const getIsExpanded = useCallback((id: string) => expandedSections.has(id), [expandedSections])
 
   useEffect(() => {
     // Auto-expand sections containing active page (only when not collapsed)
-    if (!isCollapsedDesktop) {
-      const activeSection = data.find(section =>
-        section.items?.some(item => item.href && pathname.startsWith(item.href))
-      )
-      if (activeSection) {
-        setExpandedSections(new Set([activeSection.id]))
-      }
+    if (!isCollapsedDesktop && activeSectionId) {
+      setExpandedSections(new Set([activeSectionId]))
     }
-  }, [pathname, data, isCollapsedDesktop])
+  }, [activeSectionId, isCollapsedDesktop])
 
   return (
     <>
@@ -89,11 +96,12 @@ export default function Sidebar({
       >
         <nav className="py-4 space-y-1 pb-16">
           {data.map((section) => (
-            <SidebarSection 
+            <SidebarSectionMemo 
               key={section.id} 
               section={section} 
               pathname={pathname}
-              expandedSections={expandedSections}
+              isExpanded={getIsExpanded(section.id)}
+              getIsExpanded={getIsExpanded}
               toggleSection={toggleSection}
               depth={0}
               isCollapsed={isCollapsedDesktop}
@@ -133,7 +141,8 @@ export default function Sidebar({
 interface SidebarSectionProps {
   section: SidebarItem
   pathname: string
-  expandedSections: Set<string>
+  isExpanded: boolean
+  getIsExpanded: (id: string) => boolean
   toggleSection: (id: string) => void
   depth: number
   isCollapsed: boolean
@@ -144,14 +153,14 @@ interface SidebarSectionProps {
 function SidebarSection({ 
   section, 
   pathname, 
-  expandedSections, 
+  isExpanded,
+  getIsExpanded,
   toggleSection, 
   depth,
   isCollapsed,
   onClose,
   isDesktop
 }: SidebarSectionProps) {
-  const isExpanded = expandedSections.has(section.id)
   const isActive = pathname === section.href
   const hasChildren = section.items && section.items.length > 0
 
@@ -168,6 +177,7 @@ function SidebarSection({
       <Link
         href={section.href}
         onClick={handleClick}
+        prefetch={depth > 0 ? false : undefined}
         className={`flex items-center gap-2 ${isCollapsed ? 'px-1 py-2' : 'px-3 py-2'} text-sm rounded-md transition-colors ${
           isActive
             ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium'
@@ -232,11 +242,12 @@ function SidebarSection({
       {!isCollapsed && isExpanded && hasChildren && section.items && (
         <div className="mt-1 space-y-1">
           {section.items.map((item) => (
-            <SidebarSection
+            <SidebarSectionMemo
               key={item.id}
               section={item}
               pathname={pathname}
-              expandedSections={expandedSections}
+              isExpanded={getIsExpanded(item.id)}
+              getIsExpanded={getIsExpanded}
               toggleSection={toggleSection}
               depth={depth + 1}
               isCollapsed={isCollapsed}
@@ -247,3 +258,5 @@ function SidebarSection({
     </div>
   )
 }
+
+const SidebarSectionMemo = memo(SidebarSection)

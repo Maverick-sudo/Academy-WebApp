@@ -31,3 +31,13 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# Build artifacts - Vercel regenerates these
+public/search-index*.json
+public/search-index-fast-*.json
+public/search-index-manifest.json
+public/sw.js
+public/workbox-*.js
+
+# Mermaid cache - regenerated during build
+public/mermaid-cache/
+

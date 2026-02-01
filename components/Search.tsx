@@ -7,22 +7,64 @@ import { formatDisplayTitle } from '@/lib/title'
 
 interface SearchResult {
   title: string
-  description?: string
+  description: string | undefined
   slug: string
   excerpt: string
+  score: number
 }
 
-export default function Search() {
-  const [isOpen, setIsOpen] = useState(false)
+interface SearchProps {
+  initialOpen?: boolean
+  enableShortcut?: boolean
+}
+
+export default function Search({ initialOpen = false, enableShortcut = true }: SearchProps) {
+  const [isOpen, setIsOpen] = useState(initialOpen)
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const backgroundTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const workerRef = useRef<Worker | null>(null)
   const router = useRouter()
+
+  // Initialize Web Worker
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.Worker) {
+      workerRef.current = new Worker('/search.worker.js')
+      
+      workerRef.current.onmessage = (event) => {
+        const { type, results: workerResults } = event.data
+        if (type === 'RESULTS') {
+          setResults(workerResults.slice(0, 10))
+          setSelectedIndex(0)
+          setIsLoading(false)
+        }
+      }
+
+      workerRef.current.onerror = (error) => {
+        console.error('Search worker error:', error)
+        setIsLoading(false)
+      }
+
+      return () => {
+        workerRef.current?.terminate()
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    if (initialOpen) {
+      setIsOpen(true)
+    }
+  }, [initialOpen])
 
   // Keyboard shortcut (Cmd/Ctrl + K)
   useEffect(() => {
+    if (!enableShortcut) return
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault()
@@ -36,7 +78,7 @@ export default function Search() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [])
+  }, [enableShortcut])
 
   // Focus input when opened
   useEffect(() => {
@@ -45,77 +87,204 @@ export default function Search() {
     }
   }, [isOpen])
 
-  // Handle search
+  // Handle search with smart chunked loading
   useEffect(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current)
+      debounceTimerRef.current = null
+    }
+    if (backgroundTimerRef.current) {
+      clearTimeout(backgroundTimerRef.current)
+      backgroundTimerRef.current = null
+    }
+
     if (query.length < 2) {
       setResults([])
+      setIsLoading(false)
       return
     }
 
+    const queryLower = query.toLowerCase()
     setIsLoading(true)
+    let isActive = true
     
-    // Debounced search - client-side using static JSON
-    const timer = setTimeout(async () => {
+    // Debounced search - client-side using chunked JSON indices
+    debounceTimerRef.current = setTimeout(async () => {
       try {
-        const response = await fetch('/search-index.json')
-        const allDocs = await response.json()
+        // Detect current repo from URL path
+        const pathname = window.location.pathname
+        const pathMatch = pathname.match(/\/docs\/([^\/]+)/)
+        const currentRepo = pathMatch ? pathMatch[1] : null
         
-        const queryLower = query.toLowerCase()
-        const searchResults = allDocs
-          .map((doc: any) => {
-            const titleMatch = doc.title.toLowerCase().includes(queryLower)
-            const descriptionMatch = doc.description?.toLowerCase().includes(queryLower)
-            const contentMatch = doc.content.toLowerCase().includes(queryLower)
-            
-            if (!titleMatch && !descriptionMatch && !contentMatch) {
-              return null
+        // Fetch manifest to get latest versions
+        const manifestResponse = await fetch('/search-index-manifest.json')
+        const manifest = await manifestResponse.json()
+        const fullFiles = manifest?.files ?? {}
+        const fastFiles = manifest?.fastFiles ?? {}
+
+        const repoKey = currentRepo
+          ? Object.keys(fullFiles).find(key => key.toLowerCase() === currentRepo.toLowerCase())
+          : null
+        
+        // Load current repo fast chunk first for initial results
+        let fastDocs: any[] = []
+
+        if (repoKey) {
+          const fastPath = fastFiles[repoKey] ?? fullFiles[repoKey]
+          if (fastPath) {
+            try {
+              const currentRepoResponse = await fetch(`/${fastPath}`)
+              const currentRepoDocs = await currentRepoResponse.json()
+              fastDocs = Array.isArray(currentRepoDocs) ? currentRepoDocs : []
+            } catch (error) {
+              console.warn(`Failed to load current repo chunk: ${repoKey}`, error)
             }
+          }
+        }
 
-            // Calculate relevance score
-            let score = 0
-            if (titleMatch) score += 10
-            if (descriptionMatch) score += 5
-            if (contentMatch) score += 1
-
-            // Extract excerpt
-            const contentLower = doc.content.toLowerCase()
-            const queryIndex = contentLower.indexOf(queryLower)
-            let excerpt = ''
+        // Lazy-load full repo chunks in background after 2 seconds
+        backgroundTimerRef.current = setTimeout(async () => {
+          try {
+            const repoKeys = Object.keys(fullFiles)
+            const otherDocsPromises = repoKeys.map(async (repo) => {
+              try {
+                const response = await fetch(`/${fullFiles[repo]}`)
+                const docs = await response.json()
+                return Array.isArray(docs) ? docs : []
+              } catch (error) {
+                console.warn(`Failed to load repo chunk: ${repo}`, error)
+                return []
+              }
+            })
             
-            if (queryIndex !== -1) {
-              const start = Math.max(0, queryIndex - 50)
-              const end = Math.min(doc.content.length, queryIndex + 100)
-              excerpt = (start > 0 ? '...' : '') + 
-                       doc.content.slice(start, end).trim() + 
-                       (end < doc.content.length ? '...' : '')
+            const otherDocsArrays = await Promise.allSettled(otherDocsPromises)
+            const otherDocs = otherDocsArrays
+              .filter((result): result is PromiseFulfilledResult<any[]> => result.status === 'fulfilled')
+              .flatMap(result => result.value)
+            
+            // Merge and re-search with all docs (using Web Worker)
+            const mergedDocs = mergeDocs(fastDocs, otherDocs)
+            if (workerRef.current) {
+              workerRef.current.postMessage({ type: 'SEARCH', docs: mergedDocs, query: queryLower })
             } else {
-              excerpt = doc.content.slice(0, 150).trim() + '...'
+              // Fallback to main thread
+              const updatedResults = performSearch(mergedDocs, queryLower).filter(r => r !== null) as SearchResult[]
+              if (isActive) {
+                setResults(updatedResults)
+                setSelectedIndex(0)
+              }
             }
+          } catch (error) {
+            console.warn('Failed to load full search index:', error)
+          }
+        }, 2000)
 
-            return {
-              title: doc.title,
-              description: doc.description,
-              slug: doc.slug,
-              excerpt,
-              score,
-            }
-          })
-          .filter(Boolean)
-          .sort((a: any, b: any) => b.score - a.score)
-          .slice(0, 10)
-        
-        setResults(searchResults)
-        setSelectedIndex(0)
+        // Show initial results from current repo (using Web Worker)
+        if (workerRef.current && fastDocs.length > 0) {
+          workerRef.current.postMessage({ type: 'SEARCH', docs: fastDocs, query: queryLower })
+        } else {
+          // Fallback to main thread if worker not available
+          const searchResults = performSearch(fastDocs, queryLower).filter(r => r !== null) as SearchResult[]
+          if (isActive) {
+            setResults(searchResults)
+            setSelectedIndex(0)
+            setIsLoading(false)
+          }
+        }
       } catch (error) {
         console.error('Search failed:', error)
-        setResults([])
+        if (isActive) {
+          setResults([])
+        }
       } finally {
-        setIsLoading(false)
+        if (isActive) {
+          setIsLoading(false)
+        }
       }
     }, 300)
 
-    return () => clearTimeout(timer)
+    return () => {
+      isActive = false
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
+        debounceTimerRef.current = null
+      }
+      if (backgroundTimerRef.current) {
+        clearTimeout(backgroundTimerRef.current)
+        backgroundTimerRef.current = null
+      }
+    }
   }, [query])
+  
+  // Extract search logic into reusable function
+  const performSearch = (docs: any[], queryLower: string) => {
+    return docs
+      .map((doc: any) => {
+        const title = typeof doc?.title === 'string' ? doc.title : ''
+        const description = typeof doc?.description === 'string' ? doc.description : ''
+        const content = typeof doc?.content === 'string' ? doc.content : ''
+        const slug = typeof doc?.slug === 'string' ? doc.slug : ''
+
+        if (!slug) return null
+
+        const titleMatch = title.toLowerCase().includes(queryLower)
+        const descriptionMatch = description.toLowerCase().includes(queryLower)
+        const contentMatch = content.toLowerCase().includes(queryLower)
+        
+        if (!titleMatch && !descriptionMatch && !contentMatch) {
+          return null
+        }
+
+        // Calculate relevance score
+        let score = 0
+        if (titleMatch) score += 10
+        if (descriptionMatch) score += 5
+        if (contentMatch) score += 1
+
+        // Extract excerpt
+        const contentLower = content.toLowerCase()
+        const queryIndex = contentLower.indexOf(queryLower)
+        let excerpt = ''
+        
+        if (queryIndex !== -1 && content.length > 0) {
+          const start = Math.max(0, queryIndex - 50)
+          const end = Math.min(content.length, queryIndex + 100)
+          excerpt = (start > 0 ? '...' : '') + 
+                   content.slice(start, end).trim() + 
+                   (end < content.length ? '...' : '')
+        } else if (content.length > 0) {
+          excerpt = content.slice(0, 150).trim() + '...'
+        } else if (description) {
+          excerpt = description
+        }
+
+        return {
+          title,
+          description: description || undefined,
+          slug,
+          excerpt,
+          score,
+        }
+      })
+      .filter(Boolean)
+      .sort((a: any, b: any) => b.score - a.score)
+      .slice(0, 10)
+  }
+
+  const mergeDocs = (baseDocs: any[], extraDocs: any[]) => {
+    const bySlug = new Map<string, any>()
+    for (const doc of baseDocs) {
+      if (doc?.slug) {
+        bySlug.set(String(doc.slug), doc)
+      }
+    }
+    for (const doc of extraDocs) {
+      if (doc?.slug) {
+        bySlug.set(String(doc.slug), doc)
+      }
+    }
+    return Array.from(bySlug.values())
+  }
 
   // Keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {

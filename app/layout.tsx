@@ -2,12 +2,16 @@ import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { ThemeProvider } from '@/components/ThemeProvider'
-import { generateSidebarStructure } from '@/lib/sidebar'
+import { getSidebarStructure } from '@/lib/sidebar'
 import LayoutClient from '@/components/LayoutClient'
-import NextTopLoader from 'nextjs-toploader'
-import { Toaster } from 'sonner'
+import ServiceWorkerUpdate from '@/components/ServiceWorkerUpdate'
+import ClientProviders from '@/components/ClientProviders'
 
 const inter = Inter({ subsets: ['latin'] })
+
+// Route segment config
+export const dynamicParams = false
+export const revalidate = 3600
 
 export const metadata: Metadata = {
   title: 'Academy Documentation Hub',
@@ -32,22 +36,13 @@ export default async function RootLayout({
   children: React.ReactNode
 }) {
   // Fetch sidebar data server-side
-  const sidebarData = await generateSidebarStructure()
+  const sidebarData = await getSidebarStructure()
 
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <NextTopLoader
-          color="var(--loading-bar-color)"
-          initialPosition={0.08}
-          crawlSpeed={200}
-          height={3}
-          crawl={true}
-          showSpinner={false}
-          easing="ease"
-          speed={200}
-        />
-        <Toaster position="bottom-right" />
+        <ClientProviders />
+        {process.env.NODE_ENV === 'production' && <ServiceWorkerUpdate />}
         <ThemeProvider>
           <LayoutClient sidebarData={sidebarData}>
             {children}
