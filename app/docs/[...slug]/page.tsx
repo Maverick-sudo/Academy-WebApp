@@ -213,6 +213,11 @@ export default async function DocPage({ params }: DocPageProps) {
               a({ href, children, ...props }) {
                 if (!href) return <a {...props}>{children}</a>
                 
+                // Handle anchor links (same page navigation)
+                if (href.startsWith('#')) {
+                  return <a href={href} {...props}>{children}</a>
+                }
+                
                 // Handle external links
                 if (href.startsWith('http://') || href.startsWith('https://')) {
                   return (
@@ -231,6 +236,9 @@ export default async function DocPage({ params }: DocPageProps) {
                   const basePath = `/docs/${normalizedSlug.join('/')}`
                   cleanHref = `${basePath}/${cleanHref}`
                 }
+                
+                // Normalize multiple slashes
+                cleanHref = cleanHref.replace(/\/+/g, '/')
                 
                 return (
                   <Link href={cleanHref} {...props}>
