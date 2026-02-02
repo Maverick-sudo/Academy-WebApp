@@ -12,48 +12,46 @@ A curated collection of Python tools and scripts for cybersecurity, networking, 
 ## Overview
 This repository brings together multiple Python projects designed for:
 - Network analysis and scanning
-- Encryption and secure content handling
-- Malware simulation and reporting
 - Backdoor connection and listener setup
+- Packet inspection and traffic manipulation
+- Malware simulation and reporting
 - Vulnerability assessment
-- Network hacking and packet manipulation
 
 Each folder contains scripts and modules focused on a specific domain, making it easy to explore, learn, and extend security-related Python programming.
 
 ## Folder Structure
 
-### B4CK_D00R_PRACTICAL
-- **backdoor_connect.py**: Establishes a backdoor connection to a remote host.
-- **listener.py**: Listens for incoming connections and manages backdoor sessions.
+### BackDoor
+- [backdoor_connect.py](BackDoor/backdoor_connect.py): TCP client that receives commands, executes them locally, and returns output.
+- [listener.py](BackDoor/listener.py): TCP listener that accepts a connection and sends commands to the client.
+- [README.md](BackDoor/README.md)
 
-### Encryption_Decryption
-- **secure_content_handler.py**: Handles encryption and decryption of sensitive content.
-- **README.md**: Documentation for encryption/decryption usage.
+### Network Analyzer
+- [Network_Analyzer.py](Network%20Analyzer/Network_Analyzer.py): Network traffic monitor and alerting logic.
+- [README.md](Network%20Analyzer/README.md)
 
-### Network_Analyzer
-- **Network_Analyzer.py**: Analyzes network traffic and provides insights.
-- **README.md**: Usage instructions and examples.
+### PythonHacks
+- [arp_spoof.py](PythonHacks/arp_spoof.py): Builds ARP responses to spoof address mappings.
+- [code_injector.py](PythonHacks/code_injector.py): Modifies HTTP payloads via packet inspection and rewriting.
+- [dns_spoof.py](PythonHacks/dns_spoof.py): Rewrites DNS answers for a target query name.
+- [file_interceptor.py](PythonHacks/file_interceptor.py): Redirects downloads based on file extensions.
+- [network_scanner.py](PythonHacks/network_scanner.py): Sends ARP requests to enumerate IP/MAC pairs.
+- [packet_sniffer.py](PythonHacks/packet_sniffer.py): Sniffs HTTP requests and searches for credential keywords.
+- [Socket_conn.py](PythonHacks/Socket_conn.py): Basic TCP server that responds to client requests.
+- [README.md](PythonHacks/README.md)
 
-### Python$M4lw4r3
-- **download_evil_files.py**: Downloads potentially malicious files for analysis.
-- **download_execute_report.py**: Automates download, execution, and reporting of files.
-- **execute_and_report.py**: Executes files and generates activity reports.
-- **keylogger.py**: Captures keystrokes for monitoring purposes.
-- **queue_Usage.py**: Demonstrates queue usage in malware operations.
-- **threadingExample.py**: Illustrates threading in malware-related tasks.
-
-### Python$N3T_H$CK
-- **arp_spoof.py**: Performs ARP spoofing attacks on local networks.
-- **code_injector.py**: Injects code into running processes or network streams.
-- **dns_spoof.py**: Spoofs DNS responses to redirect traffic.
-- **file_interceptor.py**: Intercepts and manipulates files in transit.
-- **network_scanner.py**: Scans networks for active hosts and open ports.
-- **packet_sniffer.py**: Captures and analyzes network packets.
-- **Socket_conn.py**: Manages socket connections for network operations.
+### PythonMalware
+- [download_evil_files.py](PythonMalware/download_evil_files.py): Downloads a file from a URL to disk.
+- [download_execute_report.py](PythonMalware/download_execute_report.py): Downloads a file, runs a command, emails results, and cleans up.
+- [execute_and_report.py](PythonMalware/execute_and_report.py): Collects Wi‑Fi profile data and emails a report.
+- [keylogger.py](PythonMalware/keylogger.py): Captures keystrokes and emails reports on an interval.
+- [queue_Usage.py](PythonMalware/queue_Usage.py): Demonstrates queue usage with worker threads.
+- [threadingExample.py](PythonMalware/threadingExample.py): Compares single-threaded vs multi-threaded task execution.
+- [README.md](PythonMalware/README.md)
 
 ### Vulnerability_Scanner
-- **Network_Vuln_Scanner.py**: Scans networks for vulnerabilities and security issues.
-- **README.md**: Documentation and usage examples.
+- [Network_Vuln_Scanner.py](Vulnerability_Scanner/Network_Vuln_Scanner.py): Uses `nmap` to scan targets for open ports and findings.
+- [README.md](Vulnerability_Scanner/README.md)
 
 ## Usage
 1. Clone the repository:
