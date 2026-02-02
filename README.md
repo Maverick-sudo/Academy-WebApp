@@ -18,6 +18,14 @@ A modern, GitBook-style documentation hub built with Next.js, deployed on Vercel
 - 🐍 **Python Version Requirement**: Run Markitdown under a Python version that already has published `onnxruntime` wheels (≤3.13 as of now). Python 3.14 (`cp314`) lacks compatible wheels, so the server will fail to start there.
 - 📎 **Docs Link**: Follow the official Markitdown and Magika release notes for updates; update this section if/when `onnxruntime` publishes cp314 wheels.
 
+## Mermaid Diagram Rendering
+
+Mermaid diagrams are pre-rendered to static SVGs by GitHub Actions and committed to the repository. This keeps Vercel builds fast and reliable while serving diagrams as static assets.
+
+If you need to regenerate diagrams locally (e.g., before testing a change), run:
+
+- `npm run mermaid:render`
+
 ## Project Structure
 
 `content/
