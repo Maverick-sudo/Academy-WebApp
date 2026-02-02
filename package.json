@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --hostname 0.0.0.0",
     "prebuild": "node .github/scripts/generate-search-index.js",
-    "mermaid:render": "tsx scripts/pre-render-mermaid.ts",
+    "mermaid:render": "node scripts/pre-render-mermaid.ts",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "next lint",
