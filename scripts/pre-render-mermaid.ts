@@ -127,10 +127,13 @@ async function renderMermaidDiagram(code: string, hash: string): Promise<string 
     // Wait for diagram to render
     await page.waitForSelector('.mermaid svg', { timeout: 5000 })
     
-    // Extract SVG
-    const svg = await page.locator('.mermaid svg').innerHTML()
+    // Extract full SVG element (outerHTML)
+    const svg = await page.evaluate(() => {
+      const svgElement = document.querySelector('.mermaid svg')
+      return svgElement ? svgElement.outerHTML : null
+    })
     
-    return `<svg xmlns="http://www.w3.org/2000/svg"${svg.substring(4)}`
+    return svg
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
     console.error(`Failed to render diagram ${hash}:`, errorMessage)
