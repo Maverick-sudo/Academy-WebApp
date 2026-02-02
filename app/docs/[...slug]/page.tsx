@@ -210,6 +210,34 @@ export default async function DocPage({ params }: DocPageProps) {
             components={{
               h1: () => null,
               img: () => null,
+              a({ href, children, ...props }) {
+                if (!href) return <a {...props}>{children}</a>
+                
+                // Handle external links
+                if (href.startsWith('http://') || href.startsWith('https://')) {
+                  return (
+                    <a href={href} target="_blank" rel="noopener noreferrer" {...props}>
+                      {children}
+                    </a>
+                  )
+                }
+                
+                // Handle internal markdown links - strip .md extension and convert to proper path
+                let cleanHref = href.replace(/\.md$/i, '')
+                
+                // If it's a relative path, prepend current doc path
+                if (!cleanHref.startsWith('/')) {
+                  // Get current base path (e.g., /docs/study-notes)
+                  const basePath = `/docs/${normalizedSlug.join('/')}`
+                  cleanHref = `${basePath}/${cleanHref}`
+                }
+                
+                return (
+                  <Link href={cleanHref} {...props}>
+                    {children}
+                  </Link>
+                )
+              },
               code({ className, children, ...props }) {
                 const languageMatch = className?.match(/language-([\w-]+)/)
                 const language = languageMatch?.[1]
