@@ -1,0 +1,183 @@
+---
+title: Gateways and VPN Connectivity
+description: VPN gateways, gateway planning, SKUs, protocols, and hybrid connectivity patterns.
+---
+
+
+### Overview
+
+Azure VPN Gateway is a specific type of Azure Virtual Network Gateway deployed within an Azure Virtual Network. Its fundamental purpose is to facilitate secure, encrypted communication between your Azure VNet and various external locations over the public internet.
+
+### Connectivity Scenarios
+
+Azure VPN Gateway supports three primary connectivity patterns:
+
+**On-Premises Networks (Site-to-Site VPN)**
+
+Establishes a secure tunnel over the public internet, enabling on-premises infrastructure to seamlessly interact with Azure resources. This is referred to as Site-to-Site (S2S) VPN and is essential for hybrid cloud deployments.
+
+**Remote User Workstations (Point-to-Site VPN)**
+
+Allows individual users on client devices to establish secure, encrypted connections directly to Azure VNet from any location with internet access. Supports remote workers, developers, and administrators.
+
+**Other Azure Virtual Networks (VNet-to-VNet)**
+
+Creates secure, encrypted links between distinct Azure VNets, even across different Azure regions or subscriptions. Enables complex, interconnected architectures across Azure environments.
+
+### Gateway Subnet Planning
+
+Gateway Subnet planning is one of the most critical architectural decisions. Unlike application subnets, the Gateway Subnet is much less flexible after initial deployment. Expanding or altering address space after deployment is complex and can cause service interruptions.
+
+**Subnet Mask Size**
+
+Microsoft strongly recommends a minimum subnet mask of `/27` (32 IP addresses). For production environments, `/26` (64 addresses) or `/25` (128 addresses) is more prudent.
+
+Sizing considerations:
+
+| Factor | IP Impact | Notes |
+| --- | --- | --- |
+| Azure Gateway VMs | Variable by SKU | Higher SKUs consume more IPs |
+| Active-Active Configurations | 2 public IPs | Enhanced availability requires dual instances |
+| ExpressRoute Co-location | Additional IPs | Both gateway types share the subnet |
+| Future Scalability | Growth buffer | Plan for additional tunnels and SKU upgrades |
+
+**Subnet Name**
+
+The subnet MUST be explicitly named `GatewaySubnet`. This is a hard requirement. Azure's provisioning logic specifically looks for this exact name. Any deviation will cause deployment failure.
+
+**Subnet Associations**
+
+The Gateway Subnet is exclusively dedicated to Azure Virtual Network Gateways (VPN and ExpressRoute). Do not deploy other resources such as:
+
+- Virtual Machines
+- Network Virtual Appliances (NVAs)
+- Application Gateways
+
+Azure enforces this by preventing association of Network Security Groups (NSGs) or Route Tables (UDRs) directly with the Gateway Subnet. Azure manages routing internally.
+
+### VPN Gateway SKU Selection
+
+The VPN Gateway SKU directly impacts performance characteristics, feature availability, and cost. Azure offers multiple SKUs designed for different throughput requirements and connection scales.
+
+| SKU | Use Case | Throughput | S2S Tunnels | P2S Connections | BGP | Availability Zones | SLA |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Basic | Dev/Test/PoC | ~100 Mbps | ~10 | ~128 | No | No | None |
+| VpnGw1 | Production | ~650 Mbps | ~30 | ~128 | Yes | No | Yes |
+| VpnGw2 | Production | ~1 Gbps | ~30 | ~128 | Yes | No | Yes |
+| VpnGw3 | Production | ~1.25 Gbps | ~30 | ~128 | Yes | No | Yes |
+| VpnGw1AZ | Production (Zone Redundant) | ~650 Mbps | ~30 | ~128 | Yes | Yes | Yes |
+| VpnGw2AZ | Production (Zone Redundant) | ~1 Gbps | ~30 | ~128 | Yes | Yes | Yes |
+| VpnGw3AZ | Production (Zone Redundant) | ~1.25 Gbps | ~30 | ~128 | Yes | Yes | Yes |
+| VpnGw4 | High Performance | ~5 Gbps | Higher | Higher | Yes | No | Yes |
+| VpnGw5 | High Performance | ~10 Gbps | Higher | Higher | Yes | No | Yes |
+
+### Deployment Types
+
+Azure VPN Gateways support two high-availability configurations:
+
+**Active-Standby (Default)**
+
+Azure deploys two VM instances behind the scenes. One instance actively handles all VPN connections (the "active" instance), while the second remains in standby mode, continuously synchronized.
+
+**Failover Behavior**
+
+If the active instance fails due to planned maintenance or hardware issues, Azure automatically fails over to the standby instance. This transition typically occurs within a few seconds to a minute, causing brief interruption to active VPN connections. Established connections will need to reconnect.
+
+**Active-Active**
+
+Both VPN Gateway VM instances actively handle VPN connections simultaneously. Each instance has its own public IP address.
+
+**Redundancy**
+
+Provides enhanced redundancy and potentially higher aggregate throughput. If one instance fails, the other continues handling connections without interruption to sessions established through the operational instance.
+
+## Virtual Networking (VPC/VNet) - Gateways & Connectivity
+
+### AWS VPC / Azure VNet internet gateway & VPN gateway
+
+A Virtual Private Cloud or Virtual Network, is essentially your own private network in AWS/Azure. A VPC allows you to define your private IP range for your AWS resources, and you place things like EC2 instances and ELBs inside of your VPC.
+A VPC lets you provision a logically isolated section of the AWS Cloud where you can launch AWS resources in a virtual network that you define. These resources can be public facing so they have access to the internet, or private with no internet access, usually for backend services like databases or application servers. The public and private grouping of resources are known as subnets and they are ranges of IP addresses in your VPC. First, let's talk about public-facing resources. In order to allow traffic from the public internet to flow into and out of your VPC, you must attach what is called an internet gateway, or IGW, to your VPC. An internet gateway is like a doorway that is open to the public. An internet gateway is a connection between a VPC and the internet. Without an internet gateway, no one can access the resources within your VPC.
+
+A Gateway is a Virtual appliance router that is centrally deployed to facilitate connections between VPC/VNET subnets and VPN gateways. Traffic Routing Could be Configured b/w subnets in a VPC or through a Virtual firewall Instance, also between VPCs in the Same Account belonging to different Accounts, and between VPCs and On-premise Networks.
+
+A VIRTUAL PRIVATE NETWORK (VPN) A VPN gateway is a type of Virtual Network Gateway. A type of private interconnected network. VPNs use an encrypted tunnel within another network. They're typically deployed to connect two or more trusted private networks to one another over an untrusted network (typically the public Internet). Traffic is encrypted while traveling over the untrusted network to prevent eavesdropping or other attacks.
+VPN gateways are deployed in Azure/AWS VNET/VPC and enable the following connectivity:
+*   Connect on-premises datacenters to Azure virtual networks through a site-to-site connection.
+*   Connect individual devices to Azure virtual networks through a point-to-site connection.
+*   Connect Azure virtual networks to other Azure virtual networks through a network-to-network connection.
+You can deploy only one VPN gateway in each virtual network, but you can use one gateway to connect to multiple locations, including other Azure virtual networks or on-premises datacenters. When you deploy a VPN gateway, you specify the VPN type: either policy-based or route-based. The main difference between these two types of VPN is how the encrypted traffic is specified.
+
+#### Similarities:
+1.  Purpose: Both are types of Azure VPN gateways used to establish secure tunnels.
+2.  Authentication: Both use preshared keys for authentication in Azure.
+3.  Core Protocols: Both rely on IKE (Internet Key Exchange) to set up the security association and IPSec (Internet Protocol Security) to encrypt/decrypt data packets within the tunnel.
+#### Differences:
+| Feature | Policy-Based VPN | Route-Based VPN |
+| --- | --- | --- |
+| Traffic Routing | Uses static IP address lists defined in the policy to decide which tunnel to use for each packet. | Uses IP routing (static routes or dynamic protocols like BGP) via virtual tunnel interfaces (VTIs) to decide which tunnel to use. |
+| Traffic Selectors | Uses specific source/destination address prefixes defined in the policy. | Uses any-to-any (wildcard) traffic selectors. |
+| Flexibility | Static, less flexible, less resilient to network changes. | More dynamic, resilient to topology changes (like new subnets). |
+| IKE Version Support | IKEv1 only. | Supports IKEv2 (often supports IKEv1 as well). |
+| Supported Connections | Limited connection types. | Supports VNet-to-VNet, Point-to-Site, Multisite, and ExpressRoute coexistence. |
+| Configuration | Source/Destination networks defined directly in the policy. | Source/Destination networks determined by routing tables (can be dynamic). |
+| Primary Use Case | Primarily for compatibility with legacy on-premises devices. | Preferred method for most scenarios, especially modern setups. |
+
+### Virtual private gateway
+A virtual private gateway connects your VPC/VNET to another private network(on-premises). When you create and attach a virtual private gateway to a VPC/VNET, the gateway acts as anchor on the cloud side of the connection. On the other side of the connection, you will need to connect a customer gateway to the other private network. A customer gateway device is a physical device or software application on your side of the connection. When you have both gateways, you can then establish an encrypted virtual private network (VPN) connection between the two sides.
+
+AWS VPN GATEWAY: Let's talk about a VPC with all internal private resources. We don't want just anyone from anywhere to be able to reach these resources. So we don't want an internet gateway attached to our VPC. Instead, we want a private gateway that only allows people in if they are coming from an approved network, not the public internet. This private doorway is called a virtual private gateway, and it allows you to create a VPN connection between a private network, like your on-premises data center or internal corporate network to your VPC. If you want to establish an encrypted VPN connection to your private internal AWS resources, you would need to attach a virtual private gateway to your VPC.
+
+AZURE VPN GATEWAY is a service that can be used to send encrypted traffic between an Azure VNET and on-premises locations over the public Internet. You can also use VPN Gateway to send encrypted traffic between Azure virtual networks over the Microsoft network. VPN Gateway uses a specific type of Azure virtual network gateway called a VPN gateway. Multiple connections can be created to the same VPN gateway. When you create multiple connections, all VPN tunnels share the available gateway bandwidth. An Azure VPN gateway is made up of these elements:
+*   Virtual network gateway
+*   Local network gateway
+*   Connection
+*   Gateway subnet
+
+### VPN gateway sizes
+The SKU or size that you deploy, determines the capabilities of your VPN gateway.
+### ExpressRoute failover
+Another high-availability option is to configure a VPN gateway as a secure failover path for ExpressRoute connections.
+### Zone-redundant gateways
+In regions that support availability zones, you can deploy VPN and ExpressRoute gateways in a zone-redundant configuration. This configuration brings resiliency, scalability, and higher availability to virtual network gateways.
+### Active/active
+With the introduction of support for the BGP routing protocol, you can also deploy VPN gateways in an active/active configuration.
+### Active/standby
+By default, VPN gateways are deployed as two instances in an active/standby configuration, even if you only see one VPN gateway resource in Azure.
+
+### PLAN A VPN GATEWAY
+If you have a business with offices in different locations, you can establish a secure connection between the Local Area Networks (LANs) over the network. A site-to-site VPN gateway creates a secure connection between computer resources at different locations.
+Creating a virtual network gateway can take some time to complete, so it's vital that you plan appropriately. Factors that you need to consider during your planning process include:
+*   THROUGHPUT/BANDWIDTH - Mbps or Gbps
+*   BACKBONE - Internet or private
+*   AVAILABILITY of a public (static) IP address - To provide better availability for your VPN connections, consider one of these options. Active-Standby(VPN Gateway redundancy) or Active-Active Azure VPN gateway
+    1.  Active-Standby is the default configuration. In this configuration there are two instances, active and standby. The standby connection takes over when the active connection is disrupted. Switching to the standby connection causes a service disruption. For planned maintenance, connectivity is restored in seconds. For unplanned interruptions, connectivity is restored in minutes.
+    2.  Active-Active configuration, both instances of the gateway establish VPN tunnels to your on-premises VPN device. The traffic from your Azure virtual network to your on-premises network is routed through both tunnels simultaneously. If an outage occurs, Azure automatically switches to the other tunnel. Although there would be a slight decrease in performance from baseline.
+*   VPN DEVICE COMPATIBILTY
+*   MULTIPLE POINT CONNECTIONS OR SITE-TO-SITE?
+    1.  A site-to-site (S2S) VPN gateway connection lets you create a secure connection to your virtual network from another virtual network or a physical network.
+    2.  A Point-to-site (P2S)connection lets you create a secure connection to your virtual network from an individual client computer. A P2S connection is established by starting it from the client computer. This solution is useful for telecommuters who want to connect to Azure VNets from a remote location, such as from home or a conference. P2S VPN is also a useful solution to use instead of S2S VPN when you have only a few clients that need to connect to a VNet and not every one from that subnet.
+*   VPN TYPE -> Route-Based aka Dynamic Routing / Policy-Based aka Static Routing Gateways
+    1.  Policy-based VPNs were previously called static routing gateways. Policy-based VPNs encrypt and direct packets through IPsec tunnels based on the IPsec policies. The policy (or traffic selector) is defined as an access list in the VPN device configuration. When using a Policy-based VPN, keep in mind the following limitations: Policy-based VPNs which support IKEv1 protocols can only be used with Basic Gateway SKUs. You can have only one tunnel when using a policy-based VPN.Therefore used for site-to-site connections.
+    2.  Route-based VPNs were previously called dynamic routing gateways. Route-based VPNs use "routes" in the IP forwarding or routing table to direct packets into their corresponding tunnel interfaces. The tunnel interfaces then encrypt or decrypt the packets in and out of the tunnels. Most VPN gateways are route-based.
+*   VPN GATEWAY TYPE -> AWS(VPN / Direct Connect)::AZURE(VPN / Express Route)
+
+### VPN gateway SKUs
+
+*   VPN GATEWAY SKU- select a SKU that satisfies your requirements based on the workload, throughput, feature, and SLAs. https://learn.microsoft.com/en-us/azure/vpn-gateway/about-gateway-skus When you create a VPN Gateway virtual network gateway, you specify the gateway SKU that you want to use. This article describes the factors that you should take into consideration when selecting a gateway SKU. If you're looking for information about ExpressRoute gateway SKUs, see Virtual network gateways for ExpressRoute. For Virtual WAN gateways, see Virtual WAN gateway settings. When you configure a virtual network gateway SKU, select the SKU that satisfies your requirements based on the types of workloads, throughput, features, and SLAs.
+The Basic SKU has feature and performance limitations and shouldn't be used in production environments.
+
+### VPN protocols
+
+Point-to-site VPN can use one of the following protocols:
+*   OpenVPN® Protocol, an SSL/TLS based VPN protocol. A TLS VPN solution can penetrate firewalls, since most firewalls open TCP port 443 outbound, which TLS uses. OpenVPN can be used to connect from Android, iOS (versions 11.0 and above), Windows, Linux, and Mac devices (macOS versions 10.13 and above).
+*   Secure Socket Tunneling Protocol (SSTP), a proprietary TLS-based VPN protocol. A TLS VPN solution can penetrate firewalls, since most firewalls open TCP port 443 outbound, which TLS uses. SSTP is only supported on Windows devices. Azure supports all versions of Windows that have SSTP (Windows 7 and later).
+*   IKEv2 VPN, a standards-based IPsec VPN solution. IKEv2 VPN can be used to connect from Mac devices (macOS versions 10.11 and above).
+
+### VPN authentication
+
+#### Point-to-site authentication methods
+The user must be authenticated before Azure accepts a P2S VPN connection. The two most common authentication methods are: Entra ID authentication and on-premises Active Directory Domain Services authentication.
+#### Authenticate using native Microsoft Entra ID authentication
+Native authentication allows users to connect to Azure using their Microsoft Entra ID credentials. Native authentication is only supported for OpenVPN protocol and Windows and requires the use of the Azure VPN Client. With this authentication, you can use conditional access and multifactor authentication (MFA) features for VPN.
+#### Authenticate using Active Directory Domain Services
+This authentication is a popular option because it allows users to connect to Azure using their organization domain credentials. It requires a RADIUS server that integrates with the server. Organizations can also use their existing RADIUS deployment. The RADIUS server is deployed either on-premises or in your Azure VNet. During authentication, the Azure VPN Gateway passes authentication messages back and forth between the RADIUS server and the connecting device. Thus, the Gateway must be able to communicate with the RADIUS server. If the RADIUS server is present on-premises, then a VPN S2S connection from Azure to the on-premises site is required for reachability.

@@ -38,6 +38,7 @@
 
   .dark {
     --card: #0f172a;
+    --card: #0f172a;
     --ring: #64748b;
     --input: #1e293b;
     --muted: #0f172a;
@@ -75,6 +76,24 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .progress-bar {
+    @apply w-full h-2 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-800;
+  }
+
+  .progress-bar::-webkit-progress-bar {
+    @apply bg-slate-200 dark:bg-slate-800 rounded-full;
+  }
+
+  .progress-bar::-webkit-progress-value {
+    @apply bg-blue-600 dark:bg-blue-400 rounded-full transition-all;
+  }
+
+  .progress-bar::-moz-progress-bar {
+    @apply bg-blue-600 dark:bg-blue-400 rounded-full;
   }
 }
 
@@ -153,3 +172,158 @@
 ::-webkit-scrollbar-thumb:hover {
   background: var(--accent);
 }
+
+/* Enhanced Section Spacing & Visual Rhythm */
+.prose h2 {
+  @apply mt-12 mb-6 pt-6 border-t border-slate-200 dark:border-slate-800;
+}
+
+.prose h3 {
+  @apply mt-8 mb-4;
+}
+
+.prose h4 {
+  @apply mt-6 mb-3;
+}
+
+.prose > * + * {
+  @apply mt-6;
+}
+
+.prose ul,
+.prose ol {
+  @apply my-6;
+}
+
+.prose li {
+  @apply my-2;
+}
+
+/* Reading progress shimmer animation */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+/* Print styles */
+@media print {
+  /* Hide navigation and UI elements */
+  nav,
+  aside,
+  header,
+  footer,
+  button,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Show main content at full width */
+  main {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Optimize typography for print */
+  body {
+    font-size: 12pt;
+    line-height: 1.5;
+    color: #000;
+    background: #fff;
+  }
+
+  /* Page breaks */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+
+  pre, blockquote, table {
+    page-break-inside: avoid;
+  }
+
+  img {
+    max-width: 100%;
+    page-break-inside: avoid;
+  }
+
+  /* Remove shadows and transitions */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  /* Show URLs for links */
+  a[href]:after {
+    content: " (" attr(href) ")";
+    font-size: 90%;
+    color: #555;
+  }
+
+  a[href^="#"]:after,
+  a[href^="javascript:"]:after {
+    content: "";
+  }
+
+  /* Code blocks */
+  pre {
+    border: 1px solid #ccc;
+    page-break-inside: avoid;
+  }
+
+  /* Breadcrumbs */
+  .breadcrumb {
+    font-size: 10pt;
+    margin-bottom: 1em;
+  }
+
+  /* Table of contents */
+  .toc {
+    border: 1px solid #ccc;
+    padding: 1em;
+    margin-bottom: 2em;
+  }
+}
+
+/* Improved code blocks */
+.prose pre {
+  @apply my-6 rounded-lg;
+}
+
+.prose code {
+  @apply px-1.5 py-0.5 rounded text-sm;
+  @apply bg-slate-100 dark:bg-slate-800;
+  @apply text-blue-700 dark:text-blue-300;
+}
+
+.prose pre code {
+  @apply p-0 bg-transparent text-inherit;
+}
+
+/* Better table spacing */
+.prose table {
+  @apply my-8;
+}
+
+.prose th,
+.prose td {
+  @apply px-4 py-3;
+}
+
+/* Blockquote styling */
+.prose blockquote {
+  @apply my-6 py-2 border-l-4 border-blue-500 dark:border-blue-400;
+  @apply bg-blue-50 dark:bg-blue-900/10;
+}
+

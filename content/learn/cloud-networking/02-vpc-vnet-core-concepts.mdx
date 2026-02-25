@@ -1,0 +1,130 @@
+---
+title: VPC and VNet Core Concepts
+description: Address planning, subnets, connectivity, peering, and endpoints for cloud networks.
+---
+
+
+### Capabilities of AZURE VIRTUAL NETWORK
+
+- Communication to the Internet: Inbound Connections require assigning a public IP or public Load Balancer.
+- Communication b/w Azure Resources: Such as VMs within your VNet can communicate directly.
+    - Virtual Networks;
+    - VNet Service Endpoints;
+    - VNet peering. VNet connects not only VMs, but connects other Resource types, allowing them to communicate directly and securely with each other.
+- Communication b/w On-premises Resources: To do so, use Point-to-site VPN, Site-to-Site VPN, or Azure Express Route.
+- Filters Network traffic b/w subnets: Via Network Security Groups or Networking Virtual Appliances (Firewalls).
+- Routing Network Traffic: By default, Azure routes traffic b/w subnets, Connected VNets, On-Premises Networks & the Internet. Route Tables and BGP Routes Override the default Routes Azure/AWS Creates.
+A route table contains a set of rules, called routes, that determine where network traffic from your subnet or gateway is directed. Whether a subnet has access to the public internet or not depends on its associated route table. If a route from the internet gateway to the subnet exists, it has public access. If the route table doesn't have a route between the subnet and the internet gateway, then it doesn't have public access. So we call subnets public or private but it's really the route table that provides that access. So for your subnets, you will create custom route tables. Inside these custom route tables, you willhave that default local route inside of it that allows traffic to flow freely within the VPC. But then you will need to create additional routes.
+The following list shows a route priority summary with links to sections below with more detailed information and examples:
+
+1. Longest prefix (for example, 10.10.2.15/32 has priority over 10.10.2.0/24)
+2. Static routes (like VPC peering and internet gateway connections)
+3. Prefix list routes
+4. Propagated routes i.e Direct Connect/ ExpressRoute BGP routes (dynamic routes), VPN static routes, VPN BGP routes (dynamic routes) (like virtual private gateways)
+
+If you've attached a virtual private gateway to your VPC and enabled route propagation on your subnet route table, routes representing your Site-to-Site VPN connection automatically appear as propagated routes in your route table.
+If the destination of a propagated route is identical to the destination of a static route, the static route takes priority. The following resources use static routes:
+- internet gateway
+- NAT gateway
+- Network interface
+- Instance ID
+- Gateway VPC endpoint
+- Transit gateway
+- VPC peering connection
+- Gateway Load Balancer endpoint
+
+### Traditional WAN vs Cloud WAN (ExpressRoute & Direct Connect) — What’s the Difference?
+
+In a traditional WAN setup, enterprise datacenters connect to multiple on-premises branch LANs using a hub-and-spoke (star) topology, often via leased lines or MPLS circuits provided by telecom carriers. This provides private, reliable, low-latency connectivity between branches and HQ.
+
+In the cloud era, services like Azure ExpressRoute and AWS Direct Connect offer a cloud-based alternative to these leased lines. They provide private Layer 3 connections from your on-premises network to the cloud, bypassing the public internet — perfect for hybrid networks with strict performance and security requirements.
+
+Both ExpressRoute and Direct Connect integrate into cloud-native WAN architectures like Azure Virtual WAN and Virtual Hubs, which act as cloud-based super routers. These virtual hubs connect branch sites, VNets/VPCs, and remote users into a global, scalable cloud backbone.
+
+### Azure/AWS VNet/VPC configuration
+
+- AZURE/AWS allows Creating Multiple VNETS/VPC per Region per Subscription & Subnetting of each Virtual Network. When you launch an EC2/VM instance (AWS's virtual machine) within a subnet, it's assigned a private IP address from the subnet's address range.
+    1. When creating a VNET, use Address Ranges enumerated in RFC 1918
+    2. [Private, Non-Routable Address Spaces]: the 10.0.0.0/8; 172.16.0.0/12; 192.168.0.0/16 prefixes.
+    3. Reserved address Ranges include: 224.0.0.0/4 (Multicast); 255.255.255.255/32 (Broadcast); 127.0.0.0/8 (loopback); 169.254.0.0/16 (link-local); 169.63.129.16/32 (INTERNAL DNS).
+- Azure assigns resources in a virtual network (VNET) a private IP Address from the Address space that you create.
+    - Deploy a VM in a VNet with Subnet Address-space 192.168.1.0/24, the VM is assigned a private IP [192.168.1.4].
+    - Azure Reserves the first four and the last IP address for a total of 5 IP Addresses within each subnet: X.X.X.0 - X.X.X.3 and X.X.X.255 [Reserved by Azure's Network and Broadcast Address].
+        - X.X.X.0 → Network Address
+        - X.X.X.1 → Reserved by Azure/AWS for the Default Gateway-> VPC/VNET Router
+        - X.X.X.2 & X.X.X.3 → Reserved by Azure/AWS to map the Azure/AWS DNS IPs to the VNet Internal private Space.
+        - X.X.X.255 [Reserved by Azure's Network and Broadcast Address].
+- Segmenting Virtual Networks into different size subnets serves to Segregate deployed Azure Resources to a Specific Subnet. Similar to traditional networks, subnets allow you to Segment your VNet Address space Into segments that are appropriate for the Organization's Internal network.
+    - CIDR/29 is the smallest subnet supported, while CIDR/2 is the largest. IPv6 subnets must be /64 in size.
+    - Subnets must have Unique Address Ranges. Certain Azure Services require their Own Subnets.
+    - Subnets can be used for traffic management to Limit access to Azure Resources to specific subnets, not a Virtual Network or Some Endpoint.
+    - Create Multiple Subnets & Enable Service Endpoints.
+- It's Important to plan your naming convention for your Resources.
+    - A well-chosen name helps you quickly identify the Resource's type, its associated workload, its deployment environment, and the Azure Region hosting it. For example, a public IP Resource for a Production SharePoint workload Residing in the West US might be pip-sharepoint-prod-westus-001 (Type-Workload-ENV-Region-#).
+
+### VNet connectivity
+
+- To activate internet connectivity for your VPC/VNET, you must create an internet gateway. Think of the gateway as similar to a modem. Just as a modem connects your computer to the internet, the internet gateway connects your VPC/VNET to the internet. Unlike your modem at home, which sometimes goes down or offline, an internet gateway is highly available and scalable. After you create an internet gateway, you attach it to your VPC.
+- To support a network that exists both in AZURE & On-premises, you must Configure IP addressing for both Networks.
+- Public IP Addresses enable Internet Resources to communicate with AZURE Resources & enable Azure Resources to communicate Outbound with Internet & public-facing Azure services. A Public IP address is dedicated to a specific Resource & has its own properties. Resources below can be associated with a public IP address:
+    1. VM Network Interface VM-NIC
+    2. Public Load Balancers L4
+    3. Internet Gateway / Virtual Network Gateways
+    4. VPN / NAT Gateways VPN-GW
+    5. Application Gateways APP-GW
+    6. Azure Firewall
+    7. Bastion Host
+    8. Azure Route Server
+    9. VM Scale Sets VMSS
+    - Public IP addresses are created dynamically OR static with an IPv4 OR IPv6 Address.
+        - A Dynamic public IP addr: Assigned address Changes over the lifespan of the Azure Resource. Allocated during creation of VM, Reclaimed when the VM is stopped/deleted. Assigned from a Unique pool of addresses with default allocation method Dynamic.
+        - A Static public IP addr: Assigned address doesn't change over the lifespan of the Azure Resource. To ensure it remains the same for a Resource, set the allocation method explicitly to static. In this case, the IP addr is assigned Immediately. The IP addr is Reclaimed only when you delete the Resource, or change the IP allocation method to dynamic.
+Inbound connectivity is Impossible without a Public IP / load balancer / VNet Gateways / NAT Gateways set.
+Outbound Connectivity is possible without a load balancer/public IP Address attached to your VM, through a NAT Gateway. A NAT Gateway is Recommended for Outbound Internet access from these private subnets.
+Microsoft AZURE deploys a Network Watcher alongside Virtual Network Deployments for every VNet deployed; a Network Watcher is deployed per VNet Region.
+
+## Virtual Network Peering (VNet/VPC Peering)
+
+“VIRTUAL NETWORK PEERING “ enables you to seamlessly connect 2 or more VNets on Azure. The VNets appear as one for communication. Enhance Security by not providing default Outbound access. Therefore, to enable Connectivity for VMs within this Subnet, it's necessary to explicitly grant Outbound access. A NAT Gateway is the Recommended way to provide connectivity for Virtual machines in the subnet "Subnets without public IP Address".
+
+- Enable Cross-Virtual Network Connectivity with Peering: Allows you to connect separate VNets with Optimal Network performance, whether they are in the Same Region [Regional VNet peering] or in different regions [Global VNet peering]. Traffic between peered VNets is private. For connectivity purposes, once peered, the VNets appear as One. This offers the following Benefits:
+    - Low Latency, high-bandwidth connection b/w Resources in different VNets.
+    - Ability to apply Network Security Groups in either VNet to block access to other VNets or subnets.
+    - Ability to transfer data b/w VNets across Azure subscriptions, Entra Tenants, Deployment models, and Regions.
+    - Ability to peer a VNet created through the Resource Manager to one created through classic deployment.
+    - No downtime to Resources in other VNets is required when creating/after creating peering.
+
+| Benefit | Description |
+| --- | --- |
+| Private network connections | When you implement Azure Virtual Network peering, network traffic between peered virtual networks is private. Traffic between the virtual networks is kept on the Microsoft Azure backbone network. No public internet, gateways, or encryption is required in the communication between the virtual networks. |
+| Strong performance | Because Azure Virtual Network peering utilizes the Azure infrastructure, you gain a low-latency, high-bandwidth connection between resources in different virtual networks. |
+| Simplified communication | Azure Virtual Network peering lets resources in one virtual network communicate with resources in a different virtual network, after the virtual networks are peered. |
+| Seamless data transfer | You can create an Azure Virtual Network peering configuration to transfer data across Azure subscriptions, deployment models, and across Azure regions. |
+| No resource disruptions | Azure Virtual Network peering doesn't require downtime for resources in either virtual network when creating the peering, or after the peering is created. |
+| Extend peering with user-defined routes and service chaining |  |
+
+Virtual network peering is nontransitive. The communication capabilities in a peering are available to only the virtual networks and resources in the peering. Other mechanisms have to be used to enable traffic to and from resources and networks outside the private peering network, You can implement these mechanisms and create a multi-level hub and spoke architecture. These options can help overcome the limit on the number of virtual network peerings per virtual network.. There are a few ways to extend the capabilities of your peering for resources and virtual networks outside your peering network:
+
+- Hub and spoke networks
+- User-defined routes
+- Service chaining
+
+| Mechanism | Description |
+| --- | --- |
+| Hub and spoke network | When you deploy a hub-and-spoke network, the hub virtual network can host infrastructure components like a network virtual appliance (NVA) or Azure VPN gateway. All the spoke virtual networks can then peer with the hub virtual network. Traffic can flow through NVAs or VPN gateways in the hub virtual network. |
+| User-defined route (UDR) | Virtual network peering enables the next hop in a user-defined route to be the IP address of a virtual machine in the peered virtual network, or a VPN gateway. |
+| Service chaining | Service chaining is used to direct traffic from one virtual network to a virtual appliance or gateway. A user-defined route defines the peered networks. |
+
+*   GATEWAY TRANSIT: Is a peering property that lets one VNet use the VPN Gateway in the peered VNet for CROSS-PREMISES OR VNET-to-VNET connectivity. When virtual networks are peered, you can configure Azure VPN Gateway in the peered virtual network as a transit point. In this scenario, a peered virtual network uses the remote VPN gateway to gain access to other resources. Supports both Regional & Global VNet peering. Gateway Transit allows the VNet to communicate to Resources outside the peering by allowing the peered Virtual Network to share the gateway and get access to Resources. This means you don't need to deploy a VPN Gateway in the peer VNet. You can apply network security groups in a virtual network to block or allow access to other virtual networks or subnets. When you configure virtual network peering, you can choose to open or close the network security group rules between the virtual networks.
+
+## Network Endpoints (VPC/VNet Endpoints)
+
+### VNet/VPC endpoint interfaces
+
+VPC/VNET Endpoints are a means of publishing a Service so that it's accessible by instances in other VPC/VNETs using only the Internal Network's private IP address. Traffic is never exposed publicly to the Internet.
+
+GATEWAY ENDPOINTS: Used to connect Instances in a VPC/VNET to Cloud Services (e.g., DB, storage). It's Configured as a Route to the Service in the VPC's Route Table.
+INTERFACE ENDPOINTS: Makes use of private link feature to allow private access to custom services;
+
+1. A Custom Service provider VPC/VNET is Configured thus publishing the Service with a DNS Host Name.
+2. A VPC/VNET endpoint Interface is config in each Service Consumer VPC/VNET Subnet by configuring it with a private IP address within the subnet + the DNS Host Name of the Service provider. Each Instance within the VPC/VNET Subnet is configured to use the private IP address to contact the Service provider.

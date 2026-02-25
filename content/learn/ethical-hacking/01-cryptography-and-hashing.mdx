@@ -1,0 +1,160 @@
+---
+title: Cryptography and Hashing
+description: Encryption, hashing, salts, and password auditing tooling.
+---
+
+
+### Understanding Encryption
+
+Cryptography & Encryption is the science of hiding data and making it available again. In cryptography, hiding data is called encryption and unhiding it is called decryption. When data is securely exchanged, it is first encrypted by the sender, and then decrypted by the receiver using a special key. For Instance, Computers encrypt using XOR is an operation that compares two bits and returns True (1) if only one of the bits is 1, and returns False (0), if the bits are the same value (both 0’s or both 1’s).
+
+### Symmetric and Asymmetric Encryption
+
+- **Symmetric encryption** uses the same key to both encrypt and decrypt data.
+- **Asymmetric encryption** uses two different keys to encrypt and decrypt data. Asymmetric encryption is the most secure way to transmit data; however, it is slower and more complex than symmetric encryption. Therefore, it is primarily used to exchange smaller pieces of data. Encryption is the most powerful single tool for protecting networking network security, it’s technique include: “Link Encryption, End-to-End Encryption, VPNs, SSH encryption, Transport layer security(TLS), IP security protocol(IPsec), Signed Code, Encrypted Email.”
+
+Asymmetric encryption uses a pair of keys, one to encrypt and the other in the pair to decrypt. Examples are RSA and Elliptic Curve Cryptography. Normally these keys are referred to as a public key and a private key. Data encrypted with the private key can be decrypted with the public key, and vice versa. Your private key needs to be kept private, hence the name. Asymmetric encryption tends to be slower and uses larger keys, for example RSA typically uses 2048 to 4096 bit keys.
+
+## Hashing
+
+Hashing is a one-way process that takes a piece of data of any size and uses a mathematical function(#function) to represent that data with a unique hash value of a fixed size. Hash functions are quite different from encryption. There is no key, You cannot compute the original data from its hash. Ideally, hash functions always generate unique values for different inputs data; when they don’t it’s called a Hash Collision. While it’s hypothetically possible to encounter a hash collision with nearly any hashing algorithm, with modern algorithms like SHA-256, it would take so long to result in a collision that it’s functionally impossible. Earlier hashing algorithms, like MD5 and SHA-1, are more likely to result in hash collisions.
+
+Due to the pigeonhole effect, collisions are not avoidable. The pigeonhole effect is basically, there are a set number of different output values for the hash function, but you can give it any size input. As there are more inputs than outputs, some of the inputs must give the same output. If you have 128 pigeons and 96 pigeonholes, some of the pigeons are going to have to share. All hash functions have finite output sizes, yet infinitely many possible inputs.
+
+It’s easy to get the hash value of some types data. If you are on a Unix-based(Mac) operating system, open your terminal and type:
+
+```bash
+echo "Hello World" | shasum -a 256
+```
+
+### Hash Function Characteristics
+
+The cryptographic algorithm used must generate hashes that have the following characteristics:
+
+- **Deterministic:** The same input should always produce the same hash.
+- **Uncorrelated:** A small change in the input should generate a completely different hash. Avalanche Effect says that if any single bit changes in the preimage, it should trigger an "avalanche" that jumbles the other bits.
+- **One-way:** It should be infeasible to reconstruct the data from the hash.
+- **Unique:** Only one file can produce one specific hash.
+
+The input to a hash function is usually called the preimage, while the output is often called a digest, or sometimes just a "hash."
+
+Note: You can't encrypt the passwords, as the key has to be stored somewhere. If someone gets the key, they can just decrypt the passwords.
+
+This is where hashing comes in. What if, instead of storing the password, you just stored the hash of the password?
+
+## Rainbow Tables and Salts
+
+Rainbow tables, massive tables of common passwords and password-hash combinations, speed up that process even more. However, It is practically impossible for an attacker to guess and match the hash of a complex password! What if two users have the same password? As a hash function will always turn the same input into the same output, you will store the same password hash for each user. That means if someone cracks that hash, they get into more than one account. It also means that someone can create a "Rainbow table" to break the hashes.
+
+*Organizations can further protect hashed information by using something called a salt.
+A SALT is a secret random string that is combined with a password prior to hashing specifically to defend against the use of rainbow tables*.
+
+The salt is added to either the start or the end of the password before it’s hashed, and this means that every user will have a different password hash even if they have the same password.
+
+In theory, you could use the same salt for all users but that means that duplicate passwords would still have the same hash, and a rainbow table could still be created specific passwords with that salt, which is why in practice they are randomly generated and stored in the database
+
+Salts don’t need to be kept private.
+
+##HashID & Automated Hash recognition
+Unix style password hashes are very easy to recognise, as they have a prefix. The prefix tells you the hashing algorithm used to generate the hash. The standard format is $format$rounds$salt$hash
+HashID is a tool written in Python 3 which supports the identification of over 220 unique hash types using regular expressions. Identify the different types of hashes used to encrypt data and especially passwords. A detailed list of supported hashes can be found here https://hashcat.net/wiki/doku.php?id=example_hashes
+It is able to identify a single hash, parse a file or read multiple files in a directory and identify the hashes within them. hashID is also capable of including the corresponding Hashcat mode and/or JohnTheRipper format in its output.
+ $YNTAX >> ./hashid.py or HASHID [-h] [-e] [-m] [-j] [-o FILE] [--version] INPUT
++---------------------------+-------------------------------------------------------+
+| Parameter                 | Description                                           |
++===========================+=======================================================+
+| INPUT                     | input to analyze (default: STDIN)                     |
++---------------------------+-------------------------------------------------------+
+| -e, --extended            | list all hash algorithms including salted passwords   |
++---------------------------+-------------------------------------------------------+
+| -m, --mode                | show corresponding hashcat mode in output             |
++---------------------------+-------------------------------------------------------+
+| -j, --john                | show corresponding JohnTheRipper format in output     |
++---------------------------+-------------------------------------------------------+
+| -o FILE, --outfile FILE   | write output to file (default: STDOUT)                |
++---------------------------+-------------------------------------------------------+
+| --help                    | show help message and exit                            |
++---------------------------+-------------------------------------------------------+
+
+**References:**
+- [HashCat Wiki](https://hashcat.net/wiki/)
+- [John The Ripper Info](https://www.openwall.com/john/)
+
+### Hash Auditing & Recovery Tools
+
+#### HashCat Usage
+
+**HashCat Basic Concepts**
+Hashcat is often used for password auditing and recovery. It supports various modes to test password strength.
+
+| Mode | Hash-Type | Description |
+| :--- | :--- | :--- |
+| Wordlist | sha2-256 | Checks hashes against a list of words. |
+| Wordlist + Rules | MD5 | Apply transformation rules to wordlist (e.g. `password` -> `P@ssw0rd`). |
+| Brute-Force | MD5 | Try all character combinations (computationally expensive). |
+| Combinator | MD5 | Combine words from dictionaries. |
+| Association | $1$ | Combine words based on association rules. |
+
+#### John The Ripper Usage
+
+**John The Ripper (JTR)**
+John the Ripper is a widely used password auditing tool. It is often used to check for weak passwords by System Administrators.
+It operates in several modes:
+- **Single Crack Mode**: Uses the username/GECOS info to guess passwords.
+- **Wordlist Mode**: Uses a dictionary file.
+- **Incremental Mode**: Tries all character combinations (Brute-force).
+
+**Basic Syntax Concepts:**
+```bash
+john --wordlist=[path/to/wordlist] [password-file]
+```
+To list supported formats:
+```bash
+john --list=formats
+```
+
+### Password Mangling
+Tools like John and Hashcat use "rules" or "mangling" to mutate dictionary words. This mimics common user behavior, such as capitalizing the first letter or adding digits at the end (e.g., "Welcome123"). 
+This highlights why simple variations of common words are not secure.
+
+### NTHash / NTLM
+NTHash is the hash format used by modern Windows OS to store user passwords.
+Auditors can interact with these hashes by dumping the SAM database or accessing NTDS.dit.
+
+### Unshadowing
+On Linux, user info is in `/etc/passwd` and password hashes are in `/etc/shadow` (readable only by root).
+To audit these passwords, tools combine the files:
+```bash
+unshadow [passwd-file] [shadow-file] > [output-file]
+```
+
+unshadow - Invokes the unshadow tool
+[path to passwd] - The file that contains the copy of the /etc/passwd file you've taken from the target machine
+[path to shadow] - The file that contains the copy of the /etc/shadow file you've taken from the target machine 
+> - This is the output director, we're using this to send the output from this file to the...
+[output file] - This is the file that will store the output from 
+
+“Note Redirect the output of unshadow to a txt file and then use JOHN with or without —format option flag to crack this”
+unshadow local_passwd local_shadow > unshadowed.txt
+john --wordlist=/usr/share/wordlists/rockyou.txt --format=sha512crypt unshadowed.txt 
+
+Cracking a Password Protected Zip File & Rar File *JTR
+Similarly to the unshadow tool that we used previously, we're going to be using the zip2john tool to convert the zip file into a hash format that John is able to understand, and hopefully use John to crack the password on password protected Zip files. Again, we're going to be using a separate part of the john suite of tools to convert the zip file into a format that John will understand, but for all intents and purposes, we're going to be using the syntax that you're already pretty familiar with by now. 
+Rar2John Almost identical to the zip2john tool that we just used, we're going to use the rar2john tool to convert the rar file into a hash format that John is able to understand
+The basic usage syntax is like this: zip2john [options] [zip file] > [output file]
+The basic usage syntax is like this: rar2john [options] [zip file] > [output file]
+[options] - Allows you to pass specific checksum options to zip2john, this shouldn't often be necessary
+[zip file] - The path to the zip file you wish to get the hash of
+> - This is the output director, we're using this to send the output from this file to the...
+[output file] - This is the file that will store the output from 
+
+“Note We're then able to take the file we output from zip2john in our example use case called "zip_hash.txt" and, as we did with unshadow, feed it directly into John as we have made the input specifically for it.
+john --wordlist=/usr/share/wordlists/rockyou.txt zip_hash.txt
+
+Cracking SSH Key Passwords *JTR
+Using John to crack the SSH private key password of id_rsa files. Unless configured otherwise, you authenticate your SSH login using a password. However, you can configure key-based authentication, which lets you use your private key, id_rsa, as an authentication key to login to a remote machine over SSH. However, doing so will often require a password- here we will be using John to crack this password to allow authentication over SSH using the key.  ssh2john converts the id_rsa private key that you use to login to the SSH session into hash format that john can work with. 
+ssh2john [id_rsa private key file] > [hash output file]
+ssh2john - Invokes the ssh2john tool
+[id_rsa private key file] - The path to the id_rsa file you wish to get the hash of
+> - This is the output director, we're using this to send the output from this file to the...
+[output file] - This is the file that will store the output from 

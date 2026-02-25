@@ -1,0 +1,493 @@
+---
+title: "Cabling Standards (Ethernet & Fibre)"
+description: Learn copper and fiber optic cabling standards, connectors, and deployment best practices.
+---
+
+A **Private Branch Exchange (PBX)** is an automated switchboard providing a single connection point for an organization's voice lines. A TDM-based PBX connects to telecommunication carriers over a digital trunk line, which supports multiple channels (e.g., for multiple concurrent calls). This PBX allows for the configuration of the internal phone system to direct and route calls to local extensions and provides other telephony features such as call waiting, forwarding, music on hold, and voicemail.
+
+## VoIP-Enabled PBX
+
+A **VoIP-enabled PBX** replaces the TDM-based PBX. It establishes connections between local VoIP endpoints, with data transmitted over the local Ethernet network. A VoIP PBX can also route incoming/outgoing calls to and from an external network. This might involve calls between internal & external VoIP endpoints or with callers on the voice telephone network. VoIP-based PBXs also support traditional telephony features.
+
+A VoIP PBX would normally be placed at the network edge and protected by a **firewall**. Internal clients connect to the PBX over Ethernet data cabling, using IP at network layers for addressing. The VoIP PBX uses the organization's Internet link to connect to a VoIP service provider, which facilitates inbound and outbound calling.
+
+## VoIP Protocols
+
+VoIP protocols are designed to support real-time services and cover one or more of the following functions:
+
+* **Session Control:** Used to establish, manage, and disassociate communication sessions. This handles tasks such as user discovery, availability advertising, negotiation of session parameters, and session termination.
+* **Data Transport:** Handles the delivery of the actual video or voice information transmission.
+* **Quality of Service (QoS):** Provides information about the connection to a QoS system, which in turn ensures communications are problem-free (e.g., addressing dropped packets, delay, or jitter).
+
+### 1. Session Initiation Protocol (SIP)
+
+**SIP Endpoints** are the end-user devices, also known as **User Agents**, such as IP-enabled handsets or client-server web conferencing software. Each device, conference, or telephony user is assigned a unique SIP Address, known as a **SIP Uniform Resource Indicator (URI)**. Examples include `sip:jamie@support.com` or `sip:2622136227@support.com`. There is also a **`tel:` URI Scheme** allowing SIP Endpoints to dial a landline or cell phone. A `tel:` URI can either use the global telephone format or a local format for internal extensions.
+
+SIP runs over UDP or TCP ports **5060** (unsecured) and **5061** (SIP-TLS). It has its own reliability & retransmission mechanisms, benefiting most from the lower overhead, reduced latency, and jitter of UDP. SIP primarily provides session management.
+Key SIP Components/Roles:
+
+    User Agent (UA): Endpoints that initiate or terminate calls. Divided into:
+        User Agent Client (UAC): Initiates SIP requests.
+        User Agent Server (UAS): Receives SIP requests and sends responses.
+    SIP Proxy Server: Intermediary entities that receive SIP requests, forward them to the next hop, and return responses. Can also handle routing decisions.
+    SIP Registrar Server: Accepts REGISTER requests from UAs to record their current location.
+    SIP Redirect Server: Accepts a SIP request, maps the address of the called party to zero or more new addresses, and returns these addresses to the client. The client then contacts the new address directly.
+
+Basic SIP Call Flow (Simplified):
+
+    INVITE: UAC sends INVITE to UAS (via proxy) to initiate a call.
+    100 Trying: Proxy acknowledges INVITE.
+    180 Ringing: UAS informs UAC that the called party is being alerted.
+    200 OK: Called party answers, UAS sends 200 OK.
+    ACK: UAC acknowledges 200 OK, call is established.
+    RTP: Media (voice/video) flows directly between UAs using RTP.
+    BYE: Either UA sends BYE to terminate call.
+    200 OK: Receiver acknowledges BYE.
+
+### 2.  H.323 Protocol Suite
+
+H.323 is an ITU-T recommendation that defines protocols for providing audio-visual communication sessions on any packet network. While less common for new deployments compared to SIP, it is still used in many legacy enterprise and service provider networks, particularly for video conferencing systems. H.323 is a binary, complex protocol that defines various components and their interactions.
+
+**Key H.323 Components/Roles:**
+
+* **Terminals:** Endpoints (e.g., video conferencing units, IP phones) that provide real-time, two-way communication.
+* **Gateways:** Devices that connect H.323 networks to other networks, such as the PSTN or other IP networks using different protocols. They perform protocol translation and media conversion.
+* **Gatekeepers:** Optional but highly recommended components that act as the central point for H.323 calls within their zone. They provide call control, address translation, bandwidth management, and admission control.
+* **Multipoint Control Unit (MCU):** Supports multipoint conferences, allowing three or more H.323 terminals to participate in a conference.
+
+**H.323 vs. SIP (Key Differences):**
+
+| Feature         | H.323                                     | SIP                                       |
+| :-------------- | :---------------------------------------- | :---------------------------------------- |
+| **Origin** | ITU-T (Telecommunications Focus)          | IETF (Internet Focus)                     |
+| **Complexity** | More complex, binary, monolithic          | Simpler, text-based, modular              |
+| **Architecture**| Gatekeeper-centric, tightly coupled       | Client-server, peer-to-peer, loosely coupled |
+| **Ports** | Uses multiple well-defined ports          | Primarily UDP/5060, TCP/5060              |
+| **Scalability** | Less scalable in large, distributed environments | Highly scalable                           |
+| **Extensibility**| Less flexible, harder to extend          | Highly extensible, easy to adapt         |
+| **Legacy Use** | Common in legacy video conferencing, PSTN gateways | Dominant for modern VoIP/UC deployments   |
+
+### 3. Real-time Transport Protocol (RTP) and RTP Control Protocol (RTCP)
+
+RTP and RTCP are fundamental protocols for delivering real-time voice and video data over IP networks once a session has been established by signaling protocols like SIP or H.323.
+
+* **Real-time Transport Protocol (RTP):**
+    * **Function:** Carries the actual audio and video data payload.
+    * **Operation:** Provides sequence numbering, timestamps, and payload type identification to enable real-time delivery and reconstruction of media streams.
+    * **Transport:** Typically runs over UDP (User Datagram Protocol) for speed, as retransmissions are generally not practical for real-time media.
+    * **Characteristics:** Does not guarantee quality of service (QoS) itself, but provides information for QoS mechanisms.
+* **RTP Control Protocol (RTCP):**
+    * **Function:** Works in conjunction with RTP to provide feedback on the quality of data distribution.
+    * **Operation:** Sends control packets periodically to all participants in a session, reporting on reception quality (jitter, packet loss, round-trip delay).
+    * **Use:** Enables adaptive applications to adjust transmission rates or codecs based on network conditions, and for diagnostic purposes.
+    * **Characteristics:** Does not carry media data itself.
+
+### Video Protocols and Codecs
+
+Video communication over IP involves specific protocols and codecs for efficient compression, transmission, and rendering of video streams.
+
+* **Video Codecs:**
+    * **Function:** Algorithms that compress raw video data for transmission and decompress it for playback. High compression ratios are crucial due to large video data sizes.
+    * **Examples:**
+        * **H.264 (AVC - Advanced Video Coding):** Widely used for streaming, video conferencing, and broadcast. Offers good compression efficiency.
+        * **H.265 (HEVC - High Efficiency Video Coding):** Successor to H.264, offering significantly better compression efficiency (up to 50% for same quality). Used for 4K/UHD video.
+        * **VP8/VP9:** Open, royalty-free video compression formats developed by Google. Used in WebM and other web-based video.
+        * **AV1:** A new, royalty-free video coding format designed to be competitive with H.265, backed by Google, Amazon, Netflix, etc.
+* **Real-time Messaging Protocol (RTMP):**
+    * **Function:** Developed by Adobe for streaming audio, video, and data over the Internet.
+    * **Operation:** Originally designed for Flash Player, it's still used in some live streaming workflows (e.g., from encoders to streaming platforms).
+    * **Characteristics:** Typically runs over TCP.
+* **WebRTC (Web Real-Time Communication):**
+    * **Function:** A free, open-source project that provides web browsers and mobile applications with Real-Time Communications (RTC) capabilities via simple APIs.
+    * **Operation:** Enables peer-to-peer voice, video, and data communication directly within a browser without plugins. Leverages RTP for media transport, and ICE, STUN, TURN for NAT traversal.
+
+---
+
+## VoIP Endpoint Implementation
+
+VoIP/SIP Endpoints can be implemented as software (softphones) or as dedicated hardware handsets.
+
+* **VLAN Tagging:** VoIP phones use VLAN tagging to ensure that SIP control and RTP protocol traffic can be segregated from normal data traffic. Since both devices (PC & VoIP Phones) may share the same physical network drop, data traffic is distinguished from voice traffic by configuring separate VLAN IDs.
+* **Power over Ethernet (PoE):** Handsets can use PoE to avoid separate power cabling or batteries.
+* **Secure Connection:** Connection security for VoIP works similarly to HTTPS. To initiate a call, **Secure SIP (SIPS)** uses digital certificates and master keys to authenticate endpoints and establish SSH/TLS tunnels.
+* **Call Quality Test:** Most service providers have test numbers to verify basic connectivity and perform an echo test call, which replays a recorded message to confirm voice quality.
+
+---
+
+## Voice Gateways
+
+SIP Endpoints can establish communications directly in a peer-to-peer architecture. However, it's more typical to use intermediary servers, directory servers, and **VoIP Gateways**.
+A **Voice Gateway** is a component that translates between a VoIP system and legacy voice equipment and networks (e.g., POTS lines, TDM PBXs).
+
+### Voice Gateway Deployment Scenarios
+
+1.  **Hybrid/Hardware-based VoIP PBX Integration (Type 1):**
+    * A hybrid or hardware-based VoIP PBX can include a plug-in or integrated VoIP gateway. These gateways come in both **analog** and **digital** types to match the type of incoming landline. An analog version is sometimes called a **Foreign Exchange Office Gateway (FXO Gateway)**.
+    * **Diagram:** External Analog or Digital Telephone Network ↔ VoIP Gateway (integrated or separate) ↔ VoIP PBX ↔ Ethernet Cabling Connections ↔ VoIP Endpoints (internal).
+
+2.  **Legacy System Connecting to VoIP Service Provider (Type 2):**
+    * A VoIP gateway can also be deployed to allow legacy analog/digital internal phone systems to use a VoIP service provider to place calls.
+    * In this setup, local/low-rate national calls might be placed directly via the legacy PBX, while international calls (which would otherwise incur high charges if placed directly) are routed via the VoIP service provider.
+    * **Diagram:** Legacy Handsets/Fax/TDM PBX ↔ Analog/Digital Cabling ↔ VoIP Gateway ↔ Edge Router/Firewall ↔ Internet Link ↔ ISP's Telephone Network (VoIP Service Provider).
+
+3.  **Connecting POTS Handsets to VoIP PBX (Type 3):**
+    * A VoIP gateway/adapter can be used to connect POTS handsets or fax machines to a VoIP PBX. This type of device is also called a **Foreign Exchange Subscriber (FXS) gateway**.
+    * **Diagram:** Legacy Handsets/Fax ↔ Voice Legacy VoIP Gateway ↔ Ethernet Cabling ↔ VoIP PBX ↔ Internet Link ↔ VoIP Service Provider.
+
+In essence, a VoIP Gateway is a component in a network that allows calls to be placed to and from voice telephony networks (PSTN) and packetized telephony networks (VoIP).
+
+### Best Practices for VoIP Deployment
+
+* Deploy VoIP/Hybrid PBXs with Voice Gateways to local and perimeter networks to support both legacy and packetized telephony.
+* Configure VoIP endpoints to use **Secure SIP (TCP/5061)** for session control and **RTP/RTCP** for data transfer.
+* Prioritize VoIP traffic using QoS mechanisms to ensure call quality and minimize latency and jitter.
+
+---
+
+# Chapter 7: CABLING STANDARDS (ETHERNET && FIBRE)
+
+Cabling is the backbone of any network infrastructure, providing the physical medium for data transmission. Proper cabling ensures reliable and high-performance network operations. This chapter delves into the various standards and types of cabling, focusing on Ethernet (copper) and Fibre Optic cabling. Ethernet cabling, primarily copper-based, is widely used for local area networks (LANs) due to its cost-effectiveness and ease of installation. Different categories of Ethernet cables support varying speeds and distances.
+
+## Ethernet & Fibre Optic Cabling
+
+**IEEE 802.3 Standards** are the most important Ethernet specifications for effectively deploying wired LANs. Ethernet dominates the wired LAN market due to ease of installation and upgradability.
+
+All Networking Signals use EM Radiation of one type or another, such as:
+* Electric Current (Copper Cabling)
+* Infrared Light (Fibre Optic)
+* Radio Waves (Wireless)
+
+Taking advantage of wave characteristics, signals are transmitted over the wave by modulation & encoding schemes. An example of encoding is transitioning between low to high voltage states in an electrical circuit, which in turn encodes digital info as 0, 1 data bits.
+
+### Copper vs. Fibre Optic
+
+**Copper Cable** transmits Electrical Signals using low voltage circuits between connected nodes in a circuit. It suffers from high **Attenuation** (i.e., signals lose strength over long distances).
+
+**Fibre Optics**, on the other hand, carries very high frequency radiation in the Infrared light part of the EM spectrum. The light signals are not susceptible to outside noise interference and are less affected by attenuation, supporting higher bandwidth over longer links than copper cabling.
+
+### Ethernet Naming Conventions
+
+**`XGBase-Y`**
+
+* `X`: Bit Rate in Mbps or Gbps (e.g., 10, 100, 1000, 10G, 40G).
+* `Base`: Baseband (all Ethernet transmission is Baseband, meaning the entire frequency range is used for one signal at a time, versus broadband which divides the frequency).
+* `Broadband`: Multiple frequencies sharing the same medium of connectivity. Common in Fiber Optic.
+* `Y`: Media type designator (e.g., `T` for Twisted Pair, `SX` for Short wavelength multimode fiber, `LX` for Long wavelength multimode fiber).
+
+### Ethernet Standards & Deployment
+
+* **10 Base-T:** Standard dates from 1990. Unlikely to be deployed in modern LANs. Mostly used in SOHO networks and for maintaining legacy networks.
+* **100 Base-Tx (Fast Ethernet):** Mostly used in SOHO Networks and for maintaining legacy networks.
+* **Gigabit Ethernet (1000Base-T):** Used in mainstream offices to connect common workstations.
+* **10G/40G Base-T:** Not really deployed in access networks as the cost for compatible network adapters and switch transceiver modules is high. Used in conglomerates, business centers, data centers, due to its high throughput.
+
+### Bandwidth
+
+**Bandwidth** refers to the frequency range measured in cycles per second or Hertz (Hz). In networking, this means the amount of data transferred, measured in bits per second (bps). For a signal with 100MHz frequency bandwidth, it can transfer much more than 100 Mbps. Due to the higher frequency required, sometimes this can cause interference. Therefore, shielding is required for longer distance Fibre Optic runs.
+
+### Media Access Control and Collision Domains
+
+Since Ethernet is a multiple access area network (i.e., available communication capacity is shared between nodes connected to the same medium of transmission), the **Media Access Control (MAC)** refers to the method a network technology uses to determine when nodes communicate in shared media and to deal with possible issues of two devices communicating simultaneously.
+
+Each network node connected to the same media is said to be in the **Same Collision Domain**.
+
+### CSMA/CD
+
+**Carrier Sense Multiple Access with Collision Detection (CSMA/CD)** is a protocol governing media access. A **collision** is a state when signals are present in an interface's transmit and receive lines simultaneously. On detecting a collision, the node broadcasts a Jam Signal. Every other node attempts a Backed-off wait for a random period before attempting to retransmit again. This mechanism means only half-duplex transmission is possible (Transmit OR Receive, but NOT BOTH simultaneously).
+
+### Twisted Pair Cabling
+
+* **Unshielded Twisted Pair (UTP):** Pairs of wires are twisted together to form a balanced circuit, carrying the same signals but with different polarity. The wires are twisted at different rates to reduce external interference and crosstalk.
+* **Shielded Twisted Pair (STP) / Screened Twisted Pair (SSTP):** Less susceptible to interference & crosstalk. Used mostly in environments with high levels of interference.
+    * **F/UTP (Foiled/Unshielded Twisted Pair):** Overall foil shield, unshielded twisted pairs.
+    * **U/FTP (Unshielded/Foiled Twisted Pair):** Unshielded overall, foiled twisted pairs.
+    * **S/FTP (Shielded/Foiled Twisted Pair):** Shielded overall, foiled twisted pairs.
+    * **F/FTP (Foiled/Foiled Twisted Pair):** Overall foil shield, foiled twisted pairs.
+
+Using screened or shielded cable means that you must also use screened or shielded connectors. Their elements should not be mixed with unscreened/unshielded elements.
+
+---
+
+### Twisted Pair Connectors
+
+* **F-Connector (Coaxial):** Used in cable television, commonly with RG-6 cable.
+* **RJ-45 (8P8C - 8 Position, 8 Conductor):** Registered Jack. Supplied in pairs of 4 (8 wires). Most commonly installed type of wiring for data.
+* **RJ-25 (6P6C):** 6 potential ports of contact, supplied with 3 pairs (6 wires).
+* **RJ-14 (6P4C):** 6 potential ports of contact, supplied with 2 pairs (4 wires). Used in dual-line telephone/DSL.
+* **RJ-11 (6P2C):** 6 potential ports of contact, supplied with 1 pair (2 wires). Used in single-line telephone/DSL.
+* **GG45 / TERA:** Used in data centers, for higher performance.
+
+---
+
+### Cabling Fire Safety Ratings
+
+A **Plenum space** is an air-handling space in a building (e.g., false ceilings, raised floors). This space can be used for telecommunications cabling. Therefore, building regulations demand the use of fire-retardant **Plenum Cabling** in such places. Plenum cables must not emit large amounts of smoke when burned, be self-extinguishing, and meet other fire safety standards. (Compare with General Purpose (non-plenum) CM/CMR/CMP cables).
+
+**Riser Cables** are passed through floors, in conduits or lift shafts.
+
+---
+
+### Coaxial & Twin-Axial Cable & Connectors
+
+**Coaxial Cable** is categorized using Radio Grade (RG) Standards, which represent the thickness of the core conductor and the cable's characteristics. Coaxial means a cable made of 2 conductors that share the same axis. The core conductor is made of a copper core (solid or stranded, not twisted) and enclosed by plastic insulation. A wire mesh (second conductor) serves as both shielding from EMI and as a ground (earth) surrounding the insulating material. Coax is usually terminated using BNC connectors, securely screwed or crimped.
+
+**Twin-Axial (Twinax)** is similar to coax but contains 2 twin conductors. Mostly used in data centers (10GbE and 40GbE) interconnects up to 5m for passive cable types and 10m for active cable types. Terminated using SFP+ Direct Attach Copper (DAC) and QSFP+ DAC transceivers.
+
+**American Wire Gauge (AWG)** is a measure of wire thickness. Increasing AWG number represents thinner wire.
+
+---
+
+### Deploying Ethernet Cabling (ANSI/TIA/EIA 568 - Structured Cabling Standards)
+
+These standards define classes of networking infrastructure.
+* **International ISO/IEC 11801:** International cabling standards.
+* **Telecommunications Industry Association (TIA) standards:** US-centric cabling standards (e.g., ANSI/TIA/EIA 568).
+Structured cabling is a scheme for deploying Ethernet cabling.
+
+* **Work Area:** User space for equipment connected to the network, usually via a wall outlet.
+* **Horizontal Cabling:** Connects user work areas to the nearest **Horizontal Cross-Connect (HCC)** / **Telecommunications Room (TR)**. Referred to as a "distribution frame." Consists of cabling from a single floor, made up of cables run horizontally through wall ducts.
+* **Backbone Cabling:** Connecting Horizontal Cross-connects via Intermediate Cross-Connects (ICCs). Inside risers, elevator shafts, HVAC spaces referred to as Vertical cross-connects, running up and down between floors.
+* **Telecommunications Room (TR):** Houses HCCs, essentially a termination point for the Horizontal Cabling along with a connection to backbone cabling.
+* **Equipment Room:** Houses the main intermediate cross-connects, houses complex equipment such as switches, routers & modems.
+* **Entrance Facilities / DEMARC POINT:** Required for the access provider's network and for inter-building communications, marking the point at which external cabling (outside plant) is joined to internal premises cabling.
+
+---
+
+### Cable Management Techniques & Tools for Ethernet (Copper Cabling)
+
+These techniques ensure that cabling is reliable and easy to maintain.
+
+Copper wire is terminated using a distribution frame or **Punchdown Block**. A punchdown block comprises a large number of Insulation-Displacement Connections (IDCs).
+
+1.  **66 Block:** Used in distribution frames to terminate telephone cabling and legacy data applications (Pre-Cat 5).
+    * *A Private Branch Exchange (PBX) is a telephone system serving local extensions of an office.*
+2.  **110 Block:** A distribution frame supporting 100 MHz operation; Cat 5 and better.
+3.  **BIX (NORTEL) & KRONE:** Other types of distribution frames.
+4.  **Patch Panel / Patch Bay:** NOT a punchdown block, but a "forwarding" frame.
+
+#### Patch Panel / Patch Bay
+
+In data networks, numerous **MACs (Moves, Adds, Changes)** would require reterminating the wiring. A **Patch Panel** is a type of distribution block with IDCs on one side & pre-terminated RJ-45 modular ports on the other, allowing incoming & outgoing connections to be reconfigured by changing the Patch Cable Connections, which is much simpler than reterminating punchdown blocks.
+
+The structured cabling forming a backbone is terminated at the back of the patch panel on the IDCs. An RJ-45 patch cord is used to connect the port to another network port, typically a switch port housed in the same rack.
+
+Fixed cable is terminated using a **Punchdown Tool**, which fixes conductors into an IDC. Different formats for IDCs (66, 110, BIX & KRONE) all require different cutting blades. Blades are double-sided: one side pushes the core into the terminal while the other side cuts excess.
+
+A **Patch Cord** is created using a **Cable Crimper**, which fixes a plug to a cable. The boots are specific to the type of connector and cable, though some may have modular dies to support a range of RJ type plugs.
+
+You must untwist the ends of the wire pairs (no more than 0.375") and place them into the connector die in the correct order for the wiring configuration (T568A or T568B) you want. For shielded/screened cable, termination must be made to shielded RJ-45 or modular plugs. A shielded modular plug has a metal housing and is not terminated using a standard cable crimper.
+
+This entire note is Cable Management for Copper Cabling Ethernet. Next, we will look into Fiber Distribution Panels.
+
+---
+
+### Wavelength Division Multiplexing (WDM)
+
+**Wavelength Division Multiplexing (WDM)** is a means of using a single fiber strand to transmit and/or receive more than one channel at a time. This involves Optical Add/Drop Multiplexers (OADMs) which can insert or remove signals for a given wavelength. **Wavelength Division Multiplexing (WDM)** helps enable bi-directional communication over a single strand of fiber by using different wavelengths for each channel. This is achieved by combining multiple optical carriers into a single fiber.
+
+* **Bi-directional Wavelength Division Multiplexing (Bidi WDM):** Transceivers support transmit and receive signals over the same strand of fiber. They must be installed in opposite pairs. For example, a downstream transceiver would use 1490nm for transmit (Tx) and 1310nm for receive (Rx), while the upstream would use 1310nm for Tx and 1490nm for Rx. They are also documented in Ethernet standards like 1000Base-BX or 10GBase-BX.
+* **Coarse Wavelength Division Multiplexing (CWDM):** Supports up to 16 wavelengths and is typically used to deploy 4/8 bidirectional channels over a single strand of fiber.
+* **Dense Wavelength Division Multiplexing (DWDM):** Provides greater numbers of channels (20, 40, 80, 160). This means less spacing between each channel and requires more precise and expensive optics.
+    * CWDM & DWDM Transceivers support multi-channel 1G, 10G, 40G, 100G.
+    * Each Transceiver in a Point-to-Point WDM Topology is cabled to a multiplexer/demultiplexer (Mux/Demux).
+
+---
+
+### Twisted Pair Copper Cabling
+
+**Twisted Pairs** consist of two wires with equal and opposite signals (Transmit +, Transmit -, Receive +, Receive -). The twist provides advantages like **limited interference**. The pairs within the same cable have different twist rates, which helps in signal reconstruction by reducing crosstalk.
+
+#### Ethernet Standards and Copper Cable Categories
+
+#### Common Ethernet Cable Categories and Performance
+
+| Category | Max Speed  | Max Distance (100Mbps) | Max Distance (1Gbps) | Max Distance (10Gbps) | Shielding   | Notes                                                        |
+| :------- | :--------- | :--------------------- | :------------------- | :-------------------- | :---------- | :----------------------------------------------------------- |
+| Cat3     | 10 Mbps    | 100 meters             | N/A                  | N/A                   | UTP         | Older voice and 10BASE-T data networks.                      |
+| Cat5     | 100 Mbps   | 100 meters             | N/A                  | N/A                   | UTP         | Common for 100BASE-TX Ethernet.                              |
+| Cat5e    | 1 Gbps     | 100 meters             | 100 meters           | N/A                   | UTP         | Enhanced for Gigabit Ethernet, reduced crosstalk.            |
+| Cat6     | 1 Gbps     | 100 meters             | 100 meters           | 55 meters             | UTP/STP     | Better performance at higher bandwidths, often with internal separator. |
+| Cat6a    | 10 Gbps    | N/A                    | N/A                  | 100 meters            | UTP/STP     | Enhanced for 10 Gigabit Ethernet over full distance.         |
+| Cat7     | 10 Gbps    | N/A                    | N/A                  | 100 meters            | S/FTP       | Designed for 10 Gigabit Ethernet, individually shielded pairs. |
+| Cat8     | 25/40 Gbps | N/A                    | N/A                  | 30 meters             | F/UTP, S/FTP | Designed for 25GBASE-T and 40GBASE-T, typically for data centers. |
+
+**Note:**
+* **10 Base-T (Category 3):** 100 meters max. This is a **legacy implementation** and only supports hubs.
+* **100 Base-TX (Category 5):** 100 meters max. Commonly referred to as "Fast Ethernet," mostly for SOHO networks. Supports switches.
+* **1000 Base-T (Gigabit Ethernet):** Uses 4 pairs of balanced twisted pairs. Deprecated for hubs, primarily used with switches. Mainstream choice for new installations.
+* **10G Base-T (10 Gigabit Ethernet):** Uses higher frequencies (500MHz vs 125MHz) compared to 1 Gigabit Ethernet.
+
+---
+
+## Fiber Optic Cabling
+
+**Optical Fiber** transmits data using light signals. Fiber Optic Cabling supports higher bandwidth over long distances than copper. Fiber Optic signals use Infrared pulses, which are not susceptible to interference or attenuation.
+
+Both the **Cladding** and **Core** are made up of similar material, however, with different refractive indexes, so as to create a boundary that causes light to bounce back into the core via total internal reflection. The surrounding **buffer** is an outer protective plastic coating.
+
+Each optic strand can only transfer light in a single direction at a time. Therefore, multiple strands are bundled together for transmission & reception simultaneously. Fiber Optic Cables are specified using the core/cladding size in microns, the composition (either Fiberglass rods or Kevlar plastic), and the mode of operation.
+
+### Fiber Modes
+
+* **Single Mode Fiber (SMF):** Characterized by a small core (5-10 microns), long wavelength laser light (1310nm → 1550nm). They support distances in cable runs of many kilometers and speeds up to 100 Gbps. Expensive to deploy.
+    * **OS1 Grade:** For indoor use.
+    * **OS2 Grade:** For outdoor deployment.
+* **Multimode Fiber (MMF):** Characterized by a larger core (50-62.5 microns), short wavelength light (850nm-1300nm) transmitted in multiple waves of varying length. Doesn't support such high signaling speeds or long distances as SMF.
+    * **OM1 (62.5 microns) / OM2 (50 microns):** Cables rated for 1Gbps and use LED light.
+    * **OM3 / OM4 (50 micron core):** Designed for use with 850nm VCSEL (Vertical-Cavity Surface-Emitting Laser) lasers, also referred to as Laser Optimized MMF (LOMMF). Not as powerful as solid-state lasers used in SMF.
+
+### Fiber Connector Types
+
+* **ST (Straight Tip):** Uses push & twist locking, mostly for multimode networks.
+* **SC (Subscriber Connector):** Uses push/pull design, used in Single or Multimode Gigabit Ethernet.
+* **LC (Lucent Connector):** Uses tabbed push/pull design, a small form factor connector widely used in 10GbE and 40GbE.
+* **MTRJ (Mechanical Transfer Registered Jack):** Uses a snap-in design for MMF.
+
+Fibre Optics is used in backbone links in campus networks, data centers, and storage area networks due to the increased bandwidth for server interconnections.
+
+---
+
+### Fibre Optic Types
+
+Fibre Optic is divided into Single Mode (SMF) and Multimode (MMF) types. MMF is characterized by the Optical Mode designators (OM1, OM2, OM3, OM4).
+
+* **Single Mode Fiber (SMF):** Simple, single frequency transmitted.
+* **Multi-Mode Fiber (MMF):** Multiple different frequency ranges transmitted.
+
+**Comparison:** Fibre gives better upgrade potential in the future, while copper is cheaper to install, and more hosts are installed with network cards supporting copper than fiber.
+
+### Advantages of Optical Fiber
+
+* **No Radio Frequency (RF) Signal:** This makes it very difficult to monitor or tap, enhancing security.
+* **Immune to RF Interference:** Light signals are not affected by electromagnetic interference.
+* **Signal Slow to Degrade:** Can be transmitted over very long distances without significant loss.
+
+### Fiber Optic Diagram Components
+
+1.  **Core:** The central part where light travels, made of glass or plastic with a high refractive index.
+2.  **Cladding:** A thin layer around the core with a lower refractive index, which causes light to reflect back into the core, keeping it contained.
+3.  **Buffer Coating:** An outer protective plastic coating providing mechanical protection.
+
+---
+
+#### Common Fibre Optic Connector Types
+
+Different types of connectors are used to terminate fibre optic cables, each with specific applications and advantages.
+
+| Connector Type | Ferrule Size (mm) | Description                                                | Common Use Cases                                 | Notes                                                              |
+| :------------- | :---------------- | :--------------------------------------------------------- | :----------------------------------------------- | :----------------------------------------------------------------- |
+| **SC (Standard Connector)** | 2.5               | Push-pull latching mechanism, square connector.            | Data communications, telecom, LAN, Fibre Channel | Easy to use, good for high-density patching.                       |
+| **LC (Lucent Connector)** | 1.25              | Small form-factor, latching mechanism, often used in duplex. | High-density patches, data centers, SFP/SFP+ transceivers | Half the size of SC, very popular due to small size.                |
+| **ST (Straight Tip)** | 2.5               | Bayonet mount, typically used with multi-mode fiber.       | Older networks, campuses, military applications    | Twist-on/off mechanism, common with multi-mode.                     |
+| **FC (Ferrule Connector)** | 2.5               | Screw-on locking mechanism, common in single-mode.         | Data communication, telecom, high-vibration environments | Provides high connection strength, often used in industrial settings. |
+| **MPO/MTP (Multi-fiber Push-on/pull-off)** | N/A (Multi-fiber) | Multi-fiber connector housing 8, 12, 24, or more fibers.  | Data centers, backbone, high-density environments | Used for parallel optics, requires specialized tools.             |
+
+#### Fibre Optic Cabling Standards (Ethernet over Fibre)
+
+| Standard       | Speed   | Fibre Type             | Max Distance (Typical)              | Notes/Common Use Cases                                                                                                |
+| :------------- | :------ | :--------------------- | :---------------------------------- | :-------------------------------------------------------------------------------------------------------------------- |
+| **100BASE-FX** | 100 Mbps| Multi-Mode Fibre       | up to 2 km                          |                                                                                                                       |
+| **1000BASE-SX** | 1 Gbps  | Multi-Mode Fibre       | up to 550 m                         | (Short Wavelength)                                                                                                    |
+| **1000BASE-LX** | 1 Gbps  | Single-Mode or Multi-Mode Fibre | up to 5 km (SMF) / 550m (MMF)       | (Long Wavelength)                                                                                                     |
+| **10GBASE-SR** | 10 Gbps | Multi-Mode Fibre       | up to 300 m (OM3) / 400 m (OM4)     | (Short Reach)                                                                                                         |
+| **10GBASE-LR** | 10 Gbps | Single-Mode Fibre      | up to 10 km                         | (Long Reach)                                                                                                          |
+| **40GBASE-SR4** | 40 Gbps | Multi-Mode Fibre       | up to 100 m (OM3) / 150 m (OM4)     | Uses MPO/MTP connectors.                                                                                              |
+| **40GBASE-LR4** | 40 Gbps | Single-Mode Fibre      | up to 10 km                         |                                                                                                                       |
+| **100GBASE-SR4** | 100 Gbps| Multi-Mode Fibre       | up to 70 m (OM3) / 100 m (OM4)      | Uses MPO/MTP connectors.                                                                                              |
+| **100GBASE-LR4** | 100 Gbps| Single-Mode Fibre      | up to 10 km                         |                                                                                                                       |
+
+---
+
+### Challenges of Fiber Optics: Return Loss
+
+Controlling light and applying the laws of physics are crucial at the physical contact (PC) points of connectors. **Return loss** refers to light reflected back to the source. This is resolved using different polishing techniques:
+
+* **UPC (Ultra Polished Connectors):** High return loss but zero air gap.
+* **APC (Angle Polished Connectors):** Lower return loss but generally has a slightly higher insertion loss than UPC.
+
+---
+
+### Fiber Distribution Panel and Fusion Splicing / Terminating Optic Fibre
+
+Because continually reconnecting fiber optic cables risks wear & tear damage, and to avoid replacing cable runs through conduit, permanent cables are run through conduit walls to wall posts at the access area end and to a **Fiber Distribution Panel** at the switch end.
+
+Fiber patch cables are used to complete the link from the wall post to the NIC, and from the patch panel to the switch port.
+
+A **Fusion Splice** achieves a more permanent join with lower insertion loss. The Fusion splicing machine performs a precise alignment between the two strands and then permanently joins them together using heat; the strands are welded. A High precision instrument must be kept clean & maintained following guidelines.
+
+---
+
+# Chapter 8: DEVICE CATEGORIZATION
+
+## Introduction to Network Devices
+
+Network devices are the fundamental components that enable communication and data exchange within a computer network. They perform various functions, from simply extending a signal to intelligent routing and security. Understanding how these devices are categorized helps in designing, implementing, and troubleshooting networks effectively. Devices can be categorized based on their function, the OSI layer at which they primarily operate, or their role within a network's architecture.
+
+### Categorization by OSI Layer
+
+Network devices often operate predominantly at specific layers of the OSI (Open Systems Interconnection) model, influencing their functionality and interaction with data.
+
+#### Layer 1 (Physical Layer) Devices
+
+These devices operate at the lowest layer, dealing with the physical transmission of raw bit streams over a physical medium. They are primarily concerned with the electrical, mechanical, procedural, and functional characteristics of the network.
+
+A **Hub** acts like a multi-port repeater so that every port receives transmissions sent from any other port. Consequently, every hub port is part of the same shared media access area and within the same Collision Domain. All node interfaces are half-duplex, using the CSMA/CD protocol. The media bandwidth (10 Mbps / 100 Mbps) is shared between all nodes. When Ethernet is wired with a hub, there needs to be a means of distinguishing the Interface on an End system (Computer host / client) from the Interface on an Intermediate system (a HUB). The end system is referred to as **MDI (Medium-Dependent Interface)**. The interface on the hub is referred to as **MDI Crossover (MDI-X)**. This means that the Transmit (Tx) wires on the host connect to Receive (Rx) wires on the hub.
+* **Hubs:**
+    * **Function:** Connect multiple Ethernet devices together, making them act as a single network segment.
+    * **Operation:** A "dumb" device that broadcasts incoming data to all connected ports. Creates a single collision domain.
+    * **Modern Use:** Largely obsolete in modern networks, replaced by switches.
+    * **Characteristics:** Half-duplex communication.
+
+* **Repeater:** Overcomes the distance limitation by boosting a signal at some point along the cable run. This is a Layer 1 (Physical Layer) device.
+    * The attenuation of signals passing over copper or fiber cable imposes a distance limitation on links. A link where the cable length exceeds the distance limitation may not achieve the required speed or become unreliable.
+    * Repeaters are available for both copper & fiber links (Optical-Electrical-Optical Repeaters).
+
+* **Media Converter:** When a repeater is used to transition from one Cable type to another, thereby connecting two cable segments of different types.
+    * **Single Mode Fiber to Twisted Pair:** Powered devices that convert light signals from SMF cabling into electrical signals carried over a copper wire, or vice versa (via Ethernet network).
+    * **Multimode Mode Fiber to Twisted Pair:** Converts light signals in MMF.
+    * **Single Mode to Multimode Fiber:** These passive (unpowered) devices convert between the two Fiber Cabling types.
+
+* **Transceivers**
+A network might involve multiple types of Cabling. When this occurs, switches & Router equipment must be able to terminate different cable and connector types, and devices must convert from one media type to another. There are also Transceiver modules for Copper wire Cabling. In the past, Transceiver modules were based on the **Gigabit Interface Converter (GBIC)** form factor, which used Subscriber Connector (SC) ports for Gigabit Ethernet. It has been replaced by **SFP (Small Form-Factor Pluggable)**, also known as **Mini-GBIC**. SFP uses LC connectors and is also designed for Gigabit Ethernet. **Enhanced SFP (SFP+)** is an updated specification to support 10GbE but still uses the LC form factor, with different modules to support various Ethernet standards. A transceiver is designed to support a specific wavelength. Transceivers must be installed as matched pairs.
+The term **MSA (Multi-Source Agreement)** is intended to ensure that a transceiver from one vendor is compatible with the switch/router module of another vendor.
+* The **Quad Small Form-Factor Pluggable (QSFP)** is a transceiver with a form factor of 4x1 Gigabit (4Gbps) links, typically aggregated to a single 4Gbps channel.
+* The **Enhanced QSFP (QSFP+)** is designed to support the 40GbE standard by provisioning 4 x 10Gbps links, where four strands transmit and four are unused, to transmit a full-duplex 40Gbps link.
+* **Transceiver** combines a Transmitter (Tx) and Receiver (Rx) in a single component.
+    * **Function:** Provide a modular interface that matches network types to equipment. Enable physical layer signal conversion, converting between different media types (e.g., fiber to copper and back again). For example, if you have fiber, the switch provides copper ports via a transceiver.
+    * **Operation:**
+    * **Duplex Communication:** Typically uses two fibers (one for transmit, one for receive).
+    * **Bi-directional Transceivers:** Allow traffic in both directions with a single fiber strand by using two different wavelengths, which reduces the number of fiber runs by half.
+* **Transceiver Form Factors**
+    * **SFP (Small Form-Factor Pluggable):** Also known as "mini-GBICs," these are compact hot-pluggable transceivers.
+    * **SFP+ (Enhanced SFP):** Same size as SFP, however, supports longer bandwidth due to its higher frequency of transmission, commonly used for 10 Gigabit Ethernet.
+    * **QSFP (Quad Small Form-Factor Pluggable):** A 4-channel SFP, combining four 1 Gigabit/s links for a total of 4 Gbit/s.
+    * **QSFP+ (Enhanced QSFP):** Designed for 40 Gigabit Ethernet (4x 10 Gbit/s channels). It combines four SFP+ into a single transceiver. Further enhancements are creating bi-directional QSFP and QSFP+ for increased efficiency over a single fiber run.
+
+---
+
+#### Layer 2 (Data Link Layer) Devices
+
+These devices operate at the Data Link Layer, dealing with MAC (Media Access Control) addresses and frames. They provide error-free transfer of data frames from one node to another over the physical layer.
+
+* **Bridges:**
+A **Bridge** works at the Data Link Layer (Layer 2). It separates physical segments into collision domains.
+
+An Ethernet Bridge establishes a connection between separate physical network segments while keeping all nodes in the same logical network (Broadcast Domain), thereby reducing the number of collisions caused by having too many nodes contending for access. By isolating these segments from each other, nodes in one domain do not slow down or contend with nodes in another domain.
+
+An Ethernet Bridge builds a **MAC address table** in memory to track which addresses are associated with which of its ports. It's initially empty pre-initialization, but information is constantly added as the bridge listens to the connected segments. Entries are flushed out of the table after a period to ensure information remains current. If no record of a hardware address (MAC) exists or the frame is a broadcast/multicast, then the bridge floods the frame to all segments except for the source segment (acting like a Layer 1 HUB).
+
+The **contention problem** (where the probability of collision increases and opportunity to transmit becomes less frequent as more devices access the shared medium) is improved by bridges but not fully resolved.
+* **Bridges:**
+    * **Function:** Connects two or more LAN segments, forwarding frames based on MAC addresses.
+    * **Operation:** Similar to a two-port switch, it filters traffic between segments.
+    * **Modern Use:** Largely replaced by multi-port switches.
+
+* **Switches:**
+The contention problem can be completely resolved by moving from a shared Ethernet System to **Switched Ethernet**, thereby replacing Hubs & Bridges. Switches perform the same function as bridges, but in a more granular way and support many more ports. Gigabit and 10 Gigabit Ethernet (GbE / 10GbE) cannot be deployed without switches.
+
+Each Switch port is a separate **Collision Domain**. In effect, the switch establishes a point-to-point link between any two network nodes. This is referred to as **MICRO SEGMENTATION** (absence of segments).
+
+As with a bridge, traffic on all switch ports is in the same **Broadcast Domain**, unless the switch is configured to use **Virtual LANs (VLANs)**.
+* **Switches:**
+    * **Function:** Connect network segments or devices, forwarding data frames only to the destination port based on MAC addresses.
+    * **Operation:** Builds a MAC address table (CAM table) by learning the MAC addresses of connected devices. Reduces collision domains, creating microsegments.

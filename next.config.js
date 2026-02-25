@@ -1,3 +1,11 @@
+const path = require('path')
+const withMDX = require('@next/mdx')({
+  extension: /\.mdx?$/,
+  options: {
+    providerImportSource: '@mdx-js/react',
+  },
+})
+
 const withPWA = require('next-pwa')({
   dest: 'public',
   disable: process.env.NODE_ENV === 'development',
@@ -58,6 +66,7 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 const nextConfig = {
   reactStrictMode: true,
   compress: true,
+  pageExtensions: ['ts', 'tsx', 'md', 'mdx'],
   images: {
     formats: ['image/avif', 'image/webp'],
   },
@@ -81,10 +90,20 @@ const nextConfig = {
   },
   // Add minimal webpack config to force webpack mode
   webpack: (config) => {
+    // Add custom loader to strip frontmatter from MDX files
+    config.module.rules.push({
+      test: /\.mdx$/,
+      use: [
+        {
+          loader: path.resolve(__dirname, 'lib/strip-frontmatter-loader.js'),
+        },
+      ],
+      enforce: 'pre', // Run before other loaders
+    });
     return config
   },
   // Add turbopack config to satisfy Next.js 16 requirement
   turbopack: {},
 }
 
-module.exports = withBundleAnalyzer(withPWA(nextConfig))
+module.exports = withBundleAnalyzer(withPWA(withMDX(nextConfig)))

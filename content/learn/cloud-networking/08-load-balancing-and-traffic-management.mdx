@@ -1,0 +1,58 @@
+---
+title: Load Balancing and Traffic Management
+description: AWS and Azure load balancer types, traffic routing, and global delivery services.
+---
+
+Load balancing is a process in which you distribute incoming traffic equitably across multiple computers. A pool of computers that have lower levels of resources often responds to traffic more effectively than a single server with higher performance. The aim of load balancing is to optimize the use of your resources, while maximizing throughput and minimizing the time it takes for a response. Load balancing can also improve availability by sharing a workload across redundant group of backend computing resources.
+
+### Core Load Balancing Concepts
+
+**Traffic Distribution**
+
+Azure load balancers decide how to process incoming requests based on configured load-balancing rules and health probes. When a request arrives at the load balancer's frontend, it uses the load-balancing rule to map incoming traffic to a backend pool of instances.
+
+The load balancer distributes traffic using a hash-based algorithm considering factors like:
+
+- Source IP address
+- Destination IP address
+- Source port
+- Destination port
+- Protocol type (TCP or UDP)
+
+**Health Monitoring**
+
+Health probes monitor the status of backend instances. If a backend instance fails the health probe, the load balancer stops sending new requests to that instance until it becomes healthy again. This combination of rules, algorithms, and health checks ensures efficient and reliable distribution of incoming requests.
+
+### AWS Types of load balancers:
+Application Load Balancer (ALB) -> An Application Load Balancer functions at Layer 7 of the Open Systems Interconnection (OSI) model. It is ideal for load balancing HTTP and HTTPS traffic. After the load balancer receives a request, it evaluates the listener rules in priority order to determine which rule to apply. It then routes traffic to targets based on the request content.
+Network Load Balancer (NLB) -> A Network Load Balancer is ideal for load balancing TCP and UDP traffic. It functions at Layer 4 of the OSI model, routing connections from a target in the target group based on IP protocol data. Routes requests from the same client to the same target. Offers low latency for latency-sensitive applications. Preserves the client-side source IP address. Automatically provides a static IP address per Availability Zone (subnet). Lets users assign a custom, fixed IP address per Availability Zone (subnet). Uses Amazon Route 53 to direct traffic to load balancer nodes in other zones.
+Gateway Load Balancer (GLB) -> A Gateway Load Balancer helps you to deploy, scale, and manage your third-party appliances, such as firewalls, intrusion detection and prevention systems, and deep packet inspection systems. It provides a gateway for distributing traffic across multiple virtual appliances while scaling them up and down based on demand. Ensures high availability and reliability by routing traffic through healthy virtual appliances, Can be monitored using CloudWatch metrics, Can deploy a new virtual appliance by selecting it in the AWS Marketplace, Connects internet gateways, virtual private clouds (VPCs), and other network resources over a private network.
+
+### AZURE Types of load balancers:
+Azure Load balancing services can be categorized in two ways: global versus regional, and HTTP(S) versus non-HTTP(S).
+1. Global versus regional -> Global load-balancing services distribute traffic across regional backends, clouds, or hybrid on-premises services. These services route end-user traffic to the closest available backend. You can think of them as systems that load balance between application stamps, endpoints, or scale-units hosted across different regions/geographies. In contrast, Regional load-balancing services distribute traffic within virtual networks across virtual machines (VMs) or zone-redundant service endpoints within a region. You can think of them as systems that load balance between VMs, containers, or clusters within a region in a virtual network.
+2. HTTP(S) versus non-HTTP(S) -> HTTP(S) load-balancing services are Layer 7 load balancers that only accept HTTP(S) traffic. They're intended for web applications or other HTTP(S) endpoints. They include features such as SSL offload, web application firewall, path-based load balancing, and session affinity. In contrast, non-HTTP(S) load-balancing services can handle non-HTTP(S) traffic and are recommended for non-web workloads.
+
+| Service | Global/regional | Recommended traffic |
+| --- | --- | --- |
+| Azure Front Door(CDN) | Global | HTTP(S) |
+| Traffic Manager | Global | non-HTTP(S) |
+| Application Gateway | Regional | HTTP(S) |
+| Azure Load Balancer | Regional | non-HTTP(S) |
+
+### Azure Load Balancer
+
+Azure Load Balancer is a high-performance, ultra-low-latency Layer 4 load-balancing service (inbound and outbound) for all UDP and TCP protocols. It distributes incoming traffic among healthy virtual machine instances using a hash-based distribution algorithm.
+
+### Azure Application Gateway
+
+Azure Application Gateway provides Application Delivery Controller (ADC) as a service, offering various Layer 7 load-balancing capabilities. Use it to optimize web farm productivity by offloading CPU-intensive TLS/SSL termination to the Application Gateway - Also, you don’t need to install certificates and configure TLS/SSL on your servers. If you need end-to-end encryption, Application Gateway can decrypt the traffic on the gateway by using your private key, then re-encrypt again with the public key of the service running in the back-end pool. Application Gateway works within a region rather than globally. Azure Application Gateway includes the following features: Support for the HTTP, HTTPS, HTTP/2, and WebSocket protocols, A web application firewall (WAF) to protect against web application vulnerabilities, End-to-end request encryption, Autoscaling to dynamically adjust capacity as your web traffic load change, Connection draining allowing graceful removal of backend pool members during planned service updates, Session stickiness to ensure client requests in the same session are routed to the same backend server(Session stickiness is especially important with e-commerce applications where you don’t want a transaction to be disrupted because the load balancer bounces it around between back-end servers.). Application Gateway uses a round-robin process to load balance requests to the servers in each back-end pool. Load-balancing works with the OSI Layer 7 routing implemented by Application Gateway routing, which means that it load balances requests based on the routing parameters (host names and paths) used by the Application Gateway rules.
+
+### Azure Traffic Manager
+
+Azure Traffic Manager is a DNS-based traffic load balancer that allows you to distribute traffic optimally to your public facing applications services across global Azure regions while providing high availability and responsiveness. Azure Traffic Manager enables you to control how network traffic is distributed to application deployments (endpoints) running in your different datacenters. Azure Traffic Manager uses DNS to direct the client requests to the appropriate service endpoint based on a traffic-routing method. For any profile, Traffic Manager applies the traffic-routing method associated to it to each DNS query it receives. The traffic-routing method determines which endpoint is returned in the DNS response. Because Traffic Manager is a DNS-based load-balancing service, it load balances only at the domain level. For that reason, it can't fail over as quickly as Front Door, because of common challenges around DNS caching and systems not honoring DNS TTLs. Traffic Manager works at the DNS level which is at the Application layer (Layer-7). Traffic Manager isn't a proxy or gateway. Traffic Manager doesn't see the traffic that passes between the clients and the service; it just gives clients the IP address of where they need to go. Traffic Manager uses DNS to direct clients to a specific service endpoint IP address based on the rules of the traffic routing method that's used. Clients connect directly to the selected endpoint.
+
+### Azure Front Door
+
+Azure Front Door is a content-delivery network (CDN) that acts as a global load balancer and speeds up your web applications.It provides Layer 7 capabilities like, TLS/SSL offloading, Path-based and URL-based routing, Fast failover & A web application firewall WAF, Caching features. These features improve your application's performance and make it highly available.
+Choose Azure Front Door when you need to load balance a web app that's spread across multiple Azure regions, providing a single, scalable entry point through Microsoft's global network for faster and more secure access. It manages user requests at the edge and routes them to the quickest and most available backend. Azure Front Door is implemented at multiple edge locations. Azure Front Door provides CDN features that optimize access to backend content, while the firewall helps to secure that access.

@@ -1,0 +1,42 @@
+{/* frontmatter removed for clean UI */}
+
+## Advanced Networking (Transit Gateway / Virtual WAN)
+
+VPCs can be Interconnected Using peering relationships and Connected to On-premise Networks Using VPN gateways. This could be difficult to manage, especially if each VPC must Interconnect in a Mesh-like topology. A Transit Gateway is a Simpler means of managing these Interconnections, handling Routing b/w the subnets in each attached VPC and any attached VPN gateways.
+Transit gateways can attach VPCs and Direct Connect gateways in the same Region. Each transit gateway allows up to 5,000 VPCs to route traffic between the gateways. This solution also removes the need to use full-mesh VPC peering.
+
+AZURE VIRTUAL WIDE AREA NETWORKS WAN is a networking service that brings many networking, security, and routing functionalities together to provide a single operational interface. Azure Virtual WAN is a centrally managed collection of connectivity resources like VPNs, which enables organizations to use the Microsoft backbone in a self-contained, security isolated manner.
+The Virtual WAN architecture is a Hub and Spoke architecture with scale and performance built in for branches, users, ExpressRoute circuits, and virtual networks. A HUB contains gateways/routers for site-to-site, ExpressRoute, or point-to-site functionality. It takes 30 minutes to create the site-to-site VPN gateway in the virtual hub.
+You must create a Virtual WAN before you can create a hub. A SPOKE
++ There are three main usage cases for virtual WAN: Site to site, Point to site, and ExpressRoute.
++ There are two types of virtual WANs: Basic (Site-to-site VPN only) and Standard with features that include:
+*   Branch connectivity (via connectivity automation from Virtual WAN Partner devices such as SD-WAN or VPN CPE).
+*   Site-to-site VPN connectivity
+*   Remote user VPN connectivity (point-to-site).
+*   Private connectivity (ExpressRoute).
+*   Intra-cloud connectivity (transitive connectivity for virtual networks).
+*   VPN ExpressRoute inter-connectivity.
+*   Routing, Azure Firewall, and encryption for private connectivity.
+This diagram shows an organization with two Virtual WAN hubs connecting the spokes. VNets, Site-to-site and point-to-site VPNs, SD WANs, and ExpressRoute connectivity are all supported.
+
+To configure an end-to-end virtual WAN, you create:
+*   Virtual WAN. Think of this as drawing a big, overall map of all your networks and how they'll connect in Azure. It's a management layer that lets you see and control your entire network setup in Azure. This resource represents Is like a virtual overlay network on Microsoft's Azure backbone and is a collection of multiple resources. It contains links to all your virtual hubs that you would like to have within the virtual WAN. Virtual WANs are isolated from each other and can't contain a common hub.
+*   Hub. Now, on your map, you need a central point where all your networks can connect. This is your "Hub." A virtual hub is a Microsoft-managed virtual network. The hub contains various service endpoints to enable connectivity. It's a virtual network that acts as a connection point to other networks. It contains all the networking gear.
+*   Hub virtual network connection. The hub virtual network connection resource is used to connect the hub seamlessly to your virtual network within Azure. “One virtual network can be connected to only one virtual hub”. On-premises locations connection: If you have physical offices, you connect your on-premises locations to the Virtual WAN Hub using Site-to-Site VPN. The "Site" resource in Azure represents your on-premises location.
+*   Hub-to-hub connection. Hubs are all connected to each other in a virtual WAN. This means that any network
+*   connected to one Hub can communicate with any network connected to another Hub.
+*   Hub route table. You can create a virtual hub route and apply the route to the virtual hub route table. You can apply multiple routes to the virtual hub route table.
+
+One of the benefits of Azure Virtual WAN is the ability to support reliable connections from many different technologies. These technologies include ExpressRoute, VPN Gateway, Barracuda CloudGen WAN, Cisco Cloud OnRamp for multicloud, and VMware SD-WAN. These types of devices are known as network virtual appliances (NVAs). NVAs enable transitive connectivity throughout an organization's Virtual WAN.
+NVAs are deployed directly into a Virtual WAN hub and have an externally facing public IP address. This capability lets customers connect their branch Customer Premises Equipment (CPE) to the same brand NVA in the virtual hub.
+
+### Manage an NVA in a Virtual Hub
+There are many partners that provide NVAs, Azure Marketplace can deploy your NVA choice directly into a virtual hub. Each NVA is deployed as a Managed Application in Azure.
+Each NVA is configured automatically as part of the deployment process. Once the NVA is provisioned, you can't access the NVA directly.
+Unlike Azure VPN Gateway configurations, you don't need to create Site resources, Site-to-Site connection resources, or point-to-site connection resources to connect your branch sites to your NVA in the Virtual WAN hub.
+You still need to create Hub-to-VNet connections to connect your Virtual WAN hub to your Azure VNets.
+
+Virtual hubs or secure virtual hubs are the regional connection points for a virtual WAN. These hubs support multiple service endpoints. The endpoints provide connectivity between networks and services. They're the core of networking for each region.
+To convert the virtual hub to a secure virtual hub, use Azure Firewall Manager.
+Firewall rules, created by the Firewall Manager, allow for the creation of security and routing policies for network traffic. Data flowing from the internet, private IP addresses, or Azure platform services can be filtered.
+Note: User-defined routes aren't needed to route traffic through the firewall.

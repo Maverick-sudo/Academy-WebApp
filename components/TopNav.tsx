@@ -6,7 +6,7 @@ import MenuButton from './MenuButton'
 
 export default function TopNav() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--sidebar)]">
+    <header className="sticky top-0 z-40 w-full border-b border-[var(--border)] bg-[var(--sidebar)]">
       <div className="container flex h-16 items-center px-4 md:px-8">
         {/* Mobile menu button - More visible */}
         <MenuButton className="xl:hidden mr-3 p-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400 text-white transition-colors" />
@@ -25,6 +25,12 @@ export default function TopNav() {
               className="transition-colors hover:text-blue-600 dark:hover:text-blue-400"
             >
               Docs
+            </Link>
+            <Link
+              href="/learn"
+              className="transition-colors hover:text-blue-600 dark:hover:text-blue-400"
+            >
+              Learn
             </Link>
             <Link
               href="https://github.com/Maverick-sudo"

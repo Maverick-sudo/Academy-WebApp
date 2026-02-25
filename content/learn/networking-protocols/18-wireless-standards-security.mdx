@@ -1,0 +1,642 @@
+---
+title: "Wireless Standard & Wireless Security"
+description: Configure wireless networks with proper security using WPA3 and 802.11 standards.
+---
+
+
+Wireless connectivity is a core feature of most network environments today, primarily because it supports users' need for mobility across various devices. The IEEE 802.11 standard defines the physical layer media by which data is encoded into a radio wave signal using various **modulation schemes**. Modulation changes one or more wave properties to encode a signal. Wi-Fi still uses different carrier methods to provide sufficient resistance to interference from noise and other radio sources.
+
+### Wireless Access and Collision Avoidance
+
+A wireless transmitter (TX) and receiver (RX) operating within a particular range of frequencies with the same modulation scheme constitute a **half-duplex shared access medium**. Unlike wired Ethernet, which uses CSMA/CD (Carrier Sense Multiple Access/Collision Detection), Wi-Fi uses **CSMA/CA (Carrier Sense Multiple Access/Collision Avoidance)** and a virtual carrier sense flow control mechanism to cope with contention and reduce the incidence of collisions.
+
+Rather than detecting collisions after they occur, a wireless station indicates its intent to transmit by broadcasting a **Request to Send (RTS)** signal.
+
+1.  A station (host) broadcasts an **RTS** frame, containing the source, destination, and the time required for transmission.
+2.  The receiving station (Access Point - AP) responds with a **Clear to Send (CTS)** signal.
+3.  Upon receiving the CTS, the sending station transmits its data. All other stations in range that hear either the RTS or CTS signal do not attempt to transmit within that period, thereby avoiding collisions.
+
+The original 802.11 Wi-Fi standard worked only at 1 Mbps. It has been revised many times, with each iteration specifying different signaling and transmission mechanisms. Products conforming to the various standards can be certified by the Wi-Fi Alliance.
+
+---
+
+### Wi-Fi Standards Evolution (802.11 Generations)
+
+The specific range of radio frequencies a wireless device operates on is referred to as a **channel**, within an overall frequency band of either 2.4 GHz or 5 GHz (and now 6 GHz with Wi-Fi 6E).
+
+### 2.4 GHz Band vs. 5 GHz Band
+
+| Feature                  | 2.4 GHz Band                                                               | 5 GHz Band                                                                                             |
+| :----------------------- | :------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------- |
+| **Propagation** | Better at propagating through solid surfaces, providing a longer signal range. | Less effective at penetrating solid surfaces, resulting in a shorter maximum signal range.               |
+| **Channels & Congestion**| Does not support a high number of channels and is often congested (channels overlap considerably). | Supports a higher number of individual channels, suffering less congestion (non-overlapping channels). |
+| **Interference & Data Rate** | Increased risk of interference, achievable data rates are typically lower. | Less risk of interference, supports higher data rate transmission at shorter signal ranges.              |
+
+### IEEE 802.11 Generations (Wi-Fi 1 through Wi-Fi 6)
+
+1.  **802.11b (Wi-Fi 1)**:
+    * Uses the **2.4 GHz** frequency band.
+    * Standardized **Direct Sequence Spread Spectrum (DSSS)** with **Complementary Code Keying (CCK)** signal encoding.
+    * Nominal rate of **11 Mbps**.
+    * The 2.4 GHz band is subdivided into up to 14 channels (spaced at 5 MHz intervals). Because Wi-Fi needs ~20 MHz channel bandwidth, 802.11b channels **overlap considerably**. This means co-channel interference is a real possibility unless widely spaced channels are chosen (e.g., 1, 6, and 11).
+
+2.  **802.11a (Wi-Fi 2)**:
+    * Uses the **5 GHz** frequency band.
+    * Uses a multiplexed carrier scheme called **Orthogonal Frequency Division Multiplexing (OFDM)**.
+    * Nominal rate of **54 Mbps**.
+    * The 5 GHz band is subdivided into many (e.g., 23 non-overlapping) 20 MHz wide channels.
+    * Introduced **Dynamic Frequency Selection (DFS)** to prevent APs from interfering with radar and satellite signals. Less likely to suffer co-channel interference due to its wider channel spacing.
+
+3.  **802.11g (Wi-Fi 3)**:
+    * An upgrade from 802.11b, operating in the **2.4 GHz** band.
+    * Uses **OFDM** (like 802.11a) but with the 2.4 GHz band's channel layout.
+    * Nominal data rate of **54 Mbps**.
+    * Offers **backward compatibility** for legacy 802.11b clients. When in compatibility mode, it reverts to using DSSS instead of OFDM.
+
+4.  **802.11n (Wi-Fi 4)**:
+    * Introduced **Multiple Input Multiple Output (MIMO)** and **Channel Bonding**, significantly increasing bandwidth.
+    * **MIMO:** Multiplexes signals from 2 to 4 separate antennas for simultaneous transmission and reception, boosting bandwidth and improving signal reliability. The configuration is identified by `A x B:C` notation (A = #Tx antennas, B = #Rx antennas, C = #simultaneous Tx/Rx streams, max 4x4:4).
+    * **Spatial Multiplexing:** Like using multiple highway lanes to transmit/receive data simultaneously.
+    * **Spatial Diversity:** Combining signals from multiple antennas to derive a stronger signal and increase range at a given data rate.
+    * Can use channels in both **2.4 GHz and 5 GHz** frequency bands.
+    * **Channel Bonding:** Allows 2 adjacent 20 MHz channels to be combined into a single 40 MHz channel (a practical option mainly in the 5 GHz band due to less congestion).
+    * A **Dual-Band AP** supports both 2.4 GHz and 5 GHz simultaneously.
+    * Data rate is 7.2 Mbps per stream, up to **600 Mbps** for a 40 MHz bonded channel with optimal 4x4:4 MIMO configuration.
+    * Can operate in **High-Throughput (HT)/Greenfield mode** for maximum performance or **HT Mixed mode** for compatibility with older standards. Greenfield mode can cause substantial interference if legacy WLANs are operating nearby.
+
+5.  **802.11ac (Wi-Fi 5)**:
+    * Designed to work **only in the 5 GHz band**. The 2.4 GHz band can be used for legacy standards in mixed mode.
+    * Aims to deliver **Very High Throughput (VHT)**, often gigabit Ethernet speeds or better.
+    * Supports more channel bonding (e.g., 80 MHz, 160 MHz channels) and up to 8 simultaneous spatial streams with denser modulation at closer ranges.
+    * Introduced **Multi-User MIMO (MU-MIMO)** for downlink (AP to client) transmissions.
+    * APs are marketed using AC values (e.g., AC5300, indicating total theoretical throughput across bands).
+
+6.  **802.11ax (Wi-Fi 6)**:
+    * Uses more complex modulation and signal encoding to improve the amount of data sent per packet by about 40%. Designated as **High Efficiency (HE) Wi-Fi**.
+    * Approximate bandwidth of **10 Gigabit speeds**, which can be achieved through the use of the **6 GHz frequency band (Wi-Fi 6E)**.
+    * Reinstates operation in the **2.4 GHz band**, mostly to support IoT device connectivity.
+    * Introduced **OFDMA (Orthogonal Frequency Division Multiple Access)** modulation scheme, allowing sub-carriers or "tones" to be allocated in groups of different sizes (Resource Units - RUs), each of which can communicate in parallel. RUs can be assigned based on Class of Service (CoS) parameters (e.g., prioritizing VoIP traffic).
+        * Large RUs: More bandwidth, fewer devices transmit.
+        * Small RUs: Less bandwidth, more devices transmit.
+    * **MU-MIMO and OFDMA** are complementary technologies: MU-MIMO makes use of spatial streams, while OFDMA makes flexible use of sub-carriers within a channel. Both can work together to increase parallelism and support communication with more devices simultaneously.
+    * **Beamforming (MU-MIMO)**: Like adjusting a spotlight to focus on specific stations (devices) instead of broadcasting signals in all directions. It directs a stronger, more concentrated signal to targeted stations, improving speed and efficiency for multiple client stations.
+        * **Downlink (DL) MU-MIMO:** Allows the AP to initiate and use its multiple antennas to process spatial streams of signals in one direction separately to other streams, meaning groups of stations can connect simultaneously and obtain bandwidth.
+        * Wi-Fi 5 supports up to 4 stations in parallel over 5 GHz only.
+        * Wi-Fi 6 supports up to 8 stations in 2.4 GHz, 5 GHz, and 6 GHz bands.
+        * **Uplink (UL) MU-MIMO:** Wi-Fi 6 supports stations initiating beamforming with the AP.
+
+---
+
+### Wireless LAN Fundamentals & Architecture
+
+### Service Sets and SSIDs
+
+* **Service Sets** are groups of wireless devices.
+* **SSID (Service Set Identifier)**: A unique network name (up to 32 bytes in length) that identifies a WLAN. For maximum compatibility, it's best to only use ASCII letters, digits, hyphens, and underscores. APs send **Beacon frames** periodically to advertise their SSID.
+* **BSSID (Basic Service Set Identifier)**: The MAC address of the Access Point that forms the Basic Service Set. Each BSS has a unique BSSID.
+
+### Wireless Network Topologies
+
+1.  **Independent Basic Service Set (IBSS) / Ad Hoc Mode**:
+    * A wireless network where two or more wireless stations connect directly without an AP.
+    * Does not require an Access Point.
+    * All stations within an Ad Hoc network must be within range of one another.
+    * Suits small workgroups, but not scalable for large networks.
+
+2.  **Basic Service Set (BSS) / Infrastructure Mode**:
+    * Clients connect to each other via an Access Point.
+    * Wireless devices (clients/stations) request to **associate** with the BSS.
+    * The area around an AP where its signal is usable is called a **Basic Service Area (BSA)** or Wireless Cell Segment.
+
+3.  **Extended Service Set (ESS)**:
+    * Used to create larger Wireless LANs beyond the range of a single AP.
+    * Multiple APs, each with its own BSS (and unique BSSID), are connected by a wired network to a switch or Wireless LAN Controller (WLC).
+    * Each BSS within an ESS uses the **same SSID** and security configuration.
+    * Each BSS uses a **different channel** to avoid interference where their BSAs overlap.
+    * **Roaming**: Clients can pass seamlessly between multiple APs in an Extended Service Area (ESA) without having to reconnect, if configured with the same SSID and security. If `802.11r` (fast roaming) is supported, it may use existing authentication status to generate security properties for the new association.
+    * The upstream wired network connecting the APs is called the **Distribution System (DS)**.
+    * Each wireless BSS or ESS is mapped to a **VLAN** in the wired network.
+    * It's possible for an AP to provide **Multiple Wireless LANs**, each with a unique SSID (creating different broadcast domains), and each WLAN can be mapped to a separate VLAN.
+
+4.  **Mesh Basic Service Set (MBSS) / Wireless Mesh Network (WMN)**:
+    * Used in situations where it's difficult to run Ethernet connections to every Access Point.
+    * Mesh APs use two radios: one to provide a BSS to wireless clients and one to form a "Backhaul Network" for bridging traffic from AP to AP.
+    * At least one AP is connected to the wired network and is called the **Root Access Point (RAP)**. Other APs are called **Mesh Access Points (MAPs)**.
+    * A routing protocol (e.g., **Hybrid Wireless Mesh Protocol - HWMP**) is used to determine effective paths.
+    * Mesh topology is more scalable than ad-hoc because stations do not need to be within direct radio range of one another; transmissions can be relayed by intermediate stations.
+
+### Association Process and Connection States
+
+Wireless clients go through a process to connect to an AP:
+
+* **Management Messages:** Not Authenticated, Not Associated
+* **Authentication Request/Response:** Authenticated, Not Associated
+* **Association Request/Response:** Authenticated & Associated
+* **Data Messages:** Authenticated & Associated
+
+---
+
+### Wireless Deployment Models
+
+There are three main types of Wireless Deployment models: Autonomous, Lightweight (Controller-Based), and Cloud-Based.
+
+1.  **Autonomous APs ("Fat APs")**:
+    * Self-contained systems that don't rely on a Wireless LAN Controller (WLC).
+    * Each AP is configured individually (IP address for remote management, RF parameters, security policies, QoS rules).
+    * Data traffic from wireless clients has a very direct path to the wired network.
+    * Best practice to keep management traffic separate (e.g., different subnet/VLAN).
+    * Each VLAN has to stretch across the entire network.
+
+2.  **Lightweight APs ("Thin APs") with a Wireless LAN Controller (WLC)**:
+    * Not self-contained; functions are split between the AP and a WLC (Split-MAC Architecture).
+    * **Thin APs handle "real-time operations"**: Transmitting/receiving traffic, encrypting/decrypting traffic, sending beacons/probes.
+    * **WLC handles "management operations"**: RF management, security policies, client association/dissociation, roaming management, QoS management.
+    * The WLC can be located in the same subnet/VLAN as the lightweight APs it manages, or in a different subnet.
+    * APs and WLCs authenticate each other using digital certificates.
+    * They communicate using **CAPWAP (Control and Provisioning of Wireless Access Points)** protocol (UDP port 5246 for control tunnel, UDP port 5247 for data tunnel).
+        * **Control Tunnel (UDP 5246):** Used to configure and manage AP operations; traffic is encrypted by default (DTLS - Datagram Transport Layer Security).
+        * **Data Tunnel (UDP 5247):** All traffic from wireless clients is sent through this tunnel to the WLC (encapsulated with new headers); it does not go directly to the wired network.
+    * **Benefits of Split-MAC Architecture:** Scalability, transmit power optimization, seamless roaming, dynamic channel assignment, client load balancing, self-healing wireless coverage, centralized security/QoS management.
+
+3.  **Cloud-Based AP Architecture**:
+    * A hybrid between autonomous APs and split-MAC architecture.
+    * Autonomous APs that are centrally managed in the cloud (e.g., Cisco Meraki).
+    * A cloud dashboard is used to configure APs, monitor the network, generate performance reports, and control settings like dynamic channel assignment and power optimization.
+    * **Data traffic is NOT sent to the cloud**; it goes directly to the wired network (like autonomous APs). Only management (control) traffic and telemetry info are sent to the cloud.
+
+### WLC Deployment Models
+
+* **Unified (Hardware Appliance):** The WLC is a hardware appliance in a central location of the network (good for hundreds of APs).
+* **Cloud-Based (VM):** The WLC is a VM running on a server, usually in a private cloud or data center (good for thousands of APs).
+* **Embedded:** The WLC is integrated within a switch (good for up to 200 APs).
+* **Mobility Express:** The WLC is integrated within an AP (good for up to 100 APs).
+
+---
+
+## Installing Wireless Networks
+
+Designing a wireless network to meet requirements for multiple device types can be complex, ensuring that range and interference issues are accounted for. Wireless network devices are referred to as **stations**.
+
+### Infrastructure Topology
+
+* In an infrastructure topology, each station is configured to connect with a **Base Station or Access Point (AP)**, forming a logical star topology.
+* The AP mediates communications between client devices and can also provide a bridge to a cabled network segment.
+* The MAC address of the AP is used as the **BSSID**.
+* Clients are configured to join a WLAN through the **Network Name or SSID**.
+* The area served by a single AP is referred to as a **Basic Service Area (BSA)** or Wireless Cell Segment.
+* The area in which stations can roam between APs to stay connected to the same SSID is referred to as an **Extended Service Area (ESA)**.
+
+### SSID Broadcasting
+
+* WLANs are configured to advertise their presence by **broadcasting their SSID**.
+* If SSID broadcast is suppressed, user stations must configure the connection to the network manually. However, network sniffers can still detect the SSID even with broadcast disabled.
+* A special management frame broadcast by an AP to advertise the WLAN is known as a **Beacon frame**.
+* The Beacon frame contains the SSID (unless disabled), supported data rates, signaling, encryption, and authentication requirements.
+* The default interval for beacon broadcasts is 100 milliseconds. Increasing this interval reduces overhead but can delay stations joining the network and hamper roaming.
+
+### Site Survey
+
+A **site survey** is a critical planning tool to ensure the WLAN delivers acceptable data rates to the supported number of devices in all expected physical locations.
+
+* A Wi-Fi device usually has an indoor range of at least 30m/100ft. 2.4 GHz radios support better distance ranges than 5 GHz ones, but Wi-Fi 4 (802.11n) and later standards improve range. Outdoor range can be double or triple indoor range.
+* Each station determines an appropriate data rate based on signal quality using **Dynamic Rate Switching/Selection (DRS)**. If the signal is strong, the station selects the highest available data rate; otherwise, it lowers the rate.
+* Radio signals pass through solid objects but can be weakened or blocked by thick walls (e.g., dense concrete). Other radio-based devices (microwave ovens, heavy machinery, cordless phones) can cause interference.
+* **Site Survey Process:**
+    1.  Examine blueprints/floor plans to understand the layout and identify features causing RF interference. Back this up with a visual inspection.
+    2.  Note locations of available network ports and power jacks for AP mounting. A switch that supports **Power over Ethernet (PoE)** can be used for PoE-compatible APs.
+    3.  Create a plan marking WLAN cells, associated APs, and booster antennas. The goal is to place APs close enough to avoid "dead zones" (areas with difficult connectivity or low data rates) but far enough apart to prevent one AP from interfering with another, or from being over/underutilized.
+    4.  Position an AP in the first planned location. Use a device with a wireless adapter and a Wi-Fi survey tool (e.g., Cisco Aironet, Ekahau Site Survey, NetAlly, MetaGeek InSSIDer) to record signal strength. Many tools can show signal strength within a particular channel graphically using a **Heat Map** (e.g., strong signal = green, low signal = orange/red).
+    5.  This step is repeated for each planned location. Neighboring APs should be configured with **non-overlapping channels** to avoid interference.
+
+### Wireless Roaming and Bridging
+
+* Clients can roam within an **Extended Service Area (ESA)**.
+* An ESA is created by installing APs with the same SSID and security configuration, connected by a wired network.
+* The APs are configured with different channels to prevent interference where their BSAs overlap.
+* If a client station detects a low signal, it checks for another stronger signal with the same SSID on other channels or a different frequency band, then disassociates from the current AP and reassociates with the new AP.
+* Depending on the roaming infrastructure and security type, the client might have to re-authenticate. If 802.11r (fast roaming) is supported, it may use existing authentication status.
+* Adapters support a "roaming aggressiveness" setting to prevent "flapping" (rapidly switching between two APs) and ensure the station disassociates from a distant, low-bandwidth AP.
+
+### Wireless Distribution System (WDS)
+
+* WDS is a configuration of multiple APs to cover areas where cabling is impossible.
+* APs are configured in **WDS/Repeater mode**. One AP is configured as a **Base Station** (connected to a cabled segment), while others are configured as **Remote Stations**.
+* Remote stations don't need to be connected to cable segments but can accept connections from wireless stations and forward all traffic to the base station.
+* Another use of WDS is **bridging two separate cable segments**. When WDS is configured in **Bridge Mode**, the APs will not support wireless clients; they simply forward traffic between cabled segments. Best to use APs from the same vendor.
+
+---
+
+## Wireless Configuration via GUI/CLI
+
+### WLAN Controller (WLC) Connectivity
+
+* The WLC connects to a switch via a **Link Aggregation Group (LAG)** (also known as EtherChannel). WLCs often only support static LAG, not PAgP or LACP.
+* **DHCP Option 43** can be used to tell APs the IP address of their WLC.
+
+### WLC Ports and Interfaces
+
+* **WLC Ports** are the physical ports that cables connect to.
+* **WLC Interfaces** are the logical interfaces within the WLC (similar to SVIs on a switch).
+
+1.  **Service Port:** A dedicated management port used for **out-of-band management**. Must connect to a switch access port as it only supports one VLAN. Used to connect to the device while it is booting.
+2.  **Distribution System (DS) Ports:** Standard network ports that connect to the **Distribution System (wired network)** and are used for data traffic. These ports usually connect to switch trunk ports. If multiple, they can form a LAG.
+3.  **Console Port:** Standard console port, using either RJ-45 or USB.
+4.  **Redundancy Port:** Used to connect to another WLC to form a **High Availability (HA) pair** (one active, one standby).
+5.  **Management Interface:** Used for management traffic such as Telnet, SSH, HTTP, HTTPS, RADIUS authentication, NTP, syslog, etc. CAPWAP tunnels are also formed from the WLC management interface.
+6.  **Redundancy Management Interface:** When two WLCs are connected by their redundancy ports, this interface can be used to connect to and manage the "standby" WLC.
+7.  **Virtual Interface:** This interface is used when communicating with wireless clients, relaying DHCP requests, performing client web authentication, etc. It's a logical interface that doesn't map directly to a physical port.
+8.  **Service Port Interface:** If the service port is in use, this logical interface is bound to it.
+9.  **Dynamic Interface:** These are the interfaces used to map a VLAN to a WLAN (i.e., a specific SSID).
+
+---
+
+---
+
+## Wireless Network Security
+
+Wireless networks, while offering mobility and convenience, pose considerable security risks if not properly secured with access controls. All clients must be authenticated before they can associate with an Access Point (AP). In corporate settings, a separate SSID (Service Set Identifier) with restricted access can be provided for guest Internet access, keeping them off the main corporate network.
+
+### Authentication Methods
+
+Here are multiple ways to authenticate clients on a wireless network, broadly categorized by their approach:
+
+* **Open Authentication:** No authentication is performed by the AP. Often used in conjunction with a **Captive Portal** (web page requiring credentials or agreement to terms) for guest access or public Wi-Fi.
+* **Wired Equivalent Privacy (WEP):** (Legacy and insecure) An older standard aiming to provide both authentication and encryption.
+* **Extensible Authentication Protocol (EAP):** A framework that defines a set of standardized authentication methods, widely used in modern wireless security.
+    * **EAP over LAN (EAPOL):** Used for wired port-based network access control (IEEE 802.1X).
+    * **EAP over Wireless (EAPOW):** Used for wireless port-based network access control (IEEE 802.1X).
+* **Lightweight EAP (LEAP):** Cisco-developed, an improvement over WEP.
+* **Protected EAP (PEAP):** Establishes a secure TLS tunnel.
+* **EAP-FAST (Flexible Authentication via Secure Tunneling):** Cisco-developed, similar to PEAP but uses Protected Access Credentials (PACs).
+* **EAP-TLS (Transport Layer Security):** The most secure EAP method, requiring certificates on both the client and server.
+
+### Extensible Authentication Protocol (EAP) Framework
+
+EAP is an authentication protocol that defines a set of standards. It's integrated with **IEEE 802.1X** (Port-based Network Access Control - PNAC), which is used to limit network access for clients until they authenticate.
+
+**Three Main EAP Entities:**
+
+1.  **Supplicant:** The end-host (client device) seeking network access.
+2.  **Authenticator:** The network access device (e.g., switch, router, Access Point, WLC) that restricts access and forwards authentication requests.
+3.  **Authentication Server / AAA Server / RADIUS / TACACS+:** The server that performs the actual authentication logic.
+
+### WEP (Wired Equivalent Privacy)
+
+* An older security protocol designed to provide both authentication and encryption for WLANs.
+* Uses the **RC4 stream cipher**.
+* It's a shared-key protocol, meaning clients connect using a pre-shared key.
+* WEP keys are typically **40-bit or 104-bit** in length.
+* The WEP key is combined with a **24-bit Initialization Vector (IV)** for encryption.
+* **WEP encryption is not secure** due to vulnerabilities in the RC4 key scheduling algorithm and the fixed IV.
+* **Authentication in WEP** was based on a simple challenge-response (Challenge-Handshake Authentication Protocol - CHAP), which is also insecure.
+
+### Lightweight Extensible Authentication Protocol (LEAP)
+
+* Developed by Cisco as an improvement over WEP.
+* Clients must provide a username/password to authenticate.
+* **Mutual authentication** is provided, where both the client and server send challenge phrases to each other.
+* Uses **dynamic WEP keys** that are changed frequently to mitigate some WEP vulnerabilities. Still not considered highly secure.
+
+### Protected Extensible Authentication Protocol (PEAP)
+
+* Like EAP-FAST, PEAP involves establishing a **secure TLS tunnel** between the client and the authentication server.
+* The server's digital certificate is used to authenticate the server to the client and to establish the TLS tunnel.
+* The client is then authenticated to the server using a less secure method (e.g., **MS-CHAPv2**) *within the protected tunnel*.
+* PEAP requires the authentication server to have a digital certificate.
+
+### EAP-FAST (Flexible Authentication via Secure Tunneling)
+
+* Developed by Cisco, often consists of three phases:
+    1.  **PAC (Protected Access Credential) Provisioning:** A secure credential (PAC) is securely provisioned to the client.
+    2.  **Secure TLS Tunnel Establishment:** A secure TLS tunnel is established using the PAC.
+    3.  **Further Communication within Secure Tunnel:** Further authentication or communication takes place within the established tunnel.
+* Unlike PEAP, EAP-FAST does not require the authentication server to have a digital certificate (though it can use one). It primarily relies on PACs for mutual authentication.
+
+### EAP-TLS (Transport Layer Security)
+
+* Requires **both the client and the server to have digital certificates**. This makes it the most secure authentication method, but also the most difficult to implement due to the certificate management overhead (every client device needs a certificate).
+* The TLS tunnel is used for key information exchange, but no further authentication is needed within the tunnel because both parties are already authenticated by their certificates.
+
+### Temporal Key Integrity Protocol (TKIP) and Counter Mode with Cipher Block Chaining Message Authentication Code (CCMP)
+
+These are cryptographic protocols used for encryption and integrity in modern wireless security:
+
+* **TKIP (Temporal Key Integrity Protocol):**
+    * Used in WPA.
+    * Combines the RC4 cipher with enhancements designed to address WEP vulnerabilities (e.g., per-packet keying, message integrity check - MIC).
+    * Still uses RC4, making it susceptible to some attacks, and is considered less secure than AES.
+* **CCMP (Counter Mode with Cipher Block Chaining Message Authentication Code Protocol):**
+    * Used in WPA2.
+    * Combines the **AES (Advanced Encryption Standard) cipher** in Counter Mode (CTR) with **CBC-MAC (Cipher Block Chaining Message Authentication Code)** for data integrity and authentication.
+    * Replaced TKIP for stronger security.
+* **GCMP (Galois/Counter Mode Protocol):**
+    * Used in WPA3.
+    * Combines **AES** in Galois/Counter Mode for both encryption and authentication. Offers better performance and stronger security than CCMP.
+
+---
+
+## WIRELESS PROTECTED ACCESS (WPA, WPA2, WPA3)
+
+The choice of security settings depends on device support for various Wi-Fi encryption standards, the type of authentication infrastructure, and the purpose of the WLAN. These standards determine the cryptographic protocols supported, key generation methods, and available authentication methods.
+
+### WPA (Wi-Fi Protected Access) - Version 1
+
+* Designed to counter vulnerabilities in the WEP standard.
+* Like WEP, WPA uses the **RC4 stream cipher** to encrypt traffic.
+* It adds **TKIP (Temporal Key Integrity Protocol)** to mitigate attacks against WEP. TKIP provides per-packet keying, message integrity checks (MIC), and rekeying, making replay attacks harder than with WEP.
+* **Vulnerable to some replay attacks** that aim to recover the encryption key, as it still uses RC4.
+
+### WPA2 (Wi-Fi Protected Access II)
+
+* **Uses Advanced Encryption Standard (AES)** cipher deployed within the **CCMP (Counter Mode with Cipher Block Chaining Message Authentication Code Protocol)**.
+* **AES replaces RC4**, and **CCMP replaces TKIP**.
+* CCMP provides both authentication and encryption, designed to make replay attacks much harder.
+* WPA2 is generally considered secure.
+* **Protected Management Frames (PMF)** are an optional feature in WPA2, made mandatory in WPA3, to protect critical management frames from spoofing and denial-of-service attacks.
+
+### WPA3 (Wi-Fi Protected Access III)
+
+* Uses the **same AES and GCMP** as WPA2.
+* However, the method by which session keys are agreed upon changes from the WPA2 4-way handshake to **SAE (Simultaneous Authentication of Equals)**.
+* **SAE** (also referred to as Password Authenticated Key Exchange - PAKE) provides stronger protection against dictionary attacks and ensures forward secrecy.
+
+### WPA Modes: Personal vs. Enterprise
+
+Wireless security comes in two main flavors (and an "Open" category):
+
+1.  **Personal (Pre-Shared Key - PSK / SAE):**
+    * Also known as **WPA2-Personal** (WPA2-PSK) or **WPA3-Personal** (WPA3-SAE).
+    * Uses a passphrase to generate the key that is used to encrypt communications.
+    * Referred to as **group authentication** because all users share the same secret.
+    * The administrator configures a passphrase (8-63 characters, 64 hex characters). This is converted to a hash value, known as the **Pairwise Master Key (PMK)**.
+    * The PMK is used as part of the WPA2 4-way handshake or WPA3 SAE to derive various session keys.
+    * **WPA2-PSK is vulnerable to dictionary attacks** if a weak passphrase is used, as the 4-way handshake can be captured offline and brute-forced.
+    * **WPA3-Personal (SAE)** changes the key agreement method to mitigate these dictionary attacks. It provides a more robust and secure key exchange, even with weak passwords.
+    * An AP can be configured for WPA3-only or with support for legacy WPA2, known as **WPA3-Personal Transition Mode**.
+
+2.  **Enterprise (IEEE 802.1X Authentication for WPA2 or WPA3):**
+    * Also known as **WPA2-Enterprise** or **WPA3-Enterprise**.
+    * Addresses the limitations of the Personal model (e.g., distribution of keys, lack of accounting).
+    * Implements **IEEE 802.1X** to use an **Extensible Authentication Protocol (EAP)** to authenticate against a network directory (e.g., RADIUS server, Active Directory).
+    * 802.1X defines the use of **EAP over Wireless (EAPOW)** to allow an AP to forward authentication data without allowing any other type of network access initially.
+    * **Authentication Process:**
+        1.  When a wireless client requests an association, the AP enables the channel only for EAPOW traffic.
+        2.  The AP passes the credentials of the Supplicant to an **AAA Server** on the wired network for validation.
+        3.  When the Supplicant has been authenticated, the AAA server transmits a **Master Key** back to the Supplicant, with which both the client and AP derive the same **Pairwise Master Key (PMK)**.
+        4.  The wireless station and AP use the PMK to derive session keys, using either the WPA2 4-way handshake or the WPA3 Simultaneous Authentication of Equals method.
+    * Provides centralized authentication, authorization, and accounting (AAA).
+
+## Troubleshooting Wireless Networks
+
+Wireless network deployments can be complicated by various environmental and performance demands. A variety of tools and techniques are available to assess Wi-Fi performance and ensure a highly available network for all users.
+
+Wireless issues can be broadly categorized into problems with:
+1.  **Signal Strength / Interference**
+2.  **Configuration Issues** (especially security and authentication)
+3.  **Differences in Speed and Throughput**
+
+### Wireless Performance Metrics
+
+* **Speed (Data Rate):** The data rate established at the Physical Layer (Layer 1) and Data Link Layer (Layer 2).
+    * Determined by Wi-Fi standards used (e.g., 802.11n, ac, ax), bonded channels, and optimization techniques such as MU-MIMO.
+    * If sender and receiver are far apart or subject to interference, a lower data rate is negotiated to make the link reliable.
+* **Throughput:** The amount of data that can be transferred at the Network Layer (Layer 3), discarding overhead from Layers 1 and 2.
+    * Often used to describe the actual data transfer achieved at the Application Layer, accounting for packet loss and retransmissions.
+
+### 1. Signal Issues
+
+* **Attenuation:** The weakening of the signal as the distance between the station and the access point (AP) increases. Also referred to as **Radio Frequency (RF) Attenuation** or **Free Space Loss**.
+    * As the distance from the antenna increases, the strength of the signal decreases in accordance with the **Inverse-Square Law**.
+* **Interference:** Various interference sources collectively overlay a competing background signal, creating noise.
+* **Measurement Units (dBm):** Attenuation and signal strength are measured in decibels (dB). Signal strength is represented as a ratio of a measurement to 1 milliwatt (mW).
+    * `0 dBm = 1 mW`.
+    * **dBm** is a unit of level used to indicate that a power ratio is expressed in decibels with reference to 1 milliwatt. It's convenient for expressing both large and small values concisely.
+    * Formula: `Power (dBm) = 10 * log10 (Power (mW) / 1 mW)`
+    * If `Power (mW) = 1 mW`, `Power (dBm) = 0 dBm`.
+    * To convert back to milliwatts: `Power (mW) = 10^(Power (dBm) / 10)`
+    * A negative dBm value represents a fraction of a milliwatt (e.g., `-3 dBm` is half a milliwatt). Positive values represent power more than 1 mW.
+    * The conversion is logarithmic: every increase/decrease of 3 dBm equates to a doubling/halving of power. Every increase/decrease of 10 dBm equates to a tenfold increase/decrease in power.
+
+* **Received Signal Strength Indicator (RSSI):** The strength of the signal from the transmitting station at the client end.
+    * When measuring RSSI in dBm, it will be a negative value (a fraction of a milliwatt), with **values closer to zero representing better performance** (e.g., `-65 dBm` is better performance than `-80 dBm`).
+    * An RSSI of `-80 dBm` to `-90 dBm` is likely to suffer packet loss or be dropped entirely.
+    * The RSSI must exceed the **minimum receiver sensitivity** of the client adapter.
+    * RSSI can also be an index value related to a scale of raw measurements (e.g., 0-60, 0-127, or 0-255). On a client, this index is often displayed as a number of "bars" on the adapter icon.
+
+* **Signal-to-Noise Ratio (SNR):** The comparative strength of the data signal to the background noise.
+    * Noise is also measured in dBm, but here, values closer to zero are less desirable as they represent higher noise levels.
+    * RSSI and SNR can be measured using a **Wi-Fi analyzer** installed on an adapter or a dedicated spectrum analyzer.
+
+### Antennas
+
+* Antennas determine the propagation pattern (shape of radio waves transmitted/received).
+* **Omnidirectional Antennas:**
+    * Send and receive signals in all directions (radiate more equally).
+    * The propagation pattern is shaped like a donut, radiating more powerfully in the horizontal plane than in the vertical plane.
+    * Generally used for broader coverage areas.
+* **Unidirectional (Directional) Antennas:**
+    * Focus the signal in a particular direction.
+    * Increase in signal strength obtained by focusing the signal is referred to as **Gain**, measured in **dBi (decibels isotropic)**.
+    * Both sender and receiver must use directional antennas for point-to-point wireless links.
+    * Examples: Yagi, parabolic grid (very highly directional for long connections).
+    * **Beamwidth:** Measured in degrees, representing the angle of the main lobe of radiation. Omni-directional antennas have a wider beamwidth (e.g., 360° horizontal), while directional antennas have narrower beamwidths (e.g., 10°, 90°).
+
+* **Polarization:** Refers to the orientation of the wave propagating from the antenna (e.g., vertical, horizontal).
+    * To maximize signal strength, the transmitting (Tx) antenna and receiving (Rx) antenna should normally use the same polarization. This is particularly important when deploying unidirectional antennas for point-to-point links.
+    * Some antennas are **dual-polarized**, meaning they can be installed in either orientation or support both simultaneously. Dual-polarized antennas are often best to support mobile devices, as these can be held by their user in a variety of orientations.
+
+* **Insufficient Wireless Coverage (Dead Spots):**
+    * Refers to spots within a building with no or weak Wi-Fi signal.
+    * If sufficient signal strength cannot be obtained or interference cannot be mitigated, the only solution is to install additional APs to cover the gap.
+    * If you cannot extend the cabled distribution network system to support additional APs, you will need to configure a wireless bridge or use a **range extender** (which extends two separate cabled segments wirelessly).
+
+* **Antenna Placement:**
+    * Incorrect antenna placement can cause or worsen attenuation and interference problems.
+    * Use a **site survey** and **heat map** to determine the optimum position for APs and the direction in which to point adjustable antennas.
+    * Using an incorrect antenna type can adversely affect signal strength (e.g., an AP designed for ceiling mounting produces a stronger signal directed downwards, whereas a wall-mounted AP's signal is angled outwards).
+
+* **Antenna Cable Attenuation:**
+    * Signal loss occurs when an antenna is connected at some distance from the access point via coaxial cabling.
+    * Higher quality cable (e.g., LMR/HDF/CFD 400 series at approx. 0.22 dB/meter) has less attenuation than lower quality (e.g., LMR/HDF/CFD 200 series at approx. 0.6 dB/meter).
+    * Connector loss (e.g., 0.15 dB per connector) is also calculated.
+    * For devices with removable antennas, a loose or disconnected antenna will significantly reduce range and connectivity.
+
+* **Effective Isotropic Radiated Power (EIRP) & Power Settings:**
+    * **EIRP** is the total power radiated from the antenna, accounting for transmission power, antenna gain, and cable/connector losses.
+    * `EIRP = Transmit Power (dBm) + Antenna Gain (dBi) - Cable/Connector Losses (dB)`
+    * This value for each radio is reported through the AP or controller management software.
+    * **Regulatory Limits:** Power limits must not exceed regulatory limits, which differ for 2.4 GHz and 5 GHz bands and for point-to-point versus point-to-multipoint operation modes.
+    * **Ineffectiveness of High Power:** Increasing transmit power is not usually an effective solution to improve wireless coverage. If the client station detects a strong signal, it will set a high data rate. However, because the EIRP of the client radio is typically much lower, it fails to transmit a strong signal back to the AP, resulting in excessive packet errors (the "AP can hear the client, but the client can't hear the AP" problem).
+    * **Rule of Thumb:** AP power should be roughly 4/3rds of the weakest client radio power. For example, if the weakest client can output 12 dBm, the AP should transmit at 9-10 dBm.
+
+### Channel Utilization and Overlap Issues
+
+* **Channel Overlap:** Refers to interference resulting from multiple access points that are all in range of one another and are configured to use similar RF wavelengths (channels).
+* **Co-Channel Interference (CCI):**
+    * Accurately described as contention for an RF channel when multiple access points use the same channel. Opportunities to transmit are reduced.
+    * Wireless stations must then use **CSMA/CA (Carrier Sense Multiple Access with Collision Avoidance)** to find transmit opportunities.
+    * CCI is measured as a percentage referred to as **channel utilization** using a Wi-Fi analyzer.
+    * **Design Goal:** A channel should exhibit no more than 50% utilization for optimal performance.
+* **Adjacent Channel Interference (ACI):**
+    * Occurs when access points are configured to different but **overlapping channels**, such as channels 1 and 3 in the 2.4 GHz band.
+    * ACI slows down the CSMA/CA process and raises noise levels.
+
+**Channel Planning:**
+
+* One of the design goals for a multi-AP site is to create "clean cells" so that clients can select an AP with the strongest signal easily and the Wi-Fi operates with a minimum of co-channel interference.
+* In the 2.4 GHz band, there are only 3 non-overlapping channels (1, 6, 11). For example, select channel 1 for APx, channel 6 for APy, and channel 11 for APz.
+* In the 5 GHz band (for 802.11a/n/ac/ax), more non-overlapping channels are available, and channels are generally wider (e.g., 20MHz, 40MHz, 80MHz, 160MHz). At least 25 MHz channel spans should be allowed to avoid channel overlap in the 5 GHz band.
+* **Power Level Adjustment:** Adjusting the power level used by an AP on a given channel is advantageous. Using the maximum available power on an AP can result in interfering with other cells and situations where a client can "hear" the AP but cannot "talk" to it because it lacks sufficient power (as discussed in EIRP).
+* **Roaming:** In order to enable seamless roaming for mobile clients, the cells or Basic Service Areas (BSAs) served by each AP need to overlap to some extent. Issues with roaming can be identified by analyzing access point association times for clients. A WLAN Controller will track client mobility, showing each AP and the time the client associated with it. A large number of clients "flapping" (repeatedly associating and disassociating) between two APs indicates a roaming issue.
+
+### Overload Capacity / Client Saturation
+
+* **Client Saturation:** Occurs when too many client stations connect to an AP, causing performance degradation.
+* The maximum number of clients an AP can support varies depending on the Wi-Fi standard used and the type of network traffic generated. A maximum of 30 clients per AP is a generally accepted rule of thumb.
+* **Design Goal:** Enough APs should be provided in appropriate locations to support the expected client density at this ratio.
+* APs can be configured to enforce a maximum number of connections; additional clients will then connect to the nearest available AP.
+* Even with a low number of clients, wireless networks can suffer from bandwidth saturation because it's a broadcast medium, meaning the available bandwidth is shared among all clients.
+* A **Wireless LAN Controller** will normally provide reporting tools to manage and diagnose bandwidth issues, report on wireless channel utilization, and configure APs and clients to reassign channels dynamically to reduce over-utilization.
+* If a **Traffic Shaper** is deployed, it may work automatically to throttle bandwidth to over-utilized clients.
+
+### Environmental Factors Causing Weak Signal / No Connection
+
+If a device is within the supported range but the signal is weak or there's no connection, interference or physical obstructions are likely.
+
+1.  **Reflection / Bounce (Multipath Interference):**
+    * Mirrors, metal surfaces, and other solid objects cause signals to reflect, meaning that a variable delay is introduced, causing packet loss and data rate decrease.
+    * However, Wi-Fi 4/5/6 (802.11n/ac/ax) standards use multipath (via **MIMO**) as a means of optimizing throughput and range.
+2.  **Refraction:** Glass or water (e.g., fish tanks) can cause radio waves to bend and take a different path to the receiver radio, causing signal distortion.
+3.  **Absorption:** The degree to which solid materials reduce signal strength as the wave's energy is lost as heat when passing through construction materials.
+    * The 2.4 GHz band generally has better penetration through objects than the 5 GHz band.
+    * Ceiling-mounted APs are often favored to minimize absorption from office furniture.
+    * An internal wall might cause 3-7 dBm of absorption.
+4.  **Electromagnetic Interference (EMI):**
+    * Interference from other powerful radio or electromagnetic sources working in the same frequency band (e.g., microwaves, cordless phones, Bluetooth devices, industrial equipment).
+    * Detected using a **Spectrum Analyzer**. This specialized radio receiver filters out anything that isn't a Wi-Fi signal.
+    * Usually supplied as handheld units with a directional antenna, so the exact location of the interference can be pinpointed.
+    * A 6 dBm change in the level of a particular source reflects a halving/doubling of the distance between the analyzer and the source of the RF interference.
+
+---
+
+## 2. Wi-Fi Security Configuration Issues
+
+### Wrong SSID and Incorrect Passphrase Issues
+
+* **SSID (Service Set Identifier):** The network name. If the SSID is suppressed (hidden), clients must connect to the AP/WLAN by entering the network name manually.
+* **Troubleshooting:**
+    * Ensure clients are configured to transmit the correct SSID. Remember that the value is case-sensitive.
+    * Check authentication settings are the same on all devices (client and AP).
+    * If a passphrase is used (e.g., WPA2-Personal), ensure it is entered correctly.
+    * Unless the WLAN is meant to provide public, unrestricted access, **do not set the authentication type to "Open"**.
+    * It's possible that two APs are operating with the same SSID. If authentication is wrong, connection to the wrong SSID will fail.
+    * If a user is joining the WLAN for the first time, there might be SSIDs from overlapping WLANs with very similar default names, leading to user confusion about which to choose.
+
+### Encryption Protocol Mismatch Issues
+
+* If the user is definitely supplying the correct key or credentials, check that the client can support the encryption and authentication standards configured on the AP.
+* A device update or OS patch may be required for the client.
+* Even if the credentials are supplied correctly, a connection will fail if the encryption protocol (e.g., WPA2 AES vs. WPA3) is mismatched.
+
+### Client Disassociation Issues
+
+* Access points and client stations normally use management frames to control connections.
+* Using **beacon frames**, clients can choose to authenticate if they are in range of an AP's Basic Service Area (BSA).
+* The client or AP can use **Disassociation** or **Deauthentication** frames to notify the other party about a connection ending.
+* A legitimate client might disassociate but not deauthenticate because it's roaming to another wireless AP within an Extended Service Area (ESA).
+* **Troubleshooting:** Investigate the AP or WLAN Controller event log to identify the cause of disassociations, especially if clients are found "flapping" between access points (indicating a roaming issue).
+* If clients are disassociated unexpectedly and there is no roaming involved, consider interference or driver issues.
+* **Malicious Attacks:** Also consider the possibility of a malicious attack.
+    * **Disassociation Attack:** Exploits the lack of encryption on management frame traffic to send spoofed frames.
+        * One type rejects management frames that spoof the MAC address of a single victim station in a disassociation notification, causing it to be disconnected from the network.
+        * Another variant broadcasts spoofed frames to disconnect all client stations.
+    * Disassociation and Deauthentication attacks are used to perform Denial of Service (DoS) against the wireless infrastructure or to exploit disconnected stations to try to force reconnection to a rogue AP ("Evil Twin"). They are also used in conjunction with a replay attack aimed at recovering the network key (e.g., cracking WPA/WPA2-Personal PSK).
+
+### Open Authentication and Captive Portal Issues
+
+* **Open Authentication** may be combined with a secondary authentication mechanism managed by a browser.
+* When a client station associates with an Open AP (e.g., a hotspot) and launches the browser, the client is redirected to a **Captive Portal** (a "splash page"). This portal allows the client to authenticate to the hotspot provider's network (often over HTTPS, so the login is secure). Such portals may enforce terms and conditions or take payment.
+* **Common Issues:** Most captive portal issues arise because the redirect does not work.
+    * Modern browsers will block redirection to sites that do not use TLS/SSL. This means the portal itself needs to be installed with a digital certificate issued by a CA that is trusted by the client's browser.
+* **Security Concern:** When using open wireless, data sent over the link is unencrypted. Users must ensure they:
+    * Send confidential web data only over HTTPS connections.
+    * Only use email, VoIP, and file transfer services with SSH/TLS enabled.
+    * Another option for users is to force a VPN connection. The VPN must use certificate-based tunneling to set up the inner authenticated method for encrypting traffic over the untrusted network.
+
+### Wireless Security Protocols (Evolution and Vulnerabilities)
+
+* **WEP (Wired Equivalent Privacy):**
+    * **Weaknesses:** Uses an RC4 cipher and a static key. Vulnerable to various replay attacks (e.g., IV attacks). Easy to crack. **Deprecated.**
+* **WPA (Wi-Fi Protected Access) 1:**
+    * **Improvements:** Uses RC4 cipher but introduces **TKIP (Temporal Key Integrity Protocol)** to mitigate replay attacks by dynamically changing session keys. Still vulnerable to some attacks.
+* **WPA2 (Wi-Fi Protected Access) (Current Standard for most deployments):**
+    * **Improvements:** Uses **AES-CCMP (Advanced Encryption Standard - Counter Mode with Cipher Block Chaining Message Authentication Code Protocol)** for stronger encryption. Offers two modes:
+        * **WPA2-Personal (PSK - Pre-Shared Key):** Uses a passphrase for authentication. Suitable for home/small office. Vulnerable to dictionary attacks if the PSK is weak.
+        * **WPA2-Enterprise:** Uses **EAP (Extensible Authentication Protocol)** to authenticate users via an **AAA (Authentication, Authorization, Accounting) server** (e.g., RADIUS, TACACS+). A unique Pairwise Master Key (PMK) is derived after authentication. Provides much stronger security, suitable for corporate environments.
+* **WPA3 (Wi-Fi Protected Access 3) (Latest Standard):**
+    * **Improvements:** Uses **AES-GCMP** (GCM-based encryption). Introduces **SAE (Simultaneous Authentication of Equals)** handshake to mitigate dictionary attacks against the pre-shared key. Provides **Protected Management Frames (PMF)** to protect management traffic from spoofing/disassociation attacks.
+    * **WPA3-Personal:** Stronger than WPA2-Personal.
+    * **WPA3-Enterprise:** Adds 192-bit encryption for sensitive data.
+
+---
+## 3. Configuring and Troubleshooting Wireless Security
+
+Wireless connections pose considerable risks unless properly secured with access controls. Identifying different wireless security methods, their configuration requirements, and troubleshooting common issues is crucial.
+
+**General Considerations:**
+
+* **Signal Strength vs. Security:** Strong signal does not equate to strong security.
+* **Interference:** Other wireless devices or even physical objects can interfere with Wi-Fi signals, impacting performance and potentially security.
+* **Rogue APs:** Unauthorized APs on the network can pose a significant security threat.
+* **Client Compatibility:** Ensure that all client devices support the chosen security standard (e.g., WPA3-only networks will not allow WPA2-only clients).
+
+**Troubleshooting Common Wireless Issues:**
+
+* **Connectivity Issues:**
+    * Incorrect SSID.
+    * Incorrect passphrase/security key.
+    * Outdated wireless adapter drivers.
+    * Channel interference (check channel settings on AP and surrounding networks).
+    * AP too far away (weak signal).
+    * Client device not supporting the chosen Wi-Fi standard or security protocol.
+* **Authentication Failures:**
+    * Incorrect username/password (for Enterprise modes).
+    * Misconfigured RADIUS server.
+    * Client certificates expired or misconfigured (for EAP-TLS).
+    * Time synchronization issues between client, AP, and authentication server.
+* **Performance Issues:**
+    * Co-channel interference (multiple APs on the same channel in proximity).
+    * Adjacent channel interference (overlapping channels, especially in 2.4 GHz).
+    * Legacy devices forcing the network into backward compatibility modes.
+    * Too many clients on one AP.
+    * Weak signal requiring lower data rates (DRS).
+    * Firmware issues on AP or client.
+
+## Guidelines for Deploying and Troubleshooting Wireless Networks
+
+Following these guidelines will lead to more robust and easily manageable wireless networks.
+
+1.  **Define Requirements:** Create a clear list of requirements (e.g., number of users, physical service area to cover, external connectivity needs).
+2.  **Consider Client Compatibility:** Consider the client devices you need to support and their compatibility requirements in terms of Wi-Fi standards (e.g., 802.11a/b/g, Wi-Fi 4/5/6).
+3.  **Site Survey and Heat Maps:**
+    * Obtain a blueprint or layout of the building.
+    * Use a **Wi-Fi Analyzer** to perform a **site survey** and generate **heat maps** of signal strength and channel utilization. This helps to mitigate dead zones and co-channel/adjacent channel interference.
+4.  **Determine AP Range:** Based on the chosen Wi-Fi technology, determine the effective range of the AP. This will help you better determine how many APs you will need to ensure adequate coverage for the space.
+5.  **Balance Client Density:** Balance the number of users who will have access to each AP. Ensure that the APs cover all required employees within their range, while also considering client capacity limits.
+6.  **Interference Check:** Tour the area within the range of the AP and check for any devices that will interfere with the wireless network (e.g., microwaves, cordless phones).
+7.  **Obstacle Clearance:** Ensure that there are no significant obstacles (e.g., metal, water, thick walls) in the path of the AP that could obstruct the wireless signal.
+8.  **AP Installation Steps (Vendor Specific but Common):**
+    * Connect the AP to the cabled network / distribution network (via a switch, often with PoE).
+    * Set the **SSID/ESSID** and an `802.11` beacon.
+    * Configure frequency bands (2.4 GHz, 5 GHz) and channel layout within each frequency band (e.g., 1, 6, 11 for 2.4 GHz).
+    * Adjust transmit power to reduce channel overlap and excessive packet loss errors (find the right balance for cell size).
+    * Configure the appropriate **encryption and authentication scheme** (e.g., WPA2/WPA3 Personal vs. WPA2/WPA3 Enterprise).
+    * If appropriate (for Enterprise mode), configure RADIUS and/or TACACS+ support for enterprise authentication.
+9.  **Real-World Testing:** Test the installation under real-world conditions to confirm it is appropriately sized, secure, and operational.
+10. **Periodic Site Surveys and Documentation:**
+    * Perform periodic site surveys to check RSSI at key locations and compare to previous performance levels.
+    * **Document every step** and establish a baseline for future installations and troubleshooting.
+
+Let's break down network types, characteristics, topology, and how they relate to performance, cabling, switching, and routing within the OSI model.
+
+---

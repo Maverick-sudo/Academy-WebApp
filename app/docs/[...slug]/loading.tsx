@@ -1,4 +1,13 @@
 export default function DocsLoading() {
+  const tocLineClasses = [
+    'w-[60%]',
+    'w-[70%] ml-3',
+    'w-[80%]',
+    'w-[60%] ml-3',
+    'w-[70%]',
+    'w-[80%] ml-3',
+  ]
+
   return (
     <div className="flex min-h-screen">
       {/* Left Sidebar Skeleton */}
@@ -55,11 +64,10 @@ export default function DocsLoading() {
         <div className="sticky top-4 p-6 animate-pulse">
           <div className="h-5 bg-slate-200 dark:bg-slate-800 rounded w-32 mb-4" />
           <div className="space-y-2">
-            {[...Array(6)].map((_, i) => (
+            {tocLineClasses.map((lineClass, i) => (
               <div
                 key={i}
-                className="h-4 bg-slate-200 dark:bg-slate-800 rounded"
-                style={{ width: `${60 + (i % 3) * 10}%`, marginLeft: `${(i % 2) * 12}px` }}
+                className={`h-4 bg-slate-200 dark:bg-slate-800 rounded ${lineClass}`}
               />
             ))}
           </div>

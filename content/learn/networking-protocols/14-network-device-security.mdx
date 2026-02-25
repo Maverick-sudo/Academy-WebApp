@@ -1,0 +1,215 @@
+---
+title: "Network Device Security"
+description: Implement security controls for network devices including AAA, ACLs, and hardening.
+---
+
+
+Port security allows you to control which source MAC address(es) are allowed to enter a switchport. If an unauthorized source MAC address enters a port, an action will be taken. The default action is ERR-Disabled.
+
+When enabled, port security on an interface with the default settings allows one MAC address. You can manually configure the allowed MAC address or change the maximum number of MAC addresses allowed. A combination of statically configured and dynamically learned MAC addresses is possible.
+
+Port security is useful because it allows network administrators to control which devices are allowed to access the network. By default, the switch will allow the first MAC address that enters the switchport interface. However, the network can be compromised with MAC address spoofing, which is why port security allows you to limit the MAC addresses allowed on each switchport. This can protect against attacks like spoofing and Man-in-the-Middle (MITM).
+
+The default state for Cisco switchports is `[Administrative mode: dynamic auto]`.
+
+**Important Considerations for Port Security:**
+* Port security can be enabled on access/trunk ports, but they **must be statically configured** as access/trunk.
+    * `Switchport mode access` (✓)
+    * `Switchport mode trunk` (✓)
+    * `Switchport mode dynamic desirable` (X)
+    * `Switchport mode dynamic auto` (X)
+
+**Configuration and Verification Commands:**
+* `switchport port-security`: Enables port-security on the selected interface.
+* `show port-security interface [interface_id]`: Displays port-security status of an interface.
+    * The default violation mode is `shutdown`. If an unauthorized frame enters the interface, it will be `ERR-Disabled`.
+    * Aging Timer of 0 minutes means the addresses will never age out.
+    * Aging Type: `Absolute` > If a default Aging Timer is configured manually on inactivity.
+    * Output also includes: `Max MAC Addr`, `Total MAC Addr`, `Configured Max Addr`, `Sticky MAC Addr`, `Latest Source Addr`, `Security Violation Counter`, and `Violation Mode`.
+    * The port status from `show port-security` command is `secure-shutdown`. From `show interface status`, it is `ERR-Disabled`.
+
+**To Recover from the ERR-Disabled State:**
+1.  Disconnect the unauthorized device; otherwise, it becomes the new secure MAC address on the interface.
+2.  `shutdown` and then `no shutdown` the interface.
+3.  Another less common way to recover is to use the `errdisable recovery` command.
+    * `show errdisable recovery`: Displays an output of all possible reasons an interface will be in an ERR-Disabled state (e.g., `arp-inspection`, `bpduguard`, `dtp-flap`, `Port Security`, `storm-control`, `unicast flood`, `stp-config mismatch`, etc.).
+    * `Errdisable Recovery Interval 180` (Default Time Out Interval: 300 seconds / 5 minutes). Every 5 minutes (by default timeout interval), all ERR-Disabled interfaces will be re-enabled if `errdisable recovery` has been enabled for the cause of the interface's disablement.
+    * `errdisable recovery cause "Err Disable Reason"`: Manual recovery using re-enablement on the interface.
+
+**Secure MAC Addresses:**
+* Dynamically learned secure MAC addresses will have a type of `DYNAMIC`.
+* Sticky static secure MAC addresses will have a type of `STATIC`.
+* `show mac-address-table secure`: Displays output of all secure MAC addresses.
+
+### Port Security Violation Modes
+
+There are 3 different violation modes that determine what the switch will do if an unauthorized frame enters an interface configured with port-security:
+
+1.  **Shutdown (Default):**
+    * Effectively shuts down the port by placing it in an `ERR-Disabled` state.
+    * The violation counter is set to 1 when the interface is disabled.
+    * Generates syslog/SNMP messages.
+2.  **Restrict:**
+    * The switch discards traffic from unauthorized MAC addresses, but the port is not disabled.
+    * The violation counter is incremented by 1 for each unauthorized frame.
+    * Generates a syslog/SNMP message each time an unauthorized frame from a MAC is detected.
+3.  **Protect:**
+    * The switch discards traffic from unauthorized frames.
+    * The interface is not disabled.
+    * It **doesn't** increment the counter, neither does it generate syslog/SNMP messages for unauthorized traffic.
+
+### Port Security Configuration Commands
+
+* `switchport port-security maximum "decimal"`: Configures the acceptable maximum number of learned MAC addresses.
+* `switchport port-security violation {restrict | protect | shutdown}`: Command to configure the violation mode.
+* `switchport port-security mac-address 0000.0000.000c`: Statically configures a secure MAC address.
+
+**Secure MAC Address Aging:**
+MAC addresses dynamically learned or statically configured on a port-security enabled port are called Secure MAC Addresses. By default, secure MAC addresses will not age out (Aging Time: 0 minutes). However, you can configure this timer:
+* `switchport port-security aging time "minutes"`
+* **Aging Types:**
+    * **Absolute Aging:** After a secure MAC address is learned, the aging timer starts, and the MAC address is removed after the timer expires, even if the switch continues receiving frames from that source. However, after the MAC address ages out, it can then immediately be re-learned if another frame with that source MAC address is received.
+    * **Inactivity Aging:** After a secure MAC address is learned, the aging timer starts but is reset every time a frame from that source MAC address is received on the interface. Therefore, as long as the switchport keeps receiving frames from that MAC address, it will never age out.
+    * `switchport port-security aging type {absolute | inactivity}`
+* Secure static MAC Aging (addresses configured with `switchport port-security mac-address`) is disabled by default; it can be enabled with `switchport port-security aging static`. The address would be removed from the MAC address table if it ages out.
+
+**Sticky Secure MAC Address Learning:**
+* `switchport port-security mac-address sticky`: When enabled on an interface, dynamically learned secure MAC addresses will be added to the running configuration like this: `switchport port-security mac-address sticky 0009.000b.000c`. These are considered both dynamic and static.
+* The 'Sticky' secure MAC addresses will never age out; you will need to save the running-config to the startup-config (`copy run start`) to make them truly permanent (else they will not be kept if the switch reboots).
+
+## DHCP Snooping
+
+DHCP Snooping is a security feature of switches used to filter DHCP messages received on **Untrusted** ports. DHCP Snooping only filters DHCP messages; non-DHCP messages are not affected. All ports are untrusted by default.
+
+### Uplink vs. Downlink — Why Trust Matters in DHCP Snooping
+
+In DHCP snooping, we manually define which ports are “trusted”.
+* **Uplink Ports = Trusted:** These are ports that connect to known infrastructure—typically:
+    * Your authorized DHCP server.
+    * Core switch/router that relays DHCP messages (via DHCP relay/Helper Address).
+    * These ports are trusted to send server-side DHCP messages (e.g., `DHCPOFFER`, `DHCPACK`, `DHCPNAK`).
+* **Downlink Ports = Untrusted:** These are ports that connect to end devices or access layer hosts (e.g., laptops, printers).
+    * Clients should only send Discover/Request messages—not server replies.
+    * If an untrusted client port sends server messages, it’s likely a rogue DHCP server, so DHCP snooping will block/drop those messages.
+
+### DHCP Message Filtering Logic
+
+DHCP Snooping filters messages by differentiating between DHCP Server Messages and DHCP Client Messages. With DHCP snooping enabled, any DHCP message received on an untrusted port is inspected and possibly discarded.
+
+1.  **Check if it’s a DHCP server message (e.g., `DHCPOFFER`, `DHCPACK`, `DHCPNAK`):**
+    * **Action:** Discard it.
+    * **Why?** Only trusted ports (typically uplinks toward legitimate DHCP servers) should be allowed to send server responses. Discarding such messages prevents rogue DHCP servers from assigning IPs, redirecting traffic, or performing MITM (man-in-the-middle) attacks. This is part of DHCP spoofing/MITM poisoning prevention.
+
+2.  **Check if it’s a DHCP client message (e.g., `DHCPDISCOVER`, `DHCPREQUEST`, `DHCPDECLINE`, `DHCPRELEASE`) is received, DHCP snooping performs the following validations:**
+    * **For `DISCOVER` or `REQUEST` messages:**
+        * **Check:** Verify that the frame's Source MAC Address and DHCP message CHADDR fields match.
+        * **Action:** MATCH - Forward; MISMATCH - Discard.
+        * **Why?** Prevents an attacker from spoofing MAC addresses or using multiple fake clients to exhaust the DHCP pool (a form of DoS attack/DHCP starvation attack). This check is not entirely perfect as an attacker can temporarily spoof the client Hardware Address (CHADDR) field.
+    * **For `RELEASE` or `DECLINE` messages:**
+        * **Check:** Verify if the frame's Source IP address matches the IP in the DHCP binding table entry.
+        * **Action:** MATCH - Forward; MISMATCH - Discard.
+        * **Why?** Prevents clients from releasing/declining IPs they don’t own, which could disrupt other users or mess with address management.
+
+### DHCP Snooping Binding Table
+
+A **DHCP Snooping binding table** is created when a client successfully leases an IP address from a DHCP server. This is a dynamically built list of:
+* MAC address
+* IP address
+* VLAN
+* Interface
+* Lease time
+
+This table is critical for verifying legitimate client behavior and for integration with features like IP Source Guard and Dynamic ARP Inspection (DAI).
+
+### DHCP Message Types and Broadcast/Unicast Behavior
+
+* **`DISCOVERY`** (Client $\rightarrow$ Server): Always Broadcast.
+    * Reason: The client does not yet have an IP address, so it sends to the broadcast IP 255.255.255.255 to reach any available DHCP server.
+* **`OFFER`** (Server $\rightarrow$ Client): Usually Broadcast (can be unicast under specific conditions).
+    * Reason: The client may not yet have a usable IP, so the server broadcasts the offer so the client can receive it even without a configured IP stack. However, if the server knows the client’s MAC address and the network allows it, it can unicast the offer directly to the client.
+* **`REQUEST`** (Client $\rightarrow$ Server): Broadcast (`ff:ff:ff:ff:ff:ff`, 255.255.255.255 from client, though a DHCP server identifier field is filled in the DHCP packet).
+    * Reason: The client still doesn’t have a valid IP and is notifying all DHCP servers of the chosen offer, so it uses broadcast again.
+* **`ACKNOWLEDGEMENT`** (Server $\rightarrow$ Client): Either Broadcast or Unicast.
+    * Broadcast if it’s a new lease and the client has no IP yet.
+    * Unicast if the client already has an IP and is renewing the lease (typically during the T1 or T2 timer stages). The client includes its current IP and can receive unicast packets now.
+* **`NAK` (Negative Acknowledgment):** Opposite of Acknowledgment, used to decline a client's request.
+* **`RELEASE`:** Used to tell the server that the client no longer requires its IP address.
+* **`DECLINE`:** Used to decline the IP address offered by the DHCP server.
+
+### DHCP Snooping Configuration Commands
+
+**DHCP Snooping Configuration Scope:** DHCP snooping is enabled per VLAN because:
+* Each VLAN can represent a separate broadcast domain and may have its own DHCP configuration.
+* The command `ip dhcp snooping vlan <vlan-id>` ensures that DHCP snooping inspects traffic only within that VLAN, not globally.
+* You must explicitly trust interfaces (e.g., uplinks).
+
+* `ip dhcp snooping`: Enables DHCP snooping globally.
+* `ip dhcp snooping vlan [vlan_id]`: Enables it on each VLAN (VLANs are segmented groups of switchport interfaces).
+* `interface [interface_id]` followed by `ip dhcp snooping trust`: Configures the selected interface as a trusted port. By default, all ports are untrusted. (Usually, the interface represents uplink ports.)
+* **Note:** DHCP snooping does not block static IP assignments by default. If a rogue client uses a static IP, that may bypass some controls unless you pair DHCP snooping with IP Source Guard. Always remember to enable DHCP snooping globally before enabling it on VLANs.
+
+**Rate Limiting DHCP Messages:**
+* Rate limiting DHCP messages on untrusted ports helps mitigate DHCP exhaustion attacks where a malicious user floods the switch with fake `DHCPDISCOVER` messages. This limits the allowed number of DHCP messages per second, which is plenty for normal clients but restricts spamming attempts.
+* `ip dhcp snooping limit rate "decimal"`: Prevents against DHCP Exhaustion Attack. DHCP Snooping rate limiting is disabled on all interfaces by default.
+* `show ip dhcp snooping binding`: Displays the binding table - created after there's a DHCP entry.
+
+**Error-Disabled State from DHCP Snooping Rate Limiting:**
+DHCP Snooping can limit the rate at which DHCP messages are allowed to enter a switchport interface. If the rate of DHCP messages crosses the configured limit, the interface is `ERR-Disabled`. Like port security, the interface can be manually re-enabled or automatically recovered with `ERRDisable Recovery`.
+* Automatically, if `errdisable recovery` is enabled for the specific reason: `errdisable recovery cause dhcp-rate-limit`.
+* To recover from the `ERR-Disabled` state manually: `shutdown` and then `no shutdown`.
+
+## DYNAMIC ARP INSPECTION (DAI)
+
+**Address Resolution Protocol (ARP)** is used to learn the MAC Address of another device with a known IP Address. For example, a PC will use ARP to learn the MAC address of its Default Gateway to communicate with external networks. ARP uses 2 messages: Request & Reply.
+A **Gratuitous ARP (G.ARP)** message is an ARP Reply that's sent without receiving any ARP Request. It allows other devices to learn the MAC address of the sending host without having to send ARP Requests. Some devices auto-send G.ARP messages when an interface is enabled, IP/MAC address is changed, etc.
+
+**DAI (Dynamic ARP Inspection)** is a security feature of switches that is used to filter ARP messages received on **untrusted ports**. DAI doesn't inspect messages received on trusted ports; these ARP messages are forwarded normally. DAI only filters ARP messages; non-ARP messages aren't inspected or affected.
+
+All ports are untrusted by default. Typically, all ports connected to other network devices (switches/routers) should be configured as **TRUSTED**, while interfaces connected to End Hosts should remain **UNTRUSTED**.
+
+Similar to DHCP poisoning, **ARP poisoning** involves an attacker manipulating a target's ARP tables so traffic is sent to the attacker. To do this, the attacker can send Gratuitous ARP Replies using a spoofed device's IP address. This leads to other devices in the network receiving the G.ARP and updating their ARP tables, causing them to send traffic to the attacker instead of the target destination.
+
+DAI prevents against such ARP poisoning attacks by inspecting the Sender/Source MAC & IP address fields of ARP messages received on untrusted ports and checks that there is a matching entry in the DHCP Snooping Binding Table. If there is a matching entry, the ARP message is forwarded; no matching entry means it is discarded.
+
+DAI operations are usually reliant on DHCP snooping for its binding table feature to check entries. Another option is to use **ARP ACLs**, which can be manually configured to map IP Addresses to MAC Addresses for DAI to check entries. This is useful for hosts that don't use the DHCP Snooping security feature.
+
+### What Are ARP ACLs?
+
+ARP ACLs match Layer 2 information: IP and MAC address pairs. They're used only by features like Dynamic ARP Inspection (DAI). Unlike Layer 3 ACLs (which match IP, ports, protocols), ARP ACLs are not used to filter routed traffic. ARP ACLs are a must for non-DHCP-bound static IP clients.
+
+**ARP ACL Configuration Example:**
+```
+arp access-list DAI_LIST
+  permit ip host 192.168.1.10 mac host aabb.ccdd.eeff
+  deny ip any mac any
+interface FastEthernet0/1
+  ip arp inspection filter DAI_LIST vlan 10
+```
+
+### Why ARP ACLs Are Bound to VLANs
+
+DAI operates at Layer 2, and VLANs define Layer 2 broadcast domains. Since ARP requests and replies are broadcast-based protocols, they only matter within the VLAN (the broadcast domain). That’s why:
+* DAI is enabled per VLAN, not per interface.
+* ARP ACLs are applied to VLANs, ensuring only valid ARP traffic is allowed within that VLAN.
+* In real networks: ARP ACLs are only used when DHCP snooping isn't an option. Most environments rely on DHCP Snooping to build dynamic IP-MAC bindings for DAI. ARP ACLs are typically used for static IP devices (e.g., servers, printers) that don’t get IPs via DHCP.
+
+#### DAI Configuration Commands
+
+* `ip arp inspection vlan [vlan_id]`: Enables DAI on a VLAN/on each VLAN in case of multiple VLANs.
+* `interface [interface_id]` or `interface range [interface_range]` followed by `ip arp inspection trust`: Manually configures a port as trusted.
+* `show ip arp inspection interfaces`: Displays an output of interfaces and their trust state with rate.
+* `ip arp inspection limit rate X burst interval Y`: Configures rate limiting at X packets in Y seconds.
+
+**DAI Rate Limiting:**
+Like DHCP Snooping, Dynamic ARP Inspection also supports Rate-limiting to prevent attackers from overwhelming the switches with ARP message frames. Even if the attacker's messages are blocked, they can overload the switch's CPU with ARP messages.
+* DAI Rate limiting is enabled on UNTRUSTED ports by default with a rate of 15 packets per second. It is disabled on trusted ports by default.
+* DHCP Snooping Rate Limiting is configured as 'x packets per second'. DAI Burst Interval allows you to configure it this way $\rightarrow$ ‘X packets per Y seconds' for flexibility.
+
+**Additional Validation Checks for DAI:**
+The command `ip arp inspection validate {src-mac | dst-mac | ip}` is used in Dynamic ARP Inspection (DAI) to configure additional validation checks on ARP packets received on untrusted ports. While DAI's primary function is to compare ARP packets against the DHCP snooping binding table or static ARP ACLs, these validate options add more granular integrity checks to prevent specific types of ARP spoofing attacks.
+You can combine these options in a single command, for example: `ip arp inspection validate src-mac dst-mac ip`
+
+**Error-Disabled State from DAI Rate Limiting:**
+If ARP messages are received faster than the specified rate, the switchport interface will be `ERR-Disabled`.
+* Automatically, if `errdisable recovery` is enabled for the specific reason: `errdisable recovery cause arp-inspection`.
+* To recover from the `ERR-Disabled` state manually: `shutdown` and then `no shutdown`.

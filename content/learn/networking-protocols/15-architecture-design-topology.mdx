@@ -1,0 +1,282 @@
+---
+title: "Architecture, Design, Topology"
+description: Design scalable network architectures with proper topology and redundancy.
+---
+
+
+### LAN Architectures & Campus LAN Design
+
+Network topologies describe the arrangement of elements (links, nodes, etc.) of a communication network. Common topologies include Mesh, Partial Mesh, Hybrid Mesh, and Star Topology.
+
+#### 1. The Two-Tier LAN Design
+
+The Two-Tier LAN Design consists of 2 hierarchical layers:
+* **Access Layer:** This is the layer that end hosts connect to. Access Layer Switches typically have many ports. QoS marking is typically done here (early stage in a packet's life), and security services like Port Security, DAI (Dynamic ARP Inspection), and DHCP snooping are implemented. Switchports might be PoE-enabled for wireless APs, IP phones, etc.
+* **Distribution Layer:** This layer aggregates connections from the Access Layer, providing fault-tolerant interconnections between different Access Blocks. It's typically placed at the border between Layer 2 and Layer 3 (routing). Distribution Layer switches implement traffic policies, routing boundaries, filtering, and QoS. They connect to services like WAN and the Internet. In a collapsed core design, the Distribution Layer is sometimes called the Core-Distribution Layer. Connections between Distribution Layer 3 switches are Layer 3. Routing information can be shared via OSPF, for example.
+
+This design is also known as a **collapsed core design** because it omits a layer found in the Three-Tier Design.
+
+**Topology within a Two-Tier Design:**
+* At the Access Layer, many devices connect to Access Switches in a **Star Topology** (with DAI, Port Security, DHCP snooping implemented).
+* At the intersection between the Access Layer and the Distribution Layer, we typically have a **Partial Mesh Topology** (leveraging STP and HSRP for redundancy).
+* Between the Distribution Layer 3 Switches (if multiple), a **Full Mesh Topology** might be used for redundancy and load balancing.
+* All together, this forms a **Hybrid Topology**.
+
+In larger networks with many Distribution Layer switches (e.g., separate building facilities in a campus or a research lab), the number of mesh connections required between Distribution L3 Switches grows rapidly, leading to scalability complications. Cisco recommends adding a Core Layer if there are more than 3 Distribution Layers in a single location. Each Distribution Layer switch then connects to a Core Layer, eliminating the need for full mesh interconnection between them.
+
+#### 2. Three-Tier LAN Design
+
+The Three-Tier LAN Design consists of 3 hierarchical layers: Access, Distribution/Aggregation, and Core.
+* **Core Layer:** This layer connects Distribution Layers together in large LAN networks. The focus is speed and fast transport. CPU-intensive operations such as security, QoS classification, and marking should be avoided at this layer. Connections are all Layer 3; therefore, there's no use for Spanning Tree Protocol. The Core Layer should maintain connectivity throughout the LAN even if devices fail. They connect to the Internet/Edge Router/Top Router used in traditional on-premises data centers (often using LACP, PAgP for link aggregation). This is also referred to as **North-South traffic**.
+
+#### 3. Spine & Leaf Architecture
+
+The Spine & Leaf Architecture is an advanced Two-Tier Design that provides better support for SDN Overlay Networks. Traditional data center designs used the Three-Tier Design, but it worked well when most traffic was North-South (traffic going in or out of the data center) and didn't function well for **East-West Traffic** (traffic between servers in the same part of the network).
+
+With the precedence of virtual servers, applications are often deployed in a distributed manner, which increases the amount of East-West traffic in a data center. The traditional Three-Tier designs led to bottlenecks in bandwidth as well as variability in server-to-server latency depending on the path the traffic takes. To resolve this, Spine-Leaf Architecture has become prominent in data centers.
+
+**Key characteristics of Spine & Leaf Architecture:**
+* Every Leaf switch is connected to every Spine Switch.
+* Every Spine Switch is connected to every Leaf Switch.
+* Leaf switches do not connect to other Leaf switches.
+* Spine switches do not connect to other Spine switches.
+* End hosts only connect to Leaf switches.
+
+The path taken by traffic is chosen randomly to balance the load, and each end host is separated by the same number of hops, providing consistent latency.
+
+### WAN Architecture Design
+
+To extend networks over a large geographical area, we use WANs (Wide Area Networks). Although internal traffic can be considered WAN, the term WAN is typically used to refer to an enterprise's private connections that link their offices, data centers, and other sites together. Over a public or shared network like the Internet, VPNs (Virtual Private Networks) can be used to create private connections between multiple LANs to a centralized WAN in a star topology style known as **Hub and Spoke Architecture**.
+
+Each LAN can be connected to the WAN data center via a Telco/Comms/Leased Line in a Star Topology. This is similar to how on-premise data centers/LANs connect to a Cloud Provider WAN, like ExpressRoute or Direct Connect.
+
+#### 1. Leased Line
+
+A Leased Line is a dedicated physical link, typically connecting 2 sites, or multiple sites to a central hub. There are various standards that provide different speeds, and different standards are available in different countries.
+Leased lines use Serial Connections (Point-to-Point Protocol and High-Level Data Link Control - HDLC) Encapsulation. Due to the higher cost, higher installation lead time, and slower speeds of leased lines, Ethernet WAN technologies are becoming more popular. A leased line is dedicated, so there is no need for MPLS labels.
+
+#### 2. Multiprotocol Label Switching (MPLS) Circuits
+
+MPLS networks are shared infrastructure because many customers/enterprises connect to and share the same infrastructure to make WAN Connections. The Label Switching in the term MPLS allows VPNs to be created over the MPLS infrastructure through the use of **LABELS**. Labels are used to separate the traffic of different customers as it travels over the shared infrastructure, ensuring it doesn't mix or congest with traffic from other customers.
+
+* **CE Router (Customer Edge Router):** Customer Premise Equipment (CPE) at the customer's site.
+* **PE Router (Provider Edge Router):** Connects directly to CE Routers and is the entry/exit point of the MPLS network for customer traffic.
+* **P Router (Provider Core Router):** Forms the internal network infrastructure of the service provider's network but doesn't connect directly to the Customer Edge Routers.
+
+When frames are received on the PE Routers from the CE Routers, they add a label to the frame. This label is placed in-between the Layer 2 Ethernet Header and the Layer 3 IP layer (effectively, Layer 2.5). These labels are used to make forwarding decisions within the Service Provider Network. MPLS Routers use the MPLS Label to decide where to forward the packet rather than a Routing table. CE Routers do not use MPLS; it's only used by the Provider Edge and Provider Core Routers.
+
+When using MPLS VPNs, the CE and PE Routers peer using OSPF to share routing information. The customer may even decide to use static routes with the PE Router as the next-hop.
+
+A Layer 2 MPLS VPN could be used in place of OSPF. In this manner, the CE-PE do not form peers. The Service Provider network is entirely transparent to the CE Routers. In effect, or logically, it's like the 2 CE Routers are directly connected; their WAN Interfaces will be in the same subnet. If a routing protocol is used, the 2 CE Routers will peer directly with each other, making the PE/P Routers act as one big switch.
+
+MPLS stands apart from other WAN Services due to its provision of effective QoS features. It provides a Layer 3 service to customers. MPLS itself is sometimes called a Layer 2.5 protocol because it adds the MPLS Header between the data-link header (Layer 2) & the IP header (Layer 3).
+
+The SP's MPLS VPN Network (between the Provider Edge Routers - PE and the Provider Core Routers - P) will use a routing protocol to build routing protocol relationships with customer routers (CE). It will learn customer subnets/routes with those routing protocol relationships (e.g., OSPF, EIGRP, RIPv2). It will advertise a customer's routes with a routing protocol so that all routers that a customer connects to the MPLS VPN can learn all routes as advertised through the MPLS VPN Network.
+
+All the Customer Edge Routers (CE) need to learn routes from the other CE routers. However, a CE Router does not form routing protocol neighbor relationships directly with other CE Routers. The process solely relies on the Provider Edge Routers (PE) and their PE-CE routing protocol neighborhood. To advertise the customer routes between the PE Routers, the PE Routers use another routing protocol along with a process called **Route Redistribution**. This happens when one router takes routes from one routing protocol process and injects them into another. Redistribution is needed when the PE-CE routing protocol is not BGP.
+
+A Router PE.1 might sit in one Point of Presence (PoP) but connect to different customers. Likewise, Router PE.2 might connect to many of those same customers. These Routers use **VRF (Virtual Routing and Forwarding)** to facilitate turning one single router into multiple virtual routers, each with its own Routing Table.
+**MP-BGP (Multiprotocol BGP)** can mark which routes are from which customers so that only the correct routes are advertised to each CE router for that customer. WAN Routes on the CE Routers refer to the neighboring PE Router as the next-hop router, with each CE Router becoming a routing protocol neighbor with the SP's PE Router on the other end of the Access Link.
+
+---
+
+### Multi-Protocol Label Switching (MPLS)
+
+When it comes to Wide Area Network (WAN) connectivity, solutions based on Generic Routing Encapsulation (GRE) or Dynamic Multipoint VPN (DMVPN) that utilize the public internet as the transport network can suffer from unpredictable performance levels. Many organizations, especially in corporate settings, prefer **Multi-Protocol Label Switching (MPLS)** as a means of establishing private links with guaranteed service levels.
+
+MPLS operates as an **overlay network**, meaning it can configure point-to-point or point-to-multipoint links between network nodes regardless of the underlying physical and data-link layer topologies. This makes it a very flexible and powerful solution for WAN providers.
+
+#### How MPLS Works
+
+Imagine you have two customer premises (CPE) routers at different sites, Site I and Site II, that need to communicate through an MPLS provider's cloud.
+
+1.  **Label Edge Router (LER) - Ingress:** The CPE Router at Site I is attached to the service provider's MPLS cloud via an **Ingress Label Edge Router (LER)**.
+2.  **Label Insertion (Push):** The Ingress LER acts as the entry point into the MPLS network. It inspects the incoming packet's Layer 3 header (e.g., IPv4 or IPv6) and, based on forwarding equivalence classes (FECs) and pre-configured policies, **inserts (pushes) a shim header (containing a label)** into each packet.
+3.  **Label Switched Routers (LSRs):** The packet, now with its label, is forwarded to an **Label Switched Router (LSR)** within the MPLS cloud.
+4.  **Label Switched Path (LSP):** Each LSR in the path examines only the label (the "shim"). It determines the **Label Switched Path (LSP)** for the packet, based on the type of data, network congestion, and other traffic engineering parameters determined by the service provider. Crucially, it uses this label to forward the packet to its next neighbor, rather than performing complex Layer 3 header lookups. This process is called **label swapping** (the LSR removes the incoming label and applies a new outgoing label). By avoiding costly routing table lookups at each hop, MPLS significantly speeds up packet forwarding.
+5.  **Label Edge Router (LER) - Egress:** The labeled packet continues traversing the LSRs until it reaches the **Egress LER** (the exit point from the MPLS network).
+6.  **Label Removal (Pop):** The Egress LER **removes (pops) the label** from the packet and then delivers the original Layer 3 packet to the destination CPE Router (e.g., at Site II).
+
+#### Benefits of MPLS
+
+MPLS allows WAN providers to offer various robust solutions for enterprise networking requirements:
+
+* **Guaranteed Service Levels:** MPLS providers can apply traffic shaping policies to communication between enterprise LANs and data centers. This enables them to guarantee specific service levels, ensuring predictable performance for critical applications.
+* **Enhanced Reliability and Redundancy:** Providers can implement link redundancy within their MPLS cloud, making connections much more reliable than those over the open Internet.
+* **Site-to-Site VPNs:** A primary use of MPLS is to create site-to-site VPNs to interconnect LANs or connect branch offices to a data center.
+* **Traffic Isolation:** Traffic passing over an MPLS VPN is isolated from any other customer traffic or public internet traffic, enhancing security and privacy. **It is crucial to understand that MPLS VPNs do NOT use the public internet as the transport network; they operate over the service provider's private infrastructure.**
+* **Flexible Access Methods:** Different sites can use any available access method (e.g., DSL, cellular, leased line, Ethernet) to connect to the MPLS cloud.
+* Many protocols can be used to connect to an SP's MPLS Network: Metro Ethernet / Fiber Links, Cable Provider Links (CATV), Serial Lines, 4G/5G, Digital Subscriber Line (DSL).
+* **Flexible Topologies:** Sites can utilize point-to-point or point-to-multipoint topologies as required, offering greater design flexibility than traditional VPNs.
+
+### Metro Ethernet
+
+**Metro Ethernet (MetroE)** service uses Ethernet physical links to connect the customer's device to the service provider's device. The service is a Layer 2 service in that the WAN provider forwards Ethernet frames from one customer device to another, acting as though the WAN service was created by one Ethernet switch. Each Customer Edge device (be it a Router or Layer 3 Switch) connects to the service with (at least) one Ethernet link (preferably Fiber Ethernet standards) rather than connecting directly to other customer (enterprise) routers. The physical link between the customer and the SP is called an Access Link, or when using Ethernet, an Ethernet Access Link.
+
+#### MetroE Service Types (Topology)
+
+* **Ethernet Line Service (point-to-point):** Two Customer Premise Equipment can exchange frames. This is similar in concept to a leased line.
+* **Ethernet LAN Service (full-mesh):** Acts like a LAN; all devices can send frames to all other devices. All devices have to be in the same subnet and become OSPF neighbors.
+* **Ethernet Tree Service (Hub-n-Spoke):** A central site can communicate to a defined set of remote sites, but the remote sites cannot communicate directly with each other. This is also referred to as "partial mesh, point-multipoint, hub-and-spoke."
+
+## Network Types and Characteristics
+
+A network comprises **nodes** and **links**.
+* **Intermediate system nodes** perform a forwarding function (e.g., routers, switches).
+* **End system nodes** are those that send and receive traffic, classified either as clients or servers.
+
+* **Server:** A server makes network applications and resources available to other hosts.
+* **Client:** A client requests and consumes the services provided by the servers.
+
+### Client-Server Network
+
+* A network where some end system nodes act mostly as servers.
+* Servers are typically more powerful computers.
+* Application services and resources are centrally provisioned, managed, and secured.
+* This model is common in corporate environments.
+
+### Peer-to-Peer Network
+
+* A network where each end system acts as both a client and a server.
+* This is a decentralized model where the provisioning, management, and security of services and data are distributed around the network.
+* Common in small home networks or file-sharing applications.
+
+### Network Type by Scope and Size
+
+A network type refers primarily to its **scope** and **size**.
+* **Size:** Can be measured by the number of nodes.
+* **Scope:** Refers to the area over which nodes sharing the same network are distributed.
+
+1.  **Local Area Network (LAN):**
+    * Describes a network type confined to a single geographical location (e.g., a home, small office/home office (SOHO), small/medium enterprise (SME) network, enterprise LAN, or data center).
+    * The term **Campus Area Network (CAN)** is sometimes used for a LAN that spans multiple nearby buildings within a limited geographical area.
+    * The term **Wireless Local Area Network (WLAN)** is used for LANs based on wireless technology (e.g., Wi-Fi hotspots).
+
+2.  **Wide Area Network (WAN):**
+    * Describes a "network of networks" connected by long-distance links.
+    * A WAN connects two or more large LANs.
+    * WANs are likely to use leased network devices and links, operated and managed by a service provider.
+    * The term **Metropolitan Area Network (MAN)** is sometimes used for a network smaller than a WAN in scope, typically a city-wide network encompassing multiple different buildings.
+
+3.  **Personal Area Network (PAN) and Wireless PAN (WPAN):**
+    * Gaining traction as the Internet of Things (IoT) evolves.
+    * Refer to close-range network links a person might establish between a variety of wearable or portable devices (e.g., Bluetooth devices, smartwatches, fitness trackers).
+
+---
+
+## Network Topology
+
+A **network topology** describes the physical or logical structure of the network in terms of **nodes** and **links**.
+
+1.  **Physical Structure:** Describes the actual placement of nodes and how they are connected by the network media (e.g., directly connected via a single cable, or connected to a switch via separate cables).
+2.  **Logical Structure:** Describes the flow of data through the network, irrespective of the physical structure. Nodes share a logical layout in which they can send messages to one another.
+
+### Common Topologies
+
+* **Point-to-Point Link:**
+    * The simplest type of topology where a single link is established between two nodes (a 1:1 relationship).
+    * Point-to-point links can be a physical or logical topology. For example, in a WAN, two routers might be physically linked via multiple intermediate networks and physical devices but still share a logical point-to-point link (e.g., a VPN tunnel).
+
+* **Star Topology:**
+    * Each endpoint node is connected to a central forwarding node (e.g., a Layer 1 hub, Layer 2 switch, or Layer 3 router).
+    * The central node mediates communications between endpoints.
+    * **Advantages:**
+        * Easy to reconfigure (add/remove nodes).
+        * Easy to troubleshoot because all data goes through a central point, which can be used to monitor and manage the network.
+        * Faults are isolated to the central node or the link to a specific endpoint.
+    * **Disadvantages:**
+        * A single point of failure at the central device.
+        * Requires more cabling than a bus or ring.
+    * **Hub-and-Spoke:** This terminology is often used when speaking about WANs with remote branches (spokes) connecting to a central office (hub).
+    * **Ethernet deployments:** Modern Ethernet using switches (not hubs) often appear as a **physical star** but operate as a **logical bus** because switches still share a single broadcast domain by default unless VLANs are used. (Note: Deprecated physical bus topology is no longer used on LANs).
+
+* **Mesh Topology:**
+    * Each endpoint device has a point-to-point link with every other device on the network.
+    * Commonly used in WANs, especially public networks like the Internet.
+    * **Fully Connected Mesh:** Impractical for large networks as the number of links required is expressed as $n(n-1)/2$, where $n$ is the number of nodes.
+    * **Hybrid Approach (Partial Mesh):** Often implemented, with only the most important devices interconnected in the mesh, perhaps with extra links for fault tolerance and redundancy.
+    * **Advantages:**
+        * Provides excellent redundancy and fault tolerance.
+        * Packets can take multiple routes through the network, providing resilience if some nodes or links fail.
+        * Nodes can forward packets to a destination by learning the network topology.
+    * **Disadvantages:**
+        * Complex to implement and manage.
+        * High cabling costs for full mesh.
+
+* **Ring Topology:**
+    * Each node is wired to its neighbor in a closed loop.
+    * Often employs the use of a **token** during transmissions (e.g., Token Ring, FDDI - Fiber Distributed Data Interface, though these are largely obsolete).
+    * A node receives a transmission from its upstream neighbor and passes it to its downstream neighbor until the transmission reaches its intended destination.
+    * **Advantages:**
+        * Each node can regenerate the transmission, improving the potential range of the network.
+        * Can cover long distances.
+    * **Disadvantages:**
+        * A break in the ring causes the whole network to fail.
+        * **Dual Counter-Rotating Rings** can be used to provide fault tolerance, allowing the system to continue operating if there is a break in one ring.
+
+* **Bus Topology:**
+    * All nodes attach directly to a single cable segment (the "bus cable").
+    * Signals travel down the bus in both directions from the source and are received by all nodes connected to the segment.
+    * The bus is terminated at both ends of the cable to absorb the signal when it has passed all connected devices.
+    * Nodes use **collision detection** (e.g., in early Ethernet) to find opportunities to transmit, as they all share the bandwidth of the media. A device recognizes and processes packets addressed to its hardware address or a broadcast address, otherwise, it ignores the packet.
+    * **Disadvantages:**
+        * No longer in widespread use due to limitations on the maximum number of nodes on a segment of cable.
+        * Difficult to reconfigure, as adding or removing nodes can disrupt the entire network.
+        * Difficult to troubleshoot, as a cable fault could be anywhere on the segment.
+        * A single point of failure if the bus cable is damaged.
+    * A bus network allowed cables to be connected using repeaters (which are not considered nodes, just passive devices amplifying signals).
+    * A **logical bus topology** is one in which nodes receive the data transmitted all at the same time, regardless of the physical wiring layout (e.g., Ethernet using a hub). However, only one node can transmit at a time, leading to collisions.
+
+* **Hybrid Topology:**
+    * Anything using a mixture of point-to-point links or star, mesh, ring, or bus physical or logical topologies.
+    * For example, a **Physical Star - Logical Bus** (modern Ethernet with switches by default).
+    * Hybrid topologies are often used to implement redundancy and fault tolerance or when connecting local area networks (LANs) to Wide Area Networks (WANs).
+
+### Hierarchical Topologies (Common in Enterprise Networks)
+
+* A **Hierarchical Star / Tree Topology** establishes a parent/child relationship between layers in the hierarchy. Corporate networks are often designed using this overall hierarchy.
+* **Links between nodes in the Tree** are referred to as **backbones or trunks** because they aggregate and distribute traffic from multiple areas of the network.
+
+* **Hierarchical Star - Mesh:**
+    * Alternatively, parent nodes or nodes at the top of the hierarchy can be configured in a partial or full mesh for redundancy.
+    * Switches lower in the hierarchy establish a star topology that connects end systems to the network.
+    * This is commonly implemented in a **Three-Tiered Switching Architecture** (Access, Distribution, Core layers).
+
+* **Star of Stars (or Hub-and-Spoke Topology):**
+    * A WAN might be configured as a hub-and-spoke between a central office (hub) and branch offices (spokes).
+    * Each site (hub and spokes) then implements a star topology locally to connect end systems.
+
+* **Star with Rings:**
+    * Alternatively, a ring topology might be used to connect geographically separate sites.
+    * Each site then implements a star topology locally to connect end systems.
+
+---
+
+### How Network Topology Affects Performance
+
+Network topology significantly impacts a network's performance, reliability, and scalability:
+
+* **Star Topology (Switched Ethernet):**
+    * **Performance:** Excellent. Each device has a dedicated connection to the switch, meaning no collisions between devices connected to different ports. Bandwidth is not shared on a segment-by-segment basis.
+    * **Reliability:** High. A failure of one device or its cable doesn't affect others. The central switch is a single point of failure, but modern switches are highly reliable.
+    * **Scalability:** Good. Easy to add new devices by connecting them to an available port.
+* **Mesh Topology:**
+    * **Performance:** Very high. Multiple paths for data allow for load balancing and avoiding congested links.
+    * **Reliability:** Extremely high. Redundant paths ensure network continues to operate even if multiple links or nodes fail.
+    * **Scalability:** Good, but full mesh becomes impractical very quickly as 'n' increases due to cabling and port requirements. Partial mesh scales better.
+* **Ring Topology (Historical):**
+    * **Performance:** Deterministic access (e.g., token passing) can provide predictable performance, but adding devices could slow down the ring.
+    * **Reliability:** Low for a single ring (one break can take down the whole network). High for dual rings.
+    * **Scalability:** Limited, adding/removing devices typically requires taking down the ring.
+* **Bus Topology (Historical):**
+    * **Performance:** Poor. Shared medium means only one device can transmit at a time, leading to collisions and significant performance degradation as more devices are added.
+    * **Reliability:** Low. A single cable break takes down the entire segment.
+    * **Scalability:** Very poor. Limited number of devices and difficult to add/remove.
+* **Hybrid/Hierarchical Topologies:**
+    * **Performance:** Optimized. Allows for specialized equipment at different layers (e.g., high-speed core routers, high-density access switches) to handle traffic efficiently.
+    * **Reliability:** Very high. Redundancy can be built into higher layers (e.g., mesh at core/distribution) while simplifying access.
+    * **Scalability:** Excellent. Networks can be expanded by adding more access layer devices or entire new network modules.
+
+In summary, choosing the right network type and topology, combined with appropriate Layer 1, 2, and 3 functions, is critical for designing a network that meets specific performance, reliability, security, and scalability requirements.
+
+---

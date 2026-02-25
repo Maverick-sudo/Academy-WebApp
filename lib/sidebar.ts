@@ -89,6 +89,20 @@ export async function generateSidebarStructure(): Promise<SidebarItem[]> {
       type: 'file',
       icon: '🏠',
     },
+    {
+      id: 'docs-home',
+      label: 'Docs',
+      href: '/docs/study-notes',
+      type: 'file',
+      icon: '📘',
+    },
+    {
+      id: 'learn',
+      label: 'Learn',
+      href: '/learn',
+      type: 'file',
+      icon: '🎓',
+    },
   ]
 
   for (const repo of repositories) {

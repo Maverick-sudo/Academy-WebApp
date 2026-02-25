@@ -16,6 +16,19 @@ interface TocContainerProps {
 export default function TocContainer({ headings }: TocContainerProps) {
   const [activeId, setActiveId] = useState<string>('')
 
+  const getPaddingClass = (level: number) => {
+    switch (level) {
+      case 2:
+        return 'pl-2'
+      case 3:
+        return 'pl-5'
+      case 4:
+        return 'pl-8'
+      default:
+        return 'pl-2'
+    }
+  }
+
   if (headings.length === 0) return null
 
   return (
@@ -29,7 +42,7 @@ export default function TocContainer({ headings }: TocContainerProps) {
           {headings.map((heading, index) => (
             <li
               key={`${heading.id}-${index}`}
-              style={{ paddingLeft: `${(heading.level - 2) * 12 + 8}px` }}
+              className={getPaddingClass(heading.level)}
             >
               <a
                 href={`#${heading.id}`}

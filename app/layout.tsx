@@ -6,6 +6,10 @@ import { getSidebarStructure } from '@/lib/sidebar'
 import LayoutClient from '@/components/LayoutClient'
 import ServiceWorkerUpdate from '@/components/ServiceWorkerUpdate'
 import ClientProviders from '@/components/ClientProviders'
+import { WebVitalsReporter } from '@/components/WebVitalsReporter'
+import ReadingProgress from '@/components/ReadingProgress'
+import KeyboardShortcuts from '@/components/KeyboardShortcuts'
+import BackToTop from '@/components/BackToTop'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -41,7 +45,11 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
+        <WebVitalsReporter />
         <ClientProviders />
+        <ReadingProgress />
+        <KeyboardShortcuts />
+        <BackToTop />
         {process.env.NODE_ENV === 'production' && <ServiceWorkerUpdate />}
         <ThemeProvider>
           <LayoutClient sidebarData={sidebarData}>

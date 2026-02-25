@@ -20,13 +20,16 @@ export default function Mermaid({ code }: MermaidProps) {
   }
 
   return (
-    <div className="relative my-6">
-      <img
-        src={svgPath}
-        alt="Mermaid diagram"
-        className="max-w-full h-auto mx-auto"
-        loading="lazy"
-      />
+    <div className="relative my-6 not-prose">
+      <div className="max-h-[600px] overflow-auto rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4">
+        <img
+          src={svgPath}
+          alt="Mermaid diagram"
+          className="max-w-full h-auto mx-auto"
+          style={{ maxHeight: '550px', objectFit: 'contain' }}
+          loading="lazy"
+        />
+      </div>
     </div>
   )
 }

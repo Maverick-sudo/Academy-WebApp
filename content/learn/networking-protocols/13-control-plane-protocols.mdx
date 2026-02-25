@@ -1,0 +1,241 @@
+---
+title: "Control Plane/Layer Protocols"
+description: Understand routing protocols, BGP, OSPF, EIGRP, and network control mechanisms.
+---
+
+
+Quality of Service (QoS) refers to tools that network devices can use to manage several related characteristics of what happens to a packet while it flows through a network. Specifically, these tools manage:
+* **Bandwidth:** The capacity usage of the link.
+* **Delay (Latency):** The time taken for one-way or round-trip transmission.
+* **Jitter:** The variation in successive one-way delay/latency between packets in the same flow.
+* **Loss:** The percentage of lost packets during transmission.
+
+These tools balance the trade-offs of which types of traffic receive network resources and when, giving more preference to some traffic and less preference to others. QoS tools change the QoS characteristics of certain flows in the network, helping to control and avoid loss, often caused by device queues getting too full.
+
+While QoS tools focus on managing bandwidth, delay, jitter, and loss, the user mainly cares about the quality of the overall experience. This is referred to as **Quality of Experience (QoE)**, which is a term referring to users’ perception of their use of the application on the network. QoS tools directly impact bandwidth, delay, jitter, and loss, which then should have some overall good effect to influence the users’ QoE. You can use QoS tools to create a better QoE for more important traffic.
+
+### Per-Hop Behaviors (PHBs)
+
+QoS tools define actions a device can apply to a packet between the time it enters the device until it exits the device. Such actions can delay, discard, or even change header fields. QoS defines these actions as **per-hop behaviors (PHBs)**, which is a formal term to refer to actions other than storing and forwarding a packet. The device can choose different PHBs for different kinds of messages, improving the QoS behavior for some messages while worsening the QoS behavior for others.
+
+Common per-hop behaviors for QoS include:
+* **Classification:** Identifying and categorizing different types of network traffic.
+* **Marking:** Changing specific bits in packet headers to indicate their classification for subsequent QoS processing.
+* **Queuing:** Managing buffers where packets wait to be transmitted, to prioritize certain traffic.
+* **Policing:** Dropping or remarking packets that exceed a defined rate.
+* **Shaping:** Buffering and delaying packets that exceed a defined rate to smooth out traffic bursts.
+
+Overall, QoS refers to the tools that devices apply to provide differential treatment to packets as they traverse the network.
+
+### Types of Traffic
+
+Network traffic can be broadly categorized, each with different QoS requirements:
+
+#### Data Applications
+* **Interactive (e.g., Web Traffic):** Requires relatively low delay and jitter for a responsive user experience.
+* **Non-Interactive (Batch Traffic):** This includes data backup or file transfers. Delay and jitter are less critical as the priority is for these applications to complete larger tasks within a longer time window, even if it means sending more data.
+
+#### Voice and Video Applications
+Both applications have similar breakdowns of Interactive & Non-Interactive "Flows." A flow is all the data moving from one application to another over the network, with one flow for each direction.
+
+* **Voice over IP (VoIP):** Involves digitizing sound (e.g., 160 bytes with G.711 Codec for 20ms) and sending it in IP packets.
+    * Though a single voice call or flow requires only a little bandwidth in comparison to data applications, Interactive Voice QoS requires a much better level of quality regarding delay, jitter, and loss: less delay, little or less jitter, and ideally no packet loss.
+    * IP phones mark call signaling traffic (used to establish calls) as PCP 3. As soon as a session is established, they mark the actual voice traffic as PCP 5.
+    * **Cisco's Enterprise QoS Solution Reference Network Design Guide suggests the following guidelines for Interactive Voice Applications:**
+        * **Delay (one-way):** 150 ms or less
+        * **Jitter:** 30 ms or less
+        * **Loss:** 1% or less
+
+* **Video Applications:** Similar to Voice but with much higher bandwidth requirements (per flow) and similar requirements for Delay, Jitter, and Loss.
+    * **Bandwidth:** Video can use a variety of codecs that impact the amount of data sent. More technical features impacting bandwidth for a single video data flow are: Image Resolution (number of pixels) + Color Depth (RGB) + Frame Rate (FPS).
+    * **End-to-End QoS Network Design Guide for Video Applications:**
+        * **Bandwidth:** 384 kbps → 20+ Mbps
+        * **Delay (one-way):** 200-400 ms
+        * **Jitter:** 30-50 ms
+        * **Loss:** 0.1% - 1%
+
+### Classification
+
+**"Classification"** refers to a type of QoS tool that identifies and categorizes packets based on their header contents. This is the first step in applying differential treatment to traffic.
+To give priority to certain types of traffic, you have to identify which types of traffic to give priority to.
+
+Methods of classification include:
+* **Access Control List (ACL):** Traffic which is permitted by the ACL will be given certain treatment. ACLs can also serve the purpose of choosing which packets to discard by performing classification (matching of header fields) to decide which packets to take certain QoS actions against.
+* **Network Based Application Recognition (NBAR):** Performs a deep packet inspection looking beyond Layer 3/4 up to Layer 7 to identify the specific kind of traffic. NBAR refers to this idea of defining the characteristics of different Applications as Application Signatures. NBAR looks for beyond what an ACL can examine in a packet; many applications can't be identified based on well-known ports alone. NBAR solves these problems and makes it easier to separate traffic into different classes.
+* **PCP (Priority Code Point) field of the Ethernet - 802.1Q tag:** This field, also known as Class of Service (CoS), is a 3-bit field within the 3rd byte of the 4-byte 802.1Q header. It is only present when 802.1Q trunking is used on the link. As a result, QoS Tools can make use of the CoS field only for QoS features enabled on interfaces that are trunking.
+* **DSCP (Differentiated Services Code Point) field of the IP Header:** Can be used to prioritize traffic.
+* **TID header (exists in 802.11) over Wi-Fi**
+* **EXP Header (MPLS label) over MPLS WAN**
+
+### Marking
+
+**Marking** is a crucial QoS tool that follows classification. After a packet is classified, it can be marked by changing some bits in specific header fields. This allows subsequent network devices to process the packet based on its marking, without needing to perform complex re-classification.
+
+**Why Marking is Important:**
+Applying complex matching of many header fields on every device and on most interfaces (both ingress and egress) requires extensive configuration and can degrade device performance. A better strategy, recommended by Cisco and RFCs, is to perform complex matching early in the packet's life (e.g., at the network edge) and then mark the packet. Devices downstream can then use simpler matching logic based on these marks.
+
+**Marking Fields:**
+* **IP DSCP (Differentiated Services Code Point):**
+    * The IP Header exists for the entire trip of the packet across the IP network. Routers forward the IP packet, discarding the old data-link header and adding a new header. Because routers do not discard and reinsert IP headers, marking fields in the IP header stay with the data from the first place it is marked until it reaches its destination.
+    * IPv4 defines a **Type of Service (ToS)** byte in its header. The original RFC defined a 3-bit **IP Precedence (IPP)** field for QoS marking. The remaining 5 bits of the ToS byte were unused.
+    * Later RFCs redefined the ToS byte with the **DSCP** field, which increased the number of marking bits from 3 (giving 8 possible values) to 6 bits (giving $2^6 = 64$ possible values) that can be marked.
+    * IPP and DSCP fields can be referenced by their decimal values as well as some convenient names.
+    * IPv6 defines a **TRAFFIC CLASS Byte**, which serves a similar purpose.
+
+* **Ethernet CoS (Class of Service) / PCP (Priority Code Point):**
+    * This field is located in the 3rd byte of the 4-byte 802.1Q header, as a 3-bit field (3 possible values).
+    * However, the 802.1Q header isn't included in all Ethernet frames; it exists only when 802.1Q trunking is used on the link. As a result, QoS Tools can make use of the CoS field only for QoS features enabled on interfaces that are trunking.
+
+If the markings are trusted, the device will forward the packet without changing the markings, or they will change the markings according to the configured policy.
+
+### Trust Boundary
+
+The **Trust boundary** refers to the point in the path of a packet flowing through a network at which the Network Engineer creating a QoS plan has to choose where to place the trust boundary for a network. That boundary typically sits on a device under the control of the IT staff.
+
+At the trust boundary, the network devices decide whether to "trust" the QoS markings applied by an upstream device or end-host. If the markings are trusted, the network will honor those markings and apply the corresponding QoS policies. If not trusted, the network device might re-mark the packets or ignore the existing markings and apply its own classification.
+
+For example, IP phones can typically be a trust boundary, instead of an Access layer switch. IP phones can set the CoS and DSCP fields of the packets created by the phone, as well as those forwarded from the PC through the phone. By trusting the markings from an IP phone, the network can ensure that voice and video traffic originating from or passing through the phone receives the appropriate QoS treatment from the moment it enters the network.
+
+### DiffServ Suggested Marking Values
+
+DiffServ (Differentiated Services) aims to create a consistent usage of DSCP (Differentiated Services Code Point) values across networks to enable product vendors to provide good default settings for their QoS features.
+
+| Marking Value         | DSCP (Decimal) | Description                                                                                                                                                                                                                               |
+| :-------------------- | :------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Default Forwarding (DF)** | 0              | Represents best-effort traffic. Packets are forwarded without any special QoS treatment.                                                                                                                                                  |
+| **Expedited Forwarding (EF)** (RFC 3246) | 46             | Designated for traffic requiring low latency, low jitter, and low loss. Primarily used for voice payload. Cisco IP phones, by default, mark voice payload at EF. Voice signaling packets (messages to set up a call) are typically marked as CS3. |
+| **Assured Forwarding (AF)** (RFC 2597) | Varies           | Defines a set of 12 DSCP values used in concert. AF categorizes traffic into four separate queues and three levels of drop priority within each queue, for use with congestion avoidance algorithms. This requires 12 different DSCP markings (one for each combination of queue and drop priority). |
+| **Class Selector (CS)** | Varies           | Recreates eight DSCP values for backward compatibility with IP Precedence (IPP) values (a 3-bit field with 8 possible values).                                                                                                              |
+
+**The DSCP to IPP (Class Selector) and AF Mapping:**
+
+| IPP | CS  | DSCP | Drop Precedence (within a given AF queue) |
+| :-- | :-- | :--- | :---------------------------------------- |
+| 0   | CS0 | 0    | Best Effort - DF                          |
+| 1   | CS1 | 8    | AF11 (10), AF12 (12), AF13 (14) - Worst Queue (Higher Drop Precedence) |
+| 2   | CS2 | 16   | AF21 (18), AF22 (20), AF23 (22)           |
+| 3   | CS3 | 24   | AF31 (26), AF32 (28), AF33 (30)           |
+| 4   | CS4 | 32   | AF41 (34), AF42 (36), AF43 (38) - Best Queue (Lower Drop Precedence) |
+| 5   | CS5 | 40   | (38, 40, 42) - Note: These DSCP values are often used for control plane traffic or network management. |
+| 6   | CS6 | 48   | (48, 50, 52) - Note: Often used for network control traffic. |
+| 7   | CS7 | 56   | (56, 58, 60) - Note: Often used for network control traffic. |
+
+* **Worst DROP (Highest drop precedence)** $\leftrightarrow$ **Best DROP**
+* **Best Queue** $\leftrightarrow$ **Worst Queue**
+
+**Cisco QoS Design Guides (based on RFC 4954 conventions):**
+Cisco has adopted and extended RFC 4954, defining default marking conventions for various traffic types:
+
+* **DSCP EF (46):** Voice payload
+* **AF41 (34), AF42 (36):** Interactive Video
+* **AF31 (26), AF32 (28):** Streaming Video (non-Interactive)
+* **AF21 (18), AF22 (20):** High Priority (low latency) data
+* **CS0 (0):** Standard Data
+
+### Queuing and Congestion Avoidance
+
+**Queuing** refers to the QoS tools for managing the queues that hold packets while they wait their turn to exit an interface.
+
+Most networking devices can have a queuing system with **Multiple Queues**. To use multiple Queues, the queuing system needs:
+* A **classifier function** to choose which packets are placed into which queue.
+* A **Scheduler** to decide which packet to take next when the interface becomes available. The scheduler performs **prioritization** – the concept of giving priority to one queue.
+
+**Packet Flow with QoS:**
+INGRESS $\rightarrow$ Classifier $\rightarrow$ Marking $\rightarrow$ QUEUES $\rightarrow$ Scheduler $\rightarrow$ Prioritization Algorithm $\rightarrow$ Shaping $\rightarrow$ Policing $\rightarrow$ Egress
+
+#### Prioritization
+
+* **Round-Robin scheduling:** Cycles through the queues in order, taking turns with each queue.
+* **Weighted Round-Robin:** In each cycle, the Scheduler either takes one packet or takes a number of bytes from each queue by taking enough packet bytes to reach that number of bytes. Also included in the concept of "Weighting" - the Scheduler takes a different number of packets (bytes) from each queue, giving more preference to one queue over another. Routers use a tool called **Class-Based Weighted Fair Queuing (CBWFQ)**.
+    * **CBWFQ (Class-Based Weighted Fair Queuing):** Each class receives at least a guaranteed amount of bandwidth during times of congestion but potentially more. Internally, CBWFQ uses a Weighted Round-Robin Scheduling algorithm, while letting the network admin define the weightings as a fixed link bandwidth percent.
+    * Unfortunately, a Round Robin Scheduler doesn't provide low enough delay, jitter, or loss for Video.
+
+* **Low Latency Queuing (LLQ):**
+    * The solution to the limitations of Round-Robin for real-time traffic is to add **Low Latency Queuing (LLQ)** to the Scheduler. A round-robin queuing system might add too much delay for Video/Voice packets because of the shuffling or cycling to pick packets from other queues.
+    * LLQ tells the scheduler to treat one or more queues as **PRIORITY Queues**. The LLQ Scheduler always takes the next packet or bytes during times of congestion from one of these special priority queues.
+    * As such, the LLQ might never have time to fill up, guaranteeing low delay, jitter, or loss to packets executing in LLQ / priority queues.
+    * Unfortunately, using LLQ might also lead to a problem of **"Queue Starvation"** for other traffic.
+
+* **Call Admission Control (CAC):**
+    * The ultimate solution to prevent loss for voice and video traffic in conjunction with LLQ and policing is to find a way to limit the amount of Voice & Video traffic that the network routes out through the link (Interface) *before* it gets to the policer, so that the policer never discards any traffic.
+    * CAC tools are implemented at the network point where calls or sessions are initiated. They assess network resources (e.g., available bandwidth) before allowing a new voice or video call to be established. If resources are insufficient to maintain the required QoS for the new call and existing calls, CAC might prevent the call from being set up, thus avoiding a poor user experience from the outset due to congestion and subsequent packet loss.
+
+* **Round Robin:** Not good for Voice & Video data traffic; typically applied to Best-Effort / less critical traffic Queues.
+
+### Shaping and Policing (mostly at WAN Edge)
+
+**Shaping and Policing** are two QoS tools often used on opposite ends of a link. Both tools manage bandwidth, delay, jitter, and loss by monitoring the bitrate of combined messages that flow through a device. Once enabled, a policer or shaper notes each packet that passes and measures the number of bits per second. Both attempt to keep the bitrate at or below the configured bandwidth, but by using different actions:
+
+* **Policers discard packets.**
+* **Shapers hold packets in queues to delay the packets.**
+
+#### Policing
+
+* Policers allow for a burst beyond the policing rate for a short time, after a period of low traffic activity. Such peaks in network traffic are allowed for the nature of bursty data applications.
+* It measures the traffic rate over time for comparison to the configured policing rate.
+* It allows for a burst of data after a period of inactivity.
+* It is enabled on an interface, in either direction, but typically at **ingress (incoming packets)**.
+* It can discard excess messages but can also remark the message so that it's a candidate for more aggressive discard later in its journey (i.e., re-classify packet into Higher Drop precedence for QoS).
+* **Question Example:** You have a 1 Gbps link from a Router into an SP, but with 200-Mbps CIR for traffic to another site. The SP (Service Provider) has told you that it discards incoming traffic exceeding the CIR. To resolve this **from the perspective of the SP discarding your traffic**, you would use a traffic **Shaper** on your router's egress interface to send traffic at or below the CIR. (Note: The prompt incorrectly suggests policing to resolve this, but policing discards *your* traffic, while shaping prevents the *SP* from discarding it by sending it at the agreed rate.)
+
+#### Shaping
+
+* Shapers slow messages down by queuing the messages. The shaper then services the shaping queues but not based on when an interface becomes available. Rather, it schedules messages from the Shaping queues based on the Shaping Rate. The shaper queues packets so that the sending rate over time doesn't exceed the shaping rate, thus avoiding congestion on the output.
+* Because shapers create queues where messages wait, a Queuing tool should be applied to those queues (e.g., Round-Robin Scheduler, Priority Queuing features of CBWFQ & LLQ respectively).
+* The unfortunate side effect of a shaper is that it slows down packets, leading to more delay & jitter.
+* Thankfully, we can configure a shaper's setting that changes its internal operation: **A Shaper's Time Interval** refers to its internal logic for how a shaper averages, over time, sending at a particular rate. Basically, it sends as fast as it can & then waits; sends & waits; sends & waits.
+* **Example:** Shaping @ 200 Mbps on a Router that has a 1000-Mbps (1 Gbps) Outgoing Interface. In that case, the shaper would result in the interface sending data 20% of the time, being silent for 80% of the time.
+* When shaping, ensure to use a short time interval. By recommendation, use a 10-ms time interval to support voice and video. With such a setting, a voice/video packet should wait no more than 10ms while waiting for the next shaping interval, at which point the priority queue scheduling algorithm should take all the voice and video traffic out.
+* Shapers measure the traffic rate over time for comparison to the configured shaping rate.
+* Shapers allow for bursting after a period of inactivity.
+* Shapers are enabled on an interface for **egress (outgoing packets)**.
+* Shapers slow down packets by queuing them and over time releasing them from the queue at the shaping rate.
+* Shapers use queuing tools to create and schedule the shaping queues, which is very important for the same reasons discussed for output queuing.
+
+### Congestion Avoidance
+
+**Congestion Avoidance** attempts to reduce overall packet loss in TCP connections via a mechanism of flow control called **Windowing**. Each TCP receiver grants a Window to the Sender. The window is a field in the TCP header that defines the number of bytes the sender can send over the TCP connection before receiving a TCP ACK for at least some of those bytes. The window size is the number of unacknowledged bytes that the sender can send before the sender must simply stop and wait.
+
+* Each ACK TCP Segment doubles (2x) the window size.
+* TCP Segment loss leads to a one-half Window Size Shrink.
+* With multiple segment losses, the window size shrinks by half multiple times, slowing down the sender's rate significantly.
+
+Without Congestion Avoidance, an event called **Tail Drop** causes the most drops in the network, which arises from **TCP Global Window Size Synchronization**.
+* **Tail Drop:** If a queue is full, new packets are dropped.
+* This leads to **Global TCP Window Size Decrease** (all TCP flows simultaneously slow down), followed by **Network Under-Utilization**, then a **Global TCP Window Size Increase** (all TCP flows try to double their window size), leading to **Congestion** again. This creates a "sawtooth" pattern of network utilization.
+
+Congestion Avoidance discards some TCP Segments *before* Queues fill, hoping that enough TCP connections will slow down, reducing Congestion and avoiding a much worse problem: the effects of queue overflow which leads to Tail-Drop (harmful because it leads to TCP Global Synchronization). To resolve this, we use Congestion avoidance.
+
+* A solution to prevent Tail Drop & TCP Global Sync is **Random Early Detection (RED)**. When the amount of traffic on the Queue reaches a certain threshold, the device will start randomly dropping packets from select TCP flows. Those TCP flows that have dropped packets will reduce the rate at which traffic is sent, but this will avoid TCP Global Sync, in which all TCP flows reduce their rate of transmission at the same time in waves.
+* In standard RED, all kinds of traffic are treated the same. An improved version, **Weighted RED**, allows you to control which packets are dropped depending on the traffic class.
+
+### The Iterative Nature of QoS Design
+
+The journey to deliver a seamless experience for real-time applications like voice and video is a fascinating progression of problem-solving:
+
+1.  **Problem 1: Round-Robin is Bad for Voice & Video Traffic due to its cyclic nature of picking traffic bytes from Queues.**
+    * The inherent fairness of round-robin means that delay-sensitive traffic has to wait its turn behind less sensitive traffic, leading to unacceptable jitter and latency for voice and video.
+
+2.  **Solution to Problem 1: This led to the creation of Special Queues to give priority to Low Latency Queues (LLQ).**
+    * This is the direct solution to the round-robin problem for real-time traffic. LLQ's strict priority mechanism ensures these packets get out first.
+
+3.  **Problem 2: Which then led to yet another problem of Queue Starvation for normal data traffic.**
+    * If LLQ can consume all available bandwidth, other queues might never get a chance to transmit, leading to starvation for best-effort traffic.
+
+4.  **Solution to Problem 2: To resolve this we introduced the concept of Policers which limit the amount of bandwidth placed into the LLQueues.**
+    * Policing is the common mechanism to cap the bandwidth that priority traffic can consume, thus protecting other queues from starvation.
+
+5.  **Problem 3: But this meant that excess traffic beyond the limit of the LLQueues Bandwidth were being discarded leading to tremendous LOSS.**
+    * Unlike shaping (which buffers), policing for LLQ's primary goal of low latency means excess traffic must be dropped, as buffering would introduce the very delay LLQ is designed to avoid. This is indeed a source of potential loss.
+
+6.  **Solution to Problem 3: Further resolved with other QoS tools $\rightarrow$ Call Admission Control (CAC).**
+    * CAC is the logical next step to prevent excessive voice/video traffic from even entering the network segment where it might face policing drops. It is a preventative measure.
+
+**The "Why" behind Policing vs. Shaping for LLQ:**
+* **Policing (Drop):** For LLQ, the goal is always minimal delay. If traffic exceeds the allocated bandwidth, buffering it (like a shaper) would defeat the low-latency purpose. Therefore, policing's action of dropping excess is preferred.
+* **Shaping (Buffer):** While you could technically apply shaping to an LLQ, it's counter-intuitive to its primary purpose. Shaping introduces delay by buffering. It's used when you want to smooth out a bursty flow, typically for non-real-time traffic, or when an ISP has a CIR and you want to prevent drops by them.
+
+**The Role of CAC in the Overall QoS Strategy:**
+* **Preventative vs. Reactive:** Policing is reactive (drops traffic once it's already in the queue and exceeding limits). CAC is preventative (prevents calls/sessions from being established if the network can't guarantee QoS for them). This is a crucial distinction.
+* **User Experience:** CAC directly impacts the user experience by either allowing a call with guaranteed quality or rejecting it, rather than allowing a call to start and then suffer poor quality due to congestion and drops. It manages expectations and resource utilization at the entry point.
+* **Applications:** CAC is typically associated with voice and video systems (e.g., Cisco Unified Communications Manager, IP PBXs) that integrate with network QoS policies.

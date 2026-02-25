@@ -1,0 +1,112 @@
+---
+title: "Software Defined Networking"
+description: Understand SDN architecture, controllers, and programmable network infrastructure.
+---
+
+
+Traditional hub-and-spoke WAN designs with on-premises data centers often suffer from performance and reliability drawbacks. While moving services to cloud data centers or using colocation mitigates some issues by separating service integrity and availability from site accessibility, a new approach is needed for modern connectivity demands.
+
+**SD-WAN replaces the traditional hub-and-spoke design with more efficient, secure connectivity to corporate clouds, often at a lower expense compared to provisioning MPLS services to every remote location.**
+
+### Key Characteristics of SD-WAN
+
+* **Overlay Network:** An SD-WAN is a type of overlay network. This means it creates a logical network on top of existing physical "underlay" networks.
+* **Multi-Location Access:** It provisions corporate WAN access across multiple locations (branch offices, remote worker locations, data centers).
+* **Direct Cloud Access:** Facilitates secure, direct access to cloud services from a branch office or other remote location, bypassing the need to backhaul traffic through a central hub.
+* **Automation & Orchestration:** SD-WAN uses automation and orchestration to dynamically provision links based on application requirements and network congestion.
+* **Secure Tunnels:** It typically uses **IPsec** (Internet Protocol Security) to ensure that traffic is tunneled securely through the underlying transport networks.
+* **Micro-segmentation & Zero Trust:** An SD-WAN solution should apply micro-segmentation and zero-trust policies to ensure all requests and responses are authenticated and authorized, even for internal traffic.
+
+### SD-WAN Architecture and Operation
+
+The SD-WAN is managed by a **Controller and management software**, which can be located in the corporate data center or a public cloud.
+
+* **SD-WAN Capable Devices:** Each site (branch, data center) has an SD-WAN capable router, gateway, or VPN application.
+* **Controller Orchestration:** The SD-WAN Controller orchestrates connections to networks and clouds enrolled in the SD-WAN.
+* **Underlay Network Agnostic:** It utilizes *any available IP underlay network*, such as broadband Internet, 4G/5G cellular, or private MPLS VPNs, to provision the fastest or most reliable available transport.
+* **Authentication and Authorization:** The Controller also ensures that access requests are authenticated and authorized, reinforcing the security posture.
+
+---
+
+## Data Center Network Design
+
+A data center is a site dedicated to provisioning server resources. It hosts network services (authentication, addressing, name resolution), application servers, and storage area networks (SANs). While many are purpose-built facilities, some concepts apply to on-premises server rooms.
+
+### Evolution of Data Center Design
+
+* **No Client PCs:** Unlike a corporate network, a data center contains no client PCs, other than hardened, secure administrative workstations (SAWs) used solely to manage servers.
+* **Traditional Three-Tiered Design (Legacy):** Historically, data centers were designed using the same three-tiered model as an enterprise campus network, with core, distribution, and access layer switches.
+* **Shift to East-West Traffic:** The changing way applications are designed (as services, using virtualization and on-demand instances) has dramatically changed the nature of traffic flows.
+    * **North-South Traffic:** Traditional traffic flow between clients and servers, often passing through a central firewall.
+    * **East-West Traffic:** Predominant traffic flow **between servers** within the data center (e.g., microservices communicating, virtual machines talking to each other).
+* **Security Challenges with East-West Traffic:** The preponderance of East-West traffic complicates security design. If each of these cascading transactions were to pass through a central firewall/security appliance, it would create a severe security bottleneck.
+* **Virtualized Security & Zero Trust:** These requirements drive the creation of **virtualized security appliances** that can monitor traffic flowing between servers. Simultaneously, security implementations are moving towards a **Zero Trust design**, implying a highly segmented network where each link between servers must be authenticated and authorized.
+
+### Overlay Networks in Data Centers
+
+* An **overlay network** is used to implement this type of point-to-point logical link between nodes or networks, abstracting the complexity of the underlying physical topology.
+* It uses **encapsulation protocols** and **Software-Defined Networking (SDN)** to create a logical tunnel between nodes or networks.
+* When used inside a data center, overlay networks are commonly implemented using **Virtual eXtensible LANs (VXLANs)**.
+
+---
+
+## INFRASTRUCTURE AS CODE (IaC)
+
+Cloud services require the rapid provisioning and de-provisioning of server instances and networks, relying heavily on automation, orchestration, and the use of overlay networks to establish point-to-point links quickly and reliably.
+
+This means that these infrastructure components must be fully accessible to scripting, representing the idea of **Infrastructure as Code (IaC)**. Software-Defined Networking (SDN) serves as a model for these processes.
+
+### Automation
+
+* **Automation** via scripting means that each configuration or build task is performed by a block of code.
+* The script takes standard arguments as data, reducing uncertainty over configuration choices and leading to fewer errors.
+* **Two principal types of automation tools** focus on making a single, discrete task repeatable:
+    * **Imperative Tools:** Require the precise steps to follow to achieve the desired configuration as input. This approach is most similar to automating traditional scripting languages such as PowerShell and Bash.
+    * **Declarative Tools:** Take the desired configuration as input and leave the details of how that configuration should be achieved to the implementation platform. For example, a declarative configuration file specifies the *desired state*, leaving the specific implementation to the automation platform. Imperative tools specify *each step required*.
+
+### Orchestration
+
+* Where automation focuses on making a single discrete task easily repeatable, **orchestration performs a sequence of automated tasks via scripts or API service calls.**
+* For orchestration to work properly, automated steps must occur in the correct sequence, taking dependencies into account. It must provide the right security credentials at every step and have the necessary rights and permissions to perform the defined tasks.
+* Orchestration automates complex processes that might otherwise require dozens or hundreds of manual steps.
+* Automation and Orchestration platforms connect to provide administration, management, and orchestration for many cloud platforms and services. Industry leaders include **Chef, Puppet, Ansible, and Kubernetes.**
+
+### Infrastructure as Code (IaC) Defined
+
+* Rather than manually installing operating systems and applications, making configuration changes, or installing patches, cloud technology encourages the use of **scripted approaches to provisioning and infrastructure management**.
+* This is where automation and orchestration fully replace manual configuration, referred to as **IaC**.
+* One of IaC's goals is to **eliminate "Snowflake Systems."** A Snowflake is a configuration or build that is different from others. The lack of consistency (or drift) in the platform environment leads to security and stability issues.
+* **IaC tools for provisioning and management:**
+    * **Terraform:** Primarily for **immutable infrastructure provisioning** (creating, modifying, deleting infrastructure resources like VMs, networks, storage).
+    * **Ansible:** **Mutable**. Uses Playbooks, Inventory, Templates. Communication via SSH (port 22). Agentless (Push mechanism).
+    * **Puppet:** **Mutable**. Uses Manifests, Templates. Communication via HTTPS (REST API) (port 8140 TCP). Agent-based (Pull mechanism).
+    * **Chef:** **Mutable**. Uses Recipes, Run-lists. Communication via HTTPS (REST API) (port 10002 TCP). Agent-based (Pull mechanism).
+
+---
+
+## SOFTWARE-DEFINED NETWORKING (SDN)
+
+SDN is a model for how these IaC processes are used for provisioning and de-provisioning networks.
+
+### SDN Architecture (Three Layers)
+
+SDN architectures are typically divided into three logical layers, from top to bottom: Application, Control (or Management), and Infrastructure (or Data).
+
+1.  **Application Layer (Top):**
+    * Applies business logic to make decisions about how traffic should be prioritized, secured, and switched.
+    * This layer defines policies such as segmentation, Access Control Lists (ACLs), Security Groups, traffic prioritization, policing/shaping, and QoS.
+    * It defines the *desired configuration and network behavior*.
+
+2.  **Control / Management Plane Layer (Middle):**
+    * The principal innovation of SDN is to **insert a control layer between the application layer and the infrastructure layer.**
+    * The functions of the control plane are implemented by a virtual device known as the **SDN Controller**.
+    * The controller interacts programmatically with network devices.
+    * **Northbound API (NBI):** The interface between SDN applications and the SDN controller. It allows applications to interact with the controllers, access the data it gathers about the network, program it, and make changes in the network via the Southbound API. Data is often sent in structured/serialized formats like JSON/YAML. It supports CRUD (Create, Read, Update, Delete) operations.
+    * **Southbound API (SBI):** The interface between the SDN Controller and the infrastructure devices. It allows the controller to communicate with and control the network devices (e.g., modify their data plane tables like IP, ACL, MAC, NAT). OpenFlow is a common Southbound API protocol.
+    * A separate **Management Plane** sits at the same level as the Control Plane to interface with the operational layer (e.g., device state, CPU/memory utilization). This is used for adding traffic conditions based on network status.
+
+3.  **Infrastructure / Data Plane Layer (Bottom):**
+    * These are the physical or virtual network appliances (switches, routers, firewalls, etc.) that handle the actual **forwarding (data) and operational planes** of traffic.
+    * They perform the important tasks of switching and routing traffic.
+
+---

@@ -1,0 +1,36 @@
+{/* frontmatter removed for clean UI */}
+
+## DNS Services (AWS Route 53 / Azure DNS) && CDN Services (AWS CloudFront / Azure FrontDoor)
+
+AMAZON ROUTE 53 is a DNS web service. It gives developers and businesses a reliable way to route end users to internet applications hosted in AWS. Route 53 is AWS's domain name service, or DNS, and it's highly available and scalable. But wait, what is DNS, you say? Think of DNS as a translation service. But instead of translating between languages, it translates website names into IP, or Internet Protocol, addresses that computers can read.
+Amazon Route 53 connects user requests to infrastructure running in AWS (such as Amazon EC2 instances and load balancers). It can route users to infrastructure outside of AWS.
+Another feature of Route 53 is the ability to manage the DNS records for domain names. You can register new domain names directly in Route 53(AZURE DNS DOES NOT OFFER THIS). You can also transfer DNS records for existing domain names managed by other domain registrars. This enables you to manage all of your domain names within a single location.
+In the previous module, you learned about Amazon CloudFront, a content delivery service(CDN is a network that helps to deliver edge content to users based on their geographic location). The following example describes how Route 53 and Amazon CloudFront work together to deliver content to customers. Route 53 can direct traffic to different endpoints using several different routing policies, such as latency-based routing, geolocation DNS, geoproximity, and weighted round robin
+
+AZURE PUBLIC DNS - A hosting service for DNS domains, providing name resolution using AZURE infrastructure. AZURE DNS uses Anycast global network of DNS name servers. Networking so that each DNS query is answered by the closest available DNS server, providing fast performance and high reliability availability for your domain. It can also be used to manage DNS records for your Azure services, and provides DNS for your external resources also. Your domains & Records can be managed via the AZURE PORTAL, PowerShell cmdlets, and the cross-platform Azure CLI. AZURE DNS does not support purchasing of domain names; you need a 3rd party Domain Name Registrar.
+
+A DNS ZONE is used to host the DNS records for a particular domain. To start hosting your domain in Azure, create a DNS Zone for that domain name; each record for your domain is then created inside this DNS Zone. The root zone is registered at the Registrar and delegated to Azure NS.
+*   The name of the zone must be unique within the Resource Group; the zone must not already exist.
+*   The same zone name can be reused in a different Resource Group or different Azure Subscription.
+*   Where multiple zones share the same name, each instance is assigned different name server addresses.
+*   Only one set of addresses can be configured with the domain name Registrar.
+*   In AZURE DNS, records are specified by using relative names. A FQDN includes the zone name, whereas a relative name does not. Each Record has a name & type. Records are organized into various types according to the data they contain (e.g., A, AAAA, MX, TXT Records).
+    *   Each time a DNS Zone is created, Azure allocates name servers from a pool.
+    *   Once the name servers are assigned, Azure DNS automatically creates authoritative NS records in your zone.
+*   Azure DNS allows you to host a DNS Zone and manage the DNS records for a domain in Azure.
+
+### AZURE PRIVATE DNS
+Provides a secure naming resolution for VMs within a VNet and connected VNets.
+In addition to internet-facing public domains, AZURE supports private DNS Domains used locally within Azure.
+*   AZURE DNS resolves domain names in a Virtual network without the need to add a Custom DNS solution.
+*   Private DNS Zones allow you to use your own custom domain names rather than the Azure-provided names.
+*   It provides name Resolution for VMs within a virtual network and between virtual networks.
+*   You can configure zone names with a split-horizon view - allowing a private & public DNS zone to share the same name.
+*   VNet is used to store & organize information about various elements of your cloud.
+*   Removes/eliminates the need for creating custom DNS solutions; host your own custom DNS records.
+*   Private DNS Zones can be shared between VNets. This capability simplifies cross-network and service discovery scenarios such as Virtual Network Peering (which enables connecting 2 or more VNets to appear as one).
+*   Private DNS Zones are global in scope (available in all Azure Regions in the Azure public cloud).
+    *   You can access them from any region, any subscription, any VNet, and any tenant/organization.
+    *   They are highly resilient, being replicated to regions all throughout the world, and are available for internal resources only.
+    *   They are not available to resources on the internet.
+In summary, Azure Public DNS is best for public and global solutions, while private DNS is best to manage domains for virtual machines or other resources within and across a virtual network.

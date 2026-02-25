@@ -1,0 +1,116 @@
+---
+title: Network Security Controls
+description: NSGs, NACLs, security groups, and application security groups for cloud networks.
+---
+
+
+AZURE NSG === AWS NACL-StateLESS-Layer3(Subnet-level) && NSG-StateFUL-Layer4(Instance-Level)
+
+AWS has a wide range of tools that cover every layer of security: network hardening, application security, user identity, authentication and authorization, distributed denial-of-service or DDoS prevention, data integrity, encryption
+The only technical reason to use subnets in a VPC is to control access to the gateways. The public subnets have access to the internet gateway; the private subnets do not. But subnets can also control traffic permissions.
+Network ACLs check traffic going into and leaving a subnet, Now, this sounds like great security, but it doesn't answer all of the network control issues. Because a network ACL only gets to evaluate a packet if it crosses a subnet boundary, in or out. It doesn't evaluate if a packet can reach a specific EC2 instance or not.
+Network ACLs are considered stateless, so you need to include both the inbound and outbound ports used for the protocol. If you don’t include the outbound range, your server would respond but the traffic would never leave the subnet.
+Because network ACLs are configured by default to allow incoming and outgoing traffic, you don’t need to change their initial settings unless you need additional security layers.
+The key difference between a security group and a network ACL is the security group is stateful, meaning, as we talked about, it has some kind of a memory when it comes to who to allow in or out, and the network ACL is stateless, which remembers nothing and checks every single packet that crosses its border regardless of any circumstances. Another key difference is that By default, a security group denies all inbound traffic and allows all outbound traffic. You can add custom rules to configure which traffic should be allowed; any other traffic would then be denied, but you can modify it by adding your own rules. For custom network ACLs, all inbound and outbound traffic is denied until you add rules to specify which traffic to allow. Additionally, all network ACLs have an explicit deny rule. This rule ensures that if a packet doesn’t match any of the other rules on the list, the packet is denied.
+
+To solve instance level access questions, we introduce security groups. The next layer of security is for your EC2 instances. Here, you can create a virtual firewall called a security group. The default configuration of a security group blocks all inbound traffic and allows all outbound traffic. Every EC2 instance, when it's launched, automatically comes with a security group and by default, the security group does not allow any traffic into the instance at all. All ports are blocked; all IP addresses sending packets are blocked. That's very secure, but perhaps not very useful. If you want an instance to actually accept traffic from the outside, like say, a message from a front end instance or a message from the Internet. So obviously, you can modify the security group to accept a specific type of traffic. In the case of a website, you want web-based traffic or HTTPS to be accepted but not other types of traffic, say an operating system or administration requests.
+
+Let's review the characteristics of AZURE security rules in network security groups.
+*   Azure creates several default security rules within each network security group, including inbound traffic and outbound traffic. Examples of default rules include DenyAllInbound traffic and AllowInternetOutbound traffic.
+*   Azure creates the default security rules in each network security group that you create. You can't remove the default security rules.
+*   You can add more security rules to a network security group by specifying conditions for any of the following settings:
+    *   Name
+    *   Priority - Each security rule is assigned a Priority value. All security rules for a network security group are processed in priority order. When a rule has a low Priority value, the rule has a higher priority or precedence in terms of order processing. You can override a default security rule by creating another security rule that has a higher Priority setting for your network security group.
+    *   Port / Protocol / Service (Any, TCP, UDP) - Specifies the destination protocol and port range for the security rule. You can choose a predefined service like RDP or SSH or provide a custom port range. There are a large number of services to select from.
+    *   Source (Any, IP addresses, Service tag)- Identifies how the security rule controls inbound traffic. The value specifies a specific source IP address range to allow or deny. The source filter can be any resource, an IP address range, an application security group, or a default tag.
+    *   Destination (Any, IP addresses, Virtual network) - Identifies how the security rule controls outbound traffic. The value specifies a specific destination IP address range to allow or deny. The destination filter value is similar to the source filter. The value can be any resource, an IP address range, an application security group, or a default tag.
+    *   Action (Allow or Deny)
+
+In Azure Network Security Groups (NSGs), lower numeric values indicate higher priority.
+#### Think of it like a ranked list:
+*   The rule with a priority of 10 is at the top of the list and is processed first.
+*   A rule with a priority of 20 is lower down the list and is processed after the rule with priority 10.
+*   If a rule with priority 10 allows traffic, and a rule with priority 20 denies the same traffic, the rule with priority 10 will take effect. The traffic is allowed.
+
+Each network security group and its defined security rules are evaluated independently. Azure processes the conditions in each rule defined for each virtual machine in your configuration. How Azure ends up applying your defined security rules for a virtual machine determines the overall effectiveness of your rules.
+*   For Inbound traffic, Azure first processes network security group security rules for any associated subnets and then any associated network interfaces. NSG inbound rules for a subnet in a VM take precedence over NSG inbound rules for a NIC in the same VM.
+*   For Outbound traffic, the process is reversed. Azure first evaluates network security group security rules for any associated network interfaces followed by any associated subnets.
+*   For both the inbound and outbound evaluation process, Azure also checks how to apply the rules for intra-subnet traffic. NSG outbound rules for a NIC in a VM take precedence over NSG outbound rules for a subnet in the same VM.
+
+### Inbound traffic effective rules
+Azure processes rules for inbound traffic for all VMs in the configuration. Azure identifies if the VMs are members of an NSG, and if they have an associated subnet or NIC.
+*   Azure creates the default security rule DenyAllInbound for the group. The default behavior is to deny all inbound traffic from the internet. If an NSG is created for a subnet or NIC, the rules for the subnet or NIC can override the default Azure security rules.
+### Outbound traffic effective rules
+Azure processes rules for outbound traffic by first examining NSG associations for NICs in all VMs.
+*   Azure creates the default security rule AllowInternetOutbound for the group. The default behavior is to allow all outbound traffic to the internet. If an NSG is created for a subnet or NIC, the rules for the subnet or NIC can override the default Azure security rules.
+
+| Traffic Direction | Azure's Default Stance | NSG Application Level | NSG Rule Evaluation Order | Explanation |
+| --- | --- | --- | --- | --- |
+| Inbound (Traffic Coming In) | Blocks all traffic from the internet. | Subnet and Network Interface (NIC) | 1. Subnet NSG rules 2. NIC NSG rules | Think of it like security guards. First, the subnet guard checks everyone entering the building. Then, the NIC guard checks the person at the apartment door. Both guards must allow the traffic. Subnet rules take precedence. |
+| Outbound (Traffic Going Out) | Allows all traffic to the internet. | NIC and Subnet | 1. NIC NSG rules. 2.Subnet NSG rules | Think of people leaving a building. First, the guard at the apartment door (NIC) checks, then the guard at the building entrance (Subnet). Both guards must allow the traffic. NIC rules take precedence. |
+
+### Things to consider when creating effective rules
+Review the following considerations regarding creating effective security rules for machines in your virtual network.
+*   Consider allowing all traffic. If you place your virtual machine within a subnet or utilize a network interface, you don't have to associate the subnet or NIC with a network security group. This approach allows all network traffic through the subnet or NIC according to the default Azure security rules. If you're not concerned about controlling traffic to your resource at a specific level, then don't associate your resource at that level to a network security group.
+*   Consider importance of allow rules. When you create a network security group, you must define an allow rule for both the subnet and network interface in the group to ensure traffic can get through. If you have a subnet or NIC in your network security group, you must define an allow rule at each level. Otherwise, the traffic is denied for any level that doesn't provide an allow rule definition.
+*   Consider intra-subnet traffic. The security rules for a network security group that's associated to a subnet can affect traffic between all virtual machines in the subnet. By default, Azure allows virtual machines in the same subnet to send traffic to each other (referred to as intra-subnet traffic). You can prohibit intra-subnet traffic by defining a rule in the network security group to deny all inbound and outbound traffic. This rule prevents all virtual machines in your subnet from communicating with each other.
+*   Consider rule priority. The security rules for a network security group are processed in priority order. To ensure a particular security rule is always processed, assign the lowest possible priority value to the rule. It's a good practice to leave gaps in your priority numbering, such as 100, 200, 300, and so. The gaps in the numbering allow you to add new rules without having to edit existing rules.
+
+#### How does Azure determine effective rules?
+Azure evaluates all the NSGs that apply to a VM (both subnet and NIC) to come up with the effective rules. Here's the basic process:
+1.  Start with the defaults: Azure has some default rules.
+2.  Apply NSG rules: If there are NSGs at both the subnet and NIC level, Azure processes both.
+3.  Prioritize: NSG rules are evaluated based on their priority. Rules with lower numbers are applied first (and can override higher-numbered rules).
+4.  The result: The combination of default rules and the NSG rules that "win" in the priority contest become the "effective rules" for the VM.
+
+#### Where do NSGs apply?
+You can associate an NSG with:
+*   A subnet: This means the rules in the NSG apply to all VMs within that subnet. In AWS (NACLs do tis job)
+*   A network interface (NIC): This is attached to a specific VM, so the rules apply only to that VM.
+#### What are "effective rules"?
+Effective security rules view is a feature in Azure Network Watcher that you can use to view the aggregated inbound and outbound rules applied to a network interface. It provides visibility into security and admin rules applied to a network interface.
+A VM might have security rules applied from both an NSG associated with its subnet and an NSG associated with its NIC. So, "effective rules" are the actual rules that apply to a VM after Azure considers all the NSGs involved. It's like Azure figuring out the final say on what traffic is allowed. The effective rules are what actually control network traffic to and from your VMs. To figure out exactly what's going on, you need to consider all the NSGs that apply and how their rules interact.
+To diagnose an Issue via the Azure Network Watcher we use the Effective security rules that show all the NSGs associated with the virtual machines and the Network interfaces. This tool shows the NSGs that are in the flow of the traffic and blocks traffic flow.
+
+*   All Subnets should use a Network Security Group to filter Network Traffic OR BASTION HOSTS(AWS).
+*   To filter traffic between subnets or between the internet and internal resources, you can use Network Security Groups or a Network Virtual Appliance (Firewall).
+*   One Important distinction b/w different Network Security Groups/zones is whether a host is INTERNET FACING -> A BASTION Host accepts Inbound connections from the Internet; it's typically placed in the perimeter Network Zone. It's configured to act as a proxy that takes Inbound Requests and checks if it's Valid (via Filtering Functions) then Retransmits to the Destination. A Bastion host is a server that sits on the Edge of a network & acts as a Gateway to a private Network.
+
+APPLICATION SECURITY GROUPS Application security groups enable you to configure network security as a natural extension of an application's structure, allowing you to group virtual machines and define network security policies based on those groups. You can reuse your security policy at scale without manual maintenance of explicit IP addresses. The platform handles the complexity of explicit IP addresses and multiple rule sets, allowing you to focus on your business logic. To better understand application security groups, consider the following example:
+
+| Priority | Source | Source ports | Destination | Destination ports | Protocol | Access |
+| --- | --- | --- | --- | --- | --- | --- |
+| 100 | Internet | * | AsgWeb | 80 | TCP | Allow |
+| 120 | * | * | AsgDb | 1433 | Any | Deny |
+| 110 | AsgLogic | * | AsgDb | 1433 | TCP | Allow |
+In the previous picture, NIC1 and NIC2 are members of the AsgWeb application security group. NIC3 is a member of the AsgLogic application security group. NIC4 is a member of the AsgDb application security group. Though each network interface (NIC) in this example is a member of only one application security group, a network interface can be a member of multiple application security groups, up to the Azure limits. None of the network interfaces have an associated network security group. NSG1 is associated to both subnets and contains the following rules:
+You can implement Application security group in your Azure virtual network to logically group your virtual machines by workload. You can then define your network security group rules based on your application security groups.
+
+### Things to know about using application security groups
+Application security groups work in the same way as network security groups, but they provide an application-centric way of looking at your infrastructure. You join your virtual machines to an application security group. Then you use the application security group as a source or destination in the network security group rules.
+
+### Things to consider when using application security groups
+There are several advantages to implementing application security groups in your virtual networks.
+*   Consider IP address maintenance. When you control network traffic by using application security groups, you don't need to configure inbound and outbound traffic for specific IP addresses. If you have many virtual machines in your configuration, it can be difficult to specify all of the affected IP addresses. As you maintain your configuration, the number of your servers can change. These changes can require you to modify how you support different IP addresses in your security rules.
+*   Consider no subnets. By organizing your virtual machines into application security groups, you don't need to also distribute your servers across specific subnets. You can arrange your servers by application and purpose to achieve logical groupings.
+*   Consider simplified rules. Application security groups help to eliminate the need for multiple rule sets. You don't need to create a separate rule for each virtual machine. You can dynamically apply new rules to designated application security groups. New security rules are automatically applied to all the virtual machines in the specified application security group.
+*   Consider workload support. A configuration that implements application security groups is easy to maintain and understand because the organization is based on workload usage. Application security groups provide logical arrangements for your applications, services, data storage, and workloads.
+
+Network interfaces that are members of the application security group apply the rules that specify it as the source or destination. The rules don't affect other network interfaces. If the network interface isn't a member of an application security group, the rule isn't applied to the network interface, even though the network security group is associated to the subnet.
+Application security groups have the following constraints:
+*   There are limits to the number of application security groups you can have in a subscription, and other limits related to application security groups. For details, see Azure limits.
+*   All network interfaces assigned to an application security group have to exist in the same virtual network that the first network interface assigned to the application security group is in. For example, if the first network interface assigned to an application security group named AsgWeb is in the virtual network named VNet1, then all subsequent network interfaces assigned to ASGWeb must exist in VNet1. You can't add network interfaces from different virtual networks to the same application security group.
+*   If you specify an application security group as the source and destination in a security rule, the network interfaces in both application security groups must exist in the same virtual network.
+    *   An example would be if AsgLogic had network interfaces from VNet1 and AsgDb had network interfaces from VNet2. In this case, it would be impossible to assign AsgLogic as the source and AsgDb as the destination in a rule. All network interfaces for both the source and destination application security groups need to exist in the same virtual network.
+
+To understand why Azure emphasizes Network Security Groups (NSGs) instead of Network ACLs (like those in AWS), let's look at how each works and the design choices behind them:
+### Network Security Groups (NSGs) in Azure:
+*   Can be associated with either subnets or individual network interfaces (NICs) of virtual machines (VMs).
+*   Stateful: They remember the state of a connection, allowing return traffic for established connections, even if not explicitly allowed by a rule.
+*   Offer more granular control, as you can secure traffic at both the subnet and the individual VM level.
+### Why Azure Focuses on NSGs:
+*   Granular Control: NSGs provide more fine-grained security control. The ability to associate them with individual NICs, in addition to subnets, allows for securing specific VMs with different rules, even within the same subnet. This is useful for applications with varying security needs.
+*   Stateful Nature: The stateful nature of NSGs simplifies security rule management. You don't have to create separate rules for inbound and outbound traffic for established connections. This reduces the complexity of security configurations and the risk of errors.
+*   Integration with Azure Services: NSGs are tightly integrated with other Azure services. For example, Application Security Groups (ASGs) in Azure allow you to group VMs by application and apply NSG rules to those groups, further simplifying security management.
+*   Flexibility: NSGs offer flexibility to apply security rules at different layers (subnet or NIC level)
+While ACLs offer a simpler approach to subnet-level security, Azure's design with NSGs prioritizes flexibility and granular control, which aligns with the needs of complex cloud deployments where different applications and workloads may have diverse security requirements.

@@ -1,0 +1,75 @@
+---
+title: "Cloud Compute Basics"
+description: Understand EC2, VMs, instance types, pricing models, and compute fundamentals.
+---
+
+
+To create an EC2 instance, you must define the following:
+Hardware specifications: CPU, memory, network, and storage
+Logical configurations: Networking location, firewall rules, authentication, and the operating system of your choice
+When launching an EC2 instance, the first setting you configure is which operating system you want by selecting an Amazon Machine Image (AMI). An AMI includes the operating system, storage mapping, architecture type, launch permissions, and any additional preinstalled software applications.
+EC2 instances are live instantiations (or versions) of what is defined in an AMI, If you are familiar with software development, you can also see this kind of relationship between a class and an object. In this case, the AMI is how you model and define your instance. The EC2 instance is the entity you interact with, where you can install your web server and serve your content to users.
+
+When you launch a new instance, AWS allocates a virtual machine that runs on a hypervisor. Then the AMI that you selected is copied to the root device volume, which contains the image that is used to boot the volume. In the end, you get a server that you can connect to and install packages and additional software on. In the example, you install a web server along with the properly configured source code of your employee directory application.
+EC2 instance lifecycle -> An EC2 instance transitions between different states from the moment you create it until its termination.
+
+| Feature | Stop | Stop-Hibernate |
+| --- | --- | --- |
+| Memory (RAM) | Lost. The contents of RAM are erased. | Preserved. The contents of RAM are saved to the EBS root volume (hiberfil.sys in Windows). |
+| Startup Time | Longer. The instance needs to boot up fresh, reload the OS, and start applications. | Faster. The instance resumes from the saved state in RAM, skipping much of the boot process. |
+| State After | Stopped. A clean shutdown state. | Stopped (with RAM preserved). The instance's previous state, including running applications and data in memory, is retained. |
+| Modifications | Some attributes (like instance type) can be modified. | Most attributes cannot be modified while in the hibernated state. You'd need to start it and then stop it normally to make changes. |
+| Prerequisites | None specific to stopping. | Specific requirements must be met (e.g., hibernation enabled, sufficient root volume size, supported instance type and OS). |
+| Cost | No compute usage charges while stopped, but EBS volume storage is charged. | No compute usage charges while stopped-hibernated, but EBS volume storage (including the space used for the hibernation file) is charged. |
+| Use Cases | Testing configuration changes, short breaks where a fresh start is acceptable. | Maintaining application state across stops, faster recovery for frequently used instances. |
+
+## Virtual Machines (General Concepts / Azure VM)
+
+VMs provide infrastructure as a service (IaaS) in the form of a virtualized server and can be used in many ways. Just like a physical computer, you can customize all of the software running on your VM. VMs are an ideal choice when you need:
+
+    Total control over the operating system (OS).
+    The ability to run custom software.
+    To use custom hosting configurations.
+
+A VM gives you the flexibility of virtualization without having to buy and maintain the physical hardware that runs the VM. However, as an IaaS offering, you still need to configure, update, and maintain the software that runs on the VM. You can even create or use an already created image to rapidly provision VMs. You can create and provision a VM in minutes when you select a preconfigured VM image. An image is a template used to create a VM and may already include an OS and other software, like development tools or web hosting environments.
+
+When you're using EC2/VM, you are responsible for patching your instances when new software packages come out, setting up the scaling of those instances as well as ensuring that you've architected your solutions to be hosted in a highly available manner. This is still not as much management as you would have if you hosted these on-premises. But management processes will still need to be in place
+
+## Compute Pricing (AWS EC2)
+
+### AWS EC2 PRICING TYPES
+
+| Feature | On-Demand | Spot Instances | Dedicated Hosts | Savings Plans | Reserved Instances |
+| --- | --- | --- | --- | --- | --- |
+| Pricing | Pay for compute capacity by the hour or second, with no long-term commitments. Generally the highest cost. | Pay the Spot price in effect for the period your instance is running. Can be significantly cheaper than On-Demand. | Pay for an entire physical server dedicated for your use. Hourly rate based on the host type. | Offer lower prices compared to On-Demand in exchange for a commitment to a consistent amount of compute usage (measured in $/hour) for a 1 or 3-year term. | Offer a significant discount (up to 75%) compared to On-Demand pricing for a commitment to a specific instance type and Availability Zone for a 1 or 3-year term. |
+| Commitment | No long-term commitment required. | No long-term commitment required. | No long-term commitment required, but typically used for longer durations. | 1 or 3-year term commitment to a specific spend amount per hour. | 1 or 3-year term commitment to a specific instance type and Availability Zone. |
+| Discount | No significant discounts for usage volume alone. | Can achieve significant discounts compared to On-Demand (up to 90%). | Discount compared to running equivalent On-Demand instances on multiple single-tenant virtual machines. | Savings depend on the committed spend amount and usage patterns. | Significant discounts compared to On-Demand. The discount varies based on the instance type, term, and payment option. |
+| Availability | Always available, subject to capacity. | Availability can vary based on supply and demand. Instances can be interrupted with little notice. | Always available once allocated. | Availability is tied to the availability of the instance types within the chosen compute savings plan. | Availability is tied to the availability of the reserved instance within the specified Availability Zone. |
+| Best For | Short-term, spiky, or unpredictable workloads that cannot be interrupted. Testing and development environments. | Workloads that are fault-tolerant, can handle interruptions, and have flexible start and end times. Big data, high-performance computing, CI/CD. | Regulatory compliance, licensing requirements that mandate dedicated hardware, or security requirements. | Workloads with consistent and predictable usage patterns across different instance types and Availability Zones within a region. | Workloads with consistent and predictable usage patterns requiring specific instance types in a particular Availability Zone. |
+| Flexibility | Highly flexible in terms of starting, stopping, and changing instance types. | Less flexible due to potential interruptions. You may need to be flexible with instance types and Availability Zones to improve chances of acquiring Spot instances. | Flexible in terms of the instances you can run on the dedicated host, as long as they are within the host's capacity. | Offers flexibility to change instance types, operating systems, and tenancies within the chosen compute savings plan. | Less flexible in terms of instance type and Availability Zone once a reservation is made. Can be some flexibility with convertible RIs. |
+| Tenancy | Shared tenancy (default). | Shared tenancy. | Single-tenant (your instances run on hardware that's dedicated to you). | Typically shared tenancy, but can apply to dedicated instances or dedicated hosts. | Typically shared tenancy, but can apply to dedicated instances. |
+
+## Compute Scaling & Availability
+
+AWS EC2 AUTO SCALING enables you to automatically add or remove Amazon EC2 instances in response to changing application demand. By automatically scaling your instances in and out as needed, you can maintain a greater sense of application availability.
+Within Amazon EC2 Auto Scaling, you can use two approaches: dynamic scaling and predictive scaling.
+*   Dynamic scaling responds to changing demand.
+*   Predictive scaling automatically schedules the right number of Amazon EC2 instances based on predicted demand.
+
+Suppose that you are preparing to launch an application on Amazon EC2 instances. When configuring the size of your Auto Scaling group, you might set the minimum number of Amazon EC2 instances at one. This means that at all times, there must be at least one Amazon EC2 instance running.
+The minimum capacity is the number of Amazon EC2 instances that launch immediately after you have created the Auto Scaling group. In this example, the Auto Scaling group has a minimum capacity of one Amazon EC2 instance.
+Next, you can set the desired capacity at two Amazon EC2 instances even though your application needs a minimum of a single Amazon EC2 instance to run.
+If you do not specify the desired number of Amazon EC2 instances in an Auto Scaling group, the desired capacity defaults to your minimum capacity.
+
+The third configuration that you can set in an Auto Scaling group is the maximum capacity. For example, you might configure the Auto Scaling group to scale out in response to increased demand, but only to a maximum of four Amazon EC2 instances.
+Because Amazon EC2 Auto Scaling uses Amazon EC2 instances, you pay for only the instances you use, when you use them. You now have a cost-effective architecture that provides the best customer experience while reducing expenses.
+
+You can run single VMs for testing, development, or minor tasks. Or you can group VMs together to provide high availability, scalability, and redundancy. AZURE can also manage the grouping of VMs for you with features such as scale sets and availability sets.
+Scale sets allow you to centrally manage, configure, and update a large number of VMs in minutes. The number of VM instances can automatically increase or decrease in response to demand, or you can set it to scale based on a defined schedule. Virtual machine scale sets also automatically deploy a load balancer to make sure that your resources are being used efficiently. With virtual machine scale sets, you can build large-scale services for areas such as compute, big data, and container workloads.
+Virtual machine availability sets are another tool to help you build a more resilient, highly available environment. Availability sets are designed to ensure that VMs stagger updates and have varied power and network connectivity, preventing you from losing all your VMs with a single network or power failure. Availability accomplish these objectives by grouping VMs in two ways: update domain and fault domain.
+## Key Takeaways
+
+- EC2 instances and VMs provide IaaS compute with full OS control
+- Choose pricing models (On-Demand, Spot, Reserved) based on workload patterns
+- Auto Scaling ensures availability while optimizing costs
+- Instance types must match workload requirements (compute, memory, storage)

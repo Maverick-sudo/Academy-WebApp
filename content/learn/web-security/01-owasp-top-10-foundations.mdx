@@ -1,0 +1,83 @@
+---
+title: OWASP Top 10 Foundations
+description: Terms, browser rendering basics, and authentication/authorization concepts.
+---
+
+Source: https://portswigger.net/web-security/learning-path
+
+| Term | Definition |
+| --- | --- |
+| Vulnerability | A vulnerability is defined as a weakness or flaw in the design, implementation or behaviours of a system or application. |
+| Exploit | An exploit is something such as an action or behaviour that utilises a vulnerability on a system or application. |
+| Proof of Concept (PoC) | A PoC is a technique or tool (script/executable) that often demonstrates the exploitation of a vulnerability. |
+
+## Browser Rendering Basics
+
+A browser engine, also known as a rendering or layout engine, is the core component of a web browser responsible for transforming HTML, CSS, and other web resources into a visual representation on the screen.
+The Critical Rendering Path is the sequence of steps the browser goes through to convert the HTML, CSS, and JavaScript into pixels on the screen. Optimizing the critical render path improves render performance. The critical rendering path includes the Document Object Model (DOM), CSS Object Model (CSSOM), render tree and layout.
+The document object model is created as the HTML is parsed. The HTML may request JavaScript, which may, in turn, alter the DOM. The HTML includes or makes requests for styles, which in turn builds the CSS object model. The browser engine combines the two to create the Render Tree. Layout determines the size and location of everything on the page. Once layout is determined, pixels are painted to the screen.
+
+### Retrieving Web Content
+
+- When you enter a URL or click a link, the browser sends a request to the web server. The server responds and the browser engine receives the HTML, CSS, JavaScript, and other files from the server.
+- JavaScript execution: JavaScript code is executed, which can dynamically manipulate the DOM and CSS, updating the page's content and appearance. *JavaScript parsing is done during compile time or whenever the parser is invoked, such as during a call to a method/function.*
+- Security and navigation: Browser engines also enforce security policies, handle navigation through hyperlinks, and manage data submitted through forms.
+
+### Building the DOM
+
+The HTML is parsed into a Document Object Model (DOM) tree, which represents the structure of the web page.
+The first step is processing the HTML markup and building the DOM tree. HTML parsing involves tokenization and tree construction. HTML tokens include start and end tags, as well as attribute names and values. If the document is well-formed, parsing it is straightforward and faster. The parser parses tokenized input into the document, building up the document tree.
+The DOM tree describes the content of the document. The `<html>` element is the first element and root node of the document tree. The tree reflects the relationships and hierarchies between different elements. Elements nested within other elements are child nodes. The greater the number of DOM nodes, the longer it takes to construct the DOM tree.
+When the parser finds non-blocking resources, such as an image, the browser will request those resources and continue parsing. Parsing can continue when a CSS file is encountered, but `<script>` elements — particularly those without an async or defer attribute — block rendering (some requests are blocking, which means the parsing of the rest of the HTML is halted until the imported asset is handled) and pause the parsing of HTML. Though the browser's preload scanner hastens this process, excessive scripts can still be a significant bottleneck. Waiting to obtain CSS doesn't block HTML parsing or downloading, but it does block JavaScript because JavaScript is often used to query CSS properties' impact on elements.
+
+### Building the CSSOM
+
+The second step in the critical rendering path is processing CSS and building the CSSOM tree. The CSS object model is similar to the DOM. The DOM and CSSOM are both trees. They are independent data structures. The browser converts the CSS rules into a map of styles it can understand and work with. The browser goes through each rule set in the CSS, creating a tree of nodes with parent, child, and sibling relationships based on the CSS selectors.
+As with HTML, the browser needs to convert the received CSS rules into something it can work with. Hence, it repeats the HTML-to-object process, but for the CSS.
+The CSSOM tree includes styles from the user agent style sheet. The browser begins with the most general rule applicable to a node and recursively refines the computed styles by applying more specific rules. In other words, it cascades the property values. Building the CSSOM is very, very fast, and this build time information is not displayed in the developer tools. Rather, the "Recalculate Style" in developer tools shows the total time it takes to parse CSS, construct the CSSOM tree, and recursively calculate computed styles. In terms of web performance, there are many better ways to invest optimization effort, as the total time to create the CSSOM is generally less than the time it takes for one DNS lookup.
+The browser then creates a render tree from both these structures to be able to paint the content to the screen. JavaScript is also downloaded, parsed, and then executed.
+
+### Layout and Rendering
+
+The browser engine calculates the layout of the page based on the DOM and CSS, then renders the page by drawing the elements on the screen. Rendering steps include style, layout, paint, and in some cases compositing. The CSSOM and DOM trees created in the parsing step are combined into a render tree which is then used to compute the layout of every visible element, which is then painted to the screen.
+- The third step is computed style tree, or render tree, construction. It starts with the root of the DOM tree, traversing each visible node. Each visible node has its CSSOM rules applied to it. The render tree holds all the visible nodes with content and computed styles, matching up all the relevant styles to every visible node in the DOM tree, and determining, based on the CSS cascade, what the computed styles are for each node.
+- The fourth step in the critical rendering path is running layout on the render tree to compute the geometry of each node. Layout is the process by which the dimensions and location of all the nodes in the render tree are determined, plus the determination of the size and position of each object on the page. Reflow is any subsequent size and position determination of any part of the page or the entire document. The first time the size and position of each node is determined is called layout. Subsequent recalculations are called reflows.
+- In the painting or rasterization phase, the browser converts each box calculated in the layout phase to actual pixels on the screen. Painting involves drawing every visual part of an element to the screen, including text, colors, borders, shadows, and replaced elements like buttons and images.
+- When sections of the document are drawn in different layers, overlapping each other, compositing is necessary to ensure they are drawn to the screen in the right order and the content is rendered correctly.
+As the page continues to load assets, reflows can happen (recall our example image that arrived late). A reflow sparks a repaint and a re-composite.
+
+## Authentication Vulnerabilities
+
+- Authentication is the verification of who you are.
+- Single-factor authentication refers to when only one form of authentication is used. For example, when you log in to a webpage using only a username and password and are granted access, that is single-factor authentication.
+- Multi-factor authentication (MFA) is the use of multiple types of authentication in order to access a single resource.
+- An API is the part of a server that sends and receives data. There are 3 main types of API authentication:
+  - HTTP Basic Auth - such as cookies that store your session credentials (https://addons.mozilla.org/en-US/firefox/addon/cookie-editor/).
+
+Broadly speaking, most vulnerabilities in authentication mechanisms arise in one of two ways:
+- The authentication mechanisms are weak because they fail to adequately protect against brute-force attacks.
+- Logic flaws or poor coding in the implementation allow the authentication mechanisms to be bypassed entirely by an attacker. This is sometimes referred to as "broken authentication".
+
+API keys - API keys are similar to HTTP Basic Auth except, instead of a username and password, you use something called an API token. An API token is a unique string of letters and numbers generated for each user.
+
+### OAuth
+
+OAuth is a commonly used authorization framework that enables websites and web applications to request limited access to a user's account on another application. Crucially, OAuth allows the user to grant this access without exposing their login credentials to the requesting application. This means users can fine-tune which data they want to share rather than having to hand over full control of their account to a third party.
+OAuth 2.0 was originally developed as a way of sharing access to specific data between applications. It works by defining a series of interactions between three distinct parties, namely a client application, a resource owner, and the OAuth service provider.
+
+- Client application - The website or web application that wants to access the user's data.
+- Resource owner - The user whose data the client application wants to access.
+- OAuth service provider - The website or application that controls the user's data and access to it. They support OAuth by providing an API for interacting with both an authorization server and a resource server.
+
+There are numerous different ways that the actual OAuth process can be implemented. These are known as OAuth "flows" or "grant types" https://portswigger.net/web-security/oauth/grant-types The OAuth grant type determines the exact sequence of steps that are involved in the OAuth process. The grant type also affects how the client application communicates with the OAuth service at each stage, including how the access token itself is sent. For this reason, grant types are often referred to as "OAuth flows". An OAuth service must be configured to support a particular grant type before a client application can initiate the corresponding flow. The client application specifies which grant type it wants to use in the initial authorization request it sends to the OAuth service.
+
+In any OAuth flow, the user must approve the requested access based on the scope defined in the authorization request. The resulting token allows the client application to access only the scope that was approved by the user. But in some cases, it may be possible for an attacker to "upgrade" an access token (either stolen or obtained using a malicious client application) with extra permissions due to flawed validation by the OAuth service. The process for doing this depends on the grant type.
+
+“The client application requests access to a subset of the user's data, specifying which grant type they want to use and what kind of access they want. The user is prompted to log in to the OAuth service and explicitly give their consent for the requested access. The client application receives a unique access token (The access token that it received from the authorization server is often used instead of a traditional password.) that proves they have permission from the user to access the requested data. Exactly how this happens varies significantly depending on the grant type. The client application uses this access token to make API calls fetching the relevant data from the resource server.”
+
+“OpenID” Connect slots neatly into the normal OAuth flows. From the client application's perspective, the key difference is that there is an additional, standardized set of scopes that are the same for all providers, and an extra response type: id_token.
+
+### Authorization
+
+Authorization is the verification of what you have the right to do.
+Role-based access control is exactly what it sounds like: you have permissions to access certain things (authorization) based on your role/responsibilities (authentication). In an enterprise environment, role-based access is usually controlled through a system of users and roles. Each user is placed in a role and given access to all of the systems that come with that role. By ensuring that each user has only the access necessary for their role, systems become more secure while streamlining operational efficiency.

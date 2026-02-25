@@ -1,0 +1,240 @@
+---
+title: Mobile Security and UEM
+description: UEM/EMM models, mobile OS security, and device connection risks.
+---
+
+
+Describes the way employees are provided with management software designed to apply security policies to mobile devices and applications.
+
+* **Bring Your Own Device (BYOD):**
+* Mobile device is owned by the employee.
+* **Visibility:** The challenge of identifying and managing devices used for corporate apps in the enterprise.
+* Mobile device must meet profile and requirements.
+* Installation of corporate apps.
+* Some level of oversight and auditing.
+* **Management:** Two main functions: Mobile Device Management (MDM) and Mobile Application Management (MAM).
+* **MDM:** Sets device policies for authentication and connectivity. MDM can also allow device resets and remote wipes.
+* **MAM:** Sets policies for apps that can process corporate data; prevents data transfer to personal apps on same device.
+* Poses the most difficulty for security framework managers.
+
+
+* **Choose Your Own Device (CYOD):** Similar to COPE.
+* Employees are given a choice of device from a list such as configured by Enterprise Managers/Container.
+
+
+* **Corporate Owned, Business Only (COBO):**
+* Device is the property of the company/organization.
+* May only be used for company business workflow.
+
+
+* **Corporate Owned, Personally-Enabled (COPE):**
+* Device remains the property of the company.
+* Subject to Acceptable Use Policies (AUP); personal web browsing.
+* Employees may use it to access personal email and social media.
+* Management software logs the use of a device.
+
+
+* **Virtualization / Virtual Desktop Infrastructure (VDI):**
+* VDI as a means of provisioning an OS desktop to interchangeable hardware.
+* The hardware must be capable of running a VDI client viewer or have browser support for a clientless HTML5 solution. Can be accessed via a mobile device/smartphone.
+* Mitigates security concerns about BYOD as corporate data and apps are segmented from the other apps on the device.
+* VDI allows client device to access a VM.
+* Corporate data is stored and processed on the VDI; less chance of compromise.
+
+
+---
+
+## Workspace
+
+Visibility across PC, laptop, smartphone, and tablet. Core functionality of UEM/EMM acts similarly to the concept of Network Access Control (NAC) solutions.
+Examples: Air-watch.com, Microsoft Intune, Symantec/Broadcom, Citrix Endpoint Management.
+
+* Management software identifies a device on the network, determining whether to allow it to connect or not, based on administrator-set parameters.
+
+---
+
+## iOS in the Enterprise (Apple's iOS)
+
+* Third-party developers create apps using Apple's Software Development Kit (SDK) available only on macOS.
+* Use an EMM suite and its developer tools to create a "wrapper" for corporate-internal iOS devices.
+* Distribution of corporate signed apps is facilitated by participating in the **Device Enrollment Program**, the **Volume Purchase Program**, and the **Developer Enterprise Program**.
+* Most iOS attacks are the same as with any system.
+* Difficult for malware infection as all code is updated from Apple's servers only.
+* Users would need to update iOS/apps to a version that mitigates any exploits of the previous versions.
+
+---
+
+## Android in the Enterprise
+
+* Open source means there is more scope for vendor-specific versions. Apps available from Google Play Store.
+* Facilitates use of EMM suites and the containerization of corporate workspaces. SDK is available for Windows, macOS, and Linux.
+* Android is less consistent than Apple in updates. Often depends on handset vendor to complete new version or issue the patch for their flavor of Android before it can be applied.
+* Android malware occurs.
+* Google implemented a server-side malware scanning product (**Play Protect**) that will warn both work and personal profiles of any security issues that have been discovered.
+* Difficult for would-be hackers and spammers to get apps in any of the major app repositories.
+* Warns users if an app is potentially damaging and scans apps that have already been purchased and installed.
+* Samsung Knox facilitates extra control over device function to run apps in sandboxes before installation.
+* Based on Security-Enhanced Linux (SELinux); uses Mandatory Access Control (MAC) policies.
+
+---
+
+## Smartphone Authentication
+
+Access control implemented by configuring screen lock.
+
+* Can only be bypassed using correct PIN, password, swipe pattern, matching biometrics (face ID / fingerprint).
+* Vulnerable to user's poor choices, plus tendency for the grease trail to facilitate a **Smudge Attack**.
+* Screen lock can be configured with a lockout policy.
+* Incorrect entries lock device for a set period.
+* Lockout policy can be configured to escalate set periods and deters attempts to guess the passcode.
+
+### Context-Aware Authentication (Newer Auth Models)
+
+* Disable screen locks when device detects that it is in a trusted location (e.g., Home IP).
+* Applies more stringent access control to prevent misuse.
+* Checks whether the device network connection can be trusted (not open Wi-Fi hotspot, for instance).
+
+---
+
+## Remote Wipe / Kill Switch
+
+* Compromised/stolen devices can be remotely reset to factory defaults or cleared of any personal data (sanitization).
+* Triggered by several incorrect passcode attempts.
+* Utilities may also wipe any plug-in memory cards.
+* Features include backing up data from the phone to a server first and displaying a "LOST/STOLEN PHONE - Return to XX" message.
+* Thieves can prevent a remote wipe by ensuring the phone cannot connect to the network, then hacking and disabling the security.
+
+---
+
+## Location Services
+
+* **Geolocation:** The use of network attributes to identify (or estimate) the physical position of a device. Device uses location services to determine its current position.
+* **Global Positioning System (GPS):** A means of determining the device's longitude and latitude based on information received from satellites via a GPS sensor chip.
+* **Indoor Positioning System (IPS):** Works out a device's location by triangulating its proximity to other radio sources, like cell towers, Wi-Fi APs, and Bluetooth/RFID beacons.
+* Location services are available to any app where the user has granted permission.
+* **Privacy:** Primary concern surrounding location services. Provides a mechanism to track an individual's movements, their social and business activities.
+* **Geofencing:** The practice of creating a virtual boundary based on real-world geography. An organization may use geofencing to create a perimeter around its office property to subsequently impact the functionality of devices exceeding the bound. Useful for auditing the use of camera/video functions or applying context-aware authentication.
+* **GPS Tagging (Geotagging):** The process of adding geographical metadata (lat/long) where the device is located at the time of initial storage/transfer to media (photos, videos, SMS messages), allowing apps to place the media at specific coordinates. Highly sensitive personal information/potentially confidential organizational data. Uploading to social media could be used to track movements.
+
+---
+
+## Full Device Encryption & External Media
+
+* Mobile OS for smartphones/tablets provide full device encryption.
+* All user data on the device is always encrypted, but the key is stored on the device, primarily used to wipe the device. OS just needs to delete the key; data becomes inaccessible rather than wiping each storage location.
+* Email data and any apps using "Data Protection" options are subject to a second round of encryption using a key derived from a PIN protected by the user's credential.
+* "Data Protection" is enabled automatically when you configure a password lock on the device.
+* **Android:** No full disk encryption as it is considered too detrimental to performance. User data is encrypted at the file level by default.
+* Mobile devices contain a Solid State Drive (SSD) / flash memory for persistent storage. Android handsets may support removable media.
+* **MicroSD Hardware Security Module (HSM):** A small form factor used to store cryptographic keys securely, allowing the material to be used with different devices.
+
+---
+
+## Application Management
+
+Enrolling devices into corporate network via management software (EMM/UEM).
+
+* Can be further configured into an **Enterprise Workspace**.
+* **Workspace Mode:** Only a certain number of authorized applications can run (Allow List/Block List).
+* **Trusted App Source:** Managed by service provider (authenticates and authorizes valid developers). Service provider may analyze code and apply policies. Issuing a certificate to sign apps (proving integrity).
+* **Private App Distribution:** For custom corporate apps. Apple uses Enterprise Developer programs via Apple Business Manager. Google Play Store has a private channel called Managed Google Play. Both allow EMM to push apps from private channel directly.
+* **Sideloading:** Android allows selection of different stores and installation of untrusted apps from third parties via APK files. iOS typically blocks this unless jailbroken.
+
+---
+
+## Mobile Application Management (MAM)
+
+* **Containerization:** Allows the employee or organization to manage and maintain the portion of the device that interfaces with the corporate network.
+* The container isolates corporate apps from the rest of the device. Requires additional authentication to access the workspace.
+* **Storage Segmentation:** The container is associated with a directory on the persistent storage that is not readable/writable by apps outside the container.
+* App network access might be restricted to a VPN tunneled through the organization's security system.
+* Assists **Content Management** and **Data Loss Prevention (DLP)** solutions.
+* **Remote Enterprise Wipe (Selective Wipe):** In BYOD/COPE, containerization allows clearing corporate account credentials and data without affecting user personal data/settings.
+
+---
+
+## Jailbreaking / Rooting
+
+* **Jailbreaking:** Associated with iOS devices.
+* **Rooting:** Associated with Android devices.
+* Both mean users could subvert the access controls to override settings or change the software.
+* Users want to avoid restrictions put on by vendors, OEMs, or carriers.
+* Requires **Privilege Escalation** to enable root access (used to install custom OS or non-kernel apps).
+* **Rooting:** Often involves exploiting a vulnerability or using custom firmware for flashing a Custom ROM to the Read-Only Memory (ROM) chips.
+* **Jailbreaking:** Accomplished by booting a device with a patched kernel (can be "tethered" to a computer).
+* **Carrier Unlocking:** Removing restrictions that lock a device to a single carrier network.
+* **Side Effects:** Leaves many security measures permanently disabled. If a user has root permissions, the UEM/EMM agent is likely compromised. UEM/EMM has routines to detect rooted/jailbroken/custom firmware. If detected, the device is assumed an **Untrusted OS**.
+
+---
+
+## Implement Secure Mobile Device Connections
+
+UEM/EMM suites set device policies for authentication and authorization.
+
+### Cellular & GPS Connection Methods
+
+* Use of cell phone network for call and internet data access.
+* Less likely to be subject to monitoring and filtering; relatively secure. Attacks require high degree of sophistication.
+* **GPS Jamming/Spoofing:** GPS signals can be jammed or spoofed using special radio equipment, which might be used to defeat geofencing.
+* **Assisted GPS (A-GPS):** Uses cellular data and signals from cell towers to triangulate position and adjust for device position relative to the tower.
+
+### Bluetooth Connection Methods
+
+* Popular for Personal Area Networks (PAN).
+* **Device Discovery:** Easily discoverable devices will connect to any other Bluetooth devices nearby. Should be disabled when not in use.
+* **Authentication & Authorization:** Devices pair using a passkey. Never use default passkeys. Regularly check paired devices.
+* **Malware:** Proof-of-concept Bluetooth worms.
+* **Bluejacking:** Sending unsolicited messages (text/picture/audio) to a device via Bluetooth.
+* **Bluesnarfing:** Exploit used to steal information from someone else’s phone. Circumvents authentication.
+* **Vulnerability:** A short PIN code is vulnerable to brute force guessing. Peripheral devices with malicious firmware can launch effective attacks.
+
+### Wi-Fi & Tethering Connection Methods
+
+* **Risks:** Connecting to open access points or rogue access points.
+* **Ad Hoc Wi-Fi Network:** Wireless stations establishing peer-to-peer connections. In terms of corporate security, these should be disabled as attackers might obtain a bridged connection to the corporate network.
+* **Wi-Fi Direct:** Allows 1-to-1 connection where one device functions as a soft AP. Android supports this.
+* **Tethering / Hotspots:** Sharing a mobile data connection.
+* **Hotspot:** Connection shared over Wi-Fi with multiple devices.
+* **Tethering:** Connection shared by connecting via USB cable or Bluetooth to a single PC.
+
+
+
+---
+
+## Firmware and Radio Updates
+
+* **Radio Firmware:** Separate from the end-user OS (Android/iOS). It contains the OS for the radio modem/sensor used for cellular, Wi-Fi, Bluetooth, NFC, and GPS.
+* Uses its own baseband processor and memory; boots a **Real-Time Operating System (RTOS)**.
+* **Over-the-Air (OTA):** Baseband updates delivered wirelessly.
+* A jailbroken/rooted handset might be configured to prevent baseband updates or apply specific firmware versions manually.
+
+---
+
+## Infrared (IR) Signaling
+
+* **IR Blaster:** Allows a device to interact with an IR receiver (e.g., HVAC/TV).
+* **IR Sensor:** Used as proximity sensors or to measure health info via internal organ levels.
+
+---
+
+## Radio Frequency (RF) / RFID Signaling
+
+* **Near Field Communication (NFC):** Used for contactless Point-of-Sale (POS) transactions (e.g., Apple/Google/Samsung Pay). A transaction is known as a "Bump."
+* **Vulnerabilities:** NFC does not provide encryption. Eavesdropping is possible if an adversary can intercept the communication.
+* **NFC/RFID Skimming:** Using a rogue reader to read signals from a contactless bank card.
+* **Attacks:** Crafting tags to direct victim devices to malicious web pages. Flooding the area with RF signals to disrupt data transfer (similar to DoS).
+
+---
+
+## USB Connection Methods
+
+* **USB On-The-Go (OTG):** Allows a port to function as a host or as a device.
+* **Risks:** Media connected to the smartphone could host malware. A charging plug could act as a Trojan. Modern versions of Android/iOS require authentication before accepting the connection.
+
+---
+
+## SMS / MMS / RCS & Push Notification
+
+* **SMS/MMS:** Operated by cellular network providers. Vulnerable due to the **SS7 Signaling Protocol**, which casts doubt on the security of 2-step verification.
+* **Rich Communication Services (RCS):** Platform-independent advanced messaging. Support for video calling and larger attachments. Supported by carriers using the "Universal Profile." No end-to-end encryption support is patchy; has resulted in DoS attacks.
+* **Push Notifications:** Services that an app/website can use to display an alert. Developers must secure the admin account and servers used to send these.

@@ -1,0 +1,611 @@
+---
+title: "Cisco Packet Tracer"
+description: "Using Cisco Packet Tracer for network simulations."
+---
+
+- vmnet8: 192.168.33.0/24 (internet via NAT)
+- vmnet9: 10.10.10.0/24 (separate internet via NAT)
+- Devices on different networks CANNOT communicate
+
+Use case: Simulate different ISPs, separate internet connections
+
+#### Adding 2 Host-Only Adapters
+
+Default behavior:
+
+- Both connect to same vmnet1 (172.16.47.0/24)
+- Get IPs from same DHCP pool or static
+- Devices on both CAN communicate (same subnet)
+
+To separate them: Create vmnet2:
+
+```text
+answer VNET_2_DHCP no
+answer VNET_2_HOSTONLY_NETMASK 255.255.255.0
+answer VNET_2_HOSTONLY_SUBNET 10.100.100.0
+answer VNET_2_VIRTUAL_ADAPTER yes
+```
+Result:
+
+- vmnet1: 172.16.47.0/24 (isolated Site A)
+- vmnet2: 10.100.100.0/24 (isolated Site B)
+- Complete separation - perfect for multi-site labs
+
+Use case: Separate headquarters and branch networks, multi-tenant simulations
+
+#### Adding 2 Bridged Adapters
+
+Behavior depends on Mac's physical connections:
+One physical connection: Both share same network Two physical connections: Can be on different networks
+
+VMware allows:
+
+- 1 Host-Only DHCP
+- 1 NAT DHCP
+
+Not 2 Host-Only DHCPs or 2 NAT DHCPs
+Because on macOS VMware, only one Host-Only network is allowed to run a DHCP service reliably.
+Rule to remember (important): Cloud with DHCP → dynamic nodes, Cloud without DHCP → static only
+
+Routers on cloudX->pnetX must be STATIC, if PnetX is without DHCPs
+
+**Summary (straight to the point):**
+
+For an Ansible node on a management network (NAT or host-only) to reach devices on isolated host-only networks in an EVE lab:
+
+1. Enable IP forwarding on the EVE VM.
+2. Do not rely on DHCP on isolated host-only networks; assign static IPs.
+3. The no ip address dhcp command must come BEFORE your static IP!
+4. Add explicit routes on the Ansible node pointing each isolated network to the EVE VM’s IP on the management0 network.
+5. Ensure return paths exist by adding routes on lab nodes back to the EVE VM, add “ip route xxx xxx“ to Export.cfg.
+6. Isolation between lab networks remains intact; EVE acts as the management-plane router only.
+
+This allows full Ansible access without breaking host-only isolation or VMware NAT constraints.
+
+**Summary:**
+
+| Mac's Active Connections | Bridged Adapter 1 | Bridged Adapter 2 | Can Separate? |
+| --- | --- | --- | --- |
+| SmartPhone only | 172.20.10.x | 172.20.10.x | No |
+| SmartPhone + WiFi | 172.20.10.x | 192.168.1.x | Yes |
+| WiFi + Ethernet | 192.168.1.x | 10.0.0.x | Yes |
+
+
+### Switch Management: The SVI Confusion
+
+Question that caused confusion: "How do I configure switches via Ansible if they don't get IPs from Cloud0 like routers do?"
+
+The difference:
+
+**Routers**
+
+```text
+interface GigabitEthernet0/0
+ ip address 192.168.33.201 255.255.255.0   ← IP on physical port
+```
+
+**Switches**
+
+```text
+interface GigabitEthernet0/0
+ switchport mode access                     ← NO IP (Layer 2 only)
+ switchport access vlan 1
+
+interface Vlan1                             ← IP on SVI (virtual interface)
+ ip address 192.168.33.221 255.255.255.0
+```
+
+Why:
+- Physical switch ports operate at Layer 2 (MAC addresses)
+- Management IP goes on SVI (Switch Virtual Interface)
+- SVI is tied to a VLAN, not a physical port
+Traffic flow for switch management:
+Ansible (192.168.33.10)
+    → Cloud0
+    → Switch Gi0/0 (switchport, no IP)
+    → VLAN 1 (default VLAN)
+    → SVI Vlan1 (192.168.33.221)
+    → Switch CPU responds to SSH
+
+### Network Type Comparison Table
+
+| Feature | NAT | Host-Only | Bridged |
+| --- | --- | --- | --- |
+| Internet access | Yes (via NAT) | No | Yes (direct) |
+| Mac can reach VM | Yes | Yes | Yes |
+| VM appears on home network | No | No | Yes |
+| Isolation from external | High | Complete | None |
+| Depends on physical adapter | No | No | Yes |
+| Can create multiples easily | Yes | Yes | Only if multiple physical |
+| DHCP included | Yes | Yes | From external router |
+| IP assignment | VMware DHCP | VMware DHCP | External DHCP/Static |
+### Practical Lab Recommendations
+
+#### For Your Current Setup (SmartPhone Hotspot Only)
+
+Recommended configuration:
+
+**Adapter 1 (pnet0): NAT (vmnet8)**
+
+- Network: 192.168.33.0/24
+- Purpose: Management + Internet access for updates
+
+**Adapter 2 (pnet1): Host-only (vmnet1)**
+
+- Network: 172.16.47.0/24
+- Purpose: Isolated lab Site A (HQ)
+
+**Adapter 3 (pnet2): Host-only (vmnet2) - CREATE THIS**
+
+- Network: 10.200.200.0/24
+- Purpose: Isolated lab Site B (Branches) or WAN simulation
+
+**pnet2 — Host-Only (vmnet2 / 10.200.200.0)**
+
+- Can ping itself
+- Cannot reach pnet0 or pnet1
+- No bridge interface on macOS
+
+This is the key problem.
+
+The root cause (important)
+On macOS, VMware does NOT automatically create a macOS bridge for every Host-Only network.
+No bridge on the host = no Layer-2 path = no traffic leaves that segment
+So:
+- vmnet1 → backed by bridge100
+- vmnet8 → backed by bridge101
+- vmnet2 → exists in VMware config only, not on macOS networking stack
+That’s why:
+- pnet2 can talk to itself
+- but cannot talk to anything else
+This is not a Linux config issue inside EVE.It is a host-side virtual switching issue. 
+To enable pnet2 (10.200.200.0/24) to be reachable from pnet0 and pnet1 you need Layer-3 routing or Layer-2 bridging.
+Solution 1 — Bridge vmnet2 to macOS (hacky, fragile)
+Solution 2 — Add Internal EVE routing (recommended, clean, realistic
+
+Enable IP forwarding inside the EVE VM:
+
+```bash
+sysctl -w net.ipv4.ip_forward=1
+```
+
+Persist it:
+
+```bash
+echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
+```
+
+Then add routes:
+
+```bash
+ip route add 10.200.200.0/24 dev pnet2
+```
+
+And ensure iptables is not blocking forwarding:
+
+```bash
+iptables -P FORWARD ACCEPT
+```
+For a More Realistic LAB, Here’s What you want
+- pnet0 (192.168.33.0/24) → Ansible management → pnet1 + pnet2
+- pnet1 ↔ pnet2 ❌ (must remain isolated)
+- Routing between pnet1 and pnet2 later via a router inside EVE topology
+
+On EVE VM only:
+
+1. Enable IP forwarding:
+
+```bash
+sysctl -w net.ipv4.ip_forward=1
+```
+
+2. Allow forwarding ONLY between pnet0 and pnet2
+
+```bash
+iptables -A FORWARD -i pnet0 -o pnet2 -j ACCEPT
+iptables -A FORWARD -i pnet2 -o pnet0 -j ACCEPT
+```
+
+3. Explicitly block pnet1 ↔ pnet2
+
+```bash
+iptables -A FORWARD -i pnet1 -o pnet2 -j DROP
+iptables -A FORWARD -i pnet2 -o pnet1 -j DROP
+```
+
+- Ansible control node on pnet0 (192.168.33.0/24)
+- Devices(Routers/Switches) on pnet1 (172.16.47.0/24)
+- Devices(Routers/Switches) on pnet2 (10.200.200.0/24)
+- EVE VM does the management routing only
+- pnet1 ↔ pnet2 remain isolated
+- Later, you add a router inside the EVE topology to handle pnet1↔pnet2 like a real network
+Because:
+- Normal kernel routing works
+- You are not forcing source interfaces
+- SSH behaves exactly like ping without -I
+- Ansible will follow the same routing logic
+This is a proper, professional lab design:
+- Management-plane routing via EVE
+- Data-plane routing via lab routers
+- Clear separation of concerns
+- No VMware hacks
+- Fully reproducible
+
+Advantages:
+
+- Three separate networks
+- One with internet for management
+- Two completely isolated for safe testing
+- No dependency on physical adapters
+- Simulates real multi-site architecture
+
+Avoid Bridged mode because:
+- Limited to SmartPhone hotspot's tiny /28 network (14 IPs)
+- Exposes lab devices to mobile data network
+- No benefit over NAT for your use case
+
+### Key Configuration Locations
+
+**On Your Mac**
+
+VMware network config:
+
+```text
+/Library/Preferences/VMware Fusion/networking
+```
+
+DHCP configs:
+
+```text
+/Library/Preferences/VMware Fusion/vmnet1/dhcpd.conf
+/Library/Preferences/VMware Fusion/vmnet8/dhcpd.conf
+```
+
+NAT config:
+
+```text
+/Library/Preferences/VMware Fusion/vmnet8/nat.conf
+```
+
+**In EVE-NG**
+
+Network interfaces:
+
+```text
+/etc/network/interfaces
+```
+
+Format:
+
+```text
+iface pnetX inet dhcp    → Get IP from VMware DHCP
+iface pnetX inet static  → Set static IP manually
+iface pnetX inet manual  → No IP configuration
+```
+
+### Critical Takeaways
+
+1. Physical adapters are the foundation - Bridged mode can only use what your Mac physically has connected
+2. NAT and Host-only are virtual - You can create as many as you want, independent of physical hardware
+3. Doubling adapters of same type - By default they share the same network unless you create new vmnet interfaces
+4. Layer 2 vs Layer 3 - Bridges connect at Layer 2 (same broadcast domain), routing needed for Layer 3 (different subnets)
+5. Switch management requires SVI - Physical switch ports don't have IPs, management IPs go on VLAN interfaces
+6. SmartPhone hotspot limitation - /28 network (14 IPs) makes bridged mode impractical for labs
+7. Isolation levels:
+
+- NAT: Isolated from home network, has internet
+- Host-only: Completely isolated, no internet
+- Bridged: No isolation, on real network
+
+### End Notes
+
+This document explains VMware Fusion network adapters using a MacBook Pro running EVE-NG as the reference platform. The concepts apply to all hypervisors (VirtualBox, Hyper-V, KVM) with different naming conventions:
+
+- VMware: vmnet1, vmnet8, pnet0
+- VirtualBox: vboxnet0, vboxnet1
+- Linux KVM: virbr0, virbr1
+- Hyper-V: Virtual Switch names
+
+The fundamental principles of NAT, Host-only, and Bridged networking remain consistent across all platforms.
+
+### VMware Adapter → EVE-NG Interface → Cloud Object Mapping
+
+#### The Translation Chain
+
+```text
+Mac (VMware)  →  EVE-NG VM  →  EVE-NG Network Objects
+   vmnetX     →   ethX/pnetX  →      CloudX
+```
+
+#### Step 1: VMware VM Settings → EVE-NG eth Interfaces
+
+The order of network adapters in VMware settings determines the eth number in EVE-NG.
+
+In VMware Fusion
+
+When you open EVE-NG VM settings → Network Adapter, you'll see:
+
+```text
+Network Adapter:     Connected to: vmnet8 (NAT)        ← This becomes eth0
+Network Adapter 2:   Connected to: vmnet1 (Host-only)  ← This becomes eth1
+Network Adapter 3:   Not connected                     ← This becomes eth2
+```
+
+Translation:
+- First adapter (Network Adapter) = eth0
+- Second adapter (Network Adapter 2) = eth1
+- Third adapter (Network Adapter 3) = eth2
+- And so on...
+The numbering is based on the ORDER in VMware settings, not the vmnet number!
+
+#### Step 2: EVE-NG eth Interfaces → pnet Bridges
+
+In EVE-NG's /etc/network/interfaces, the eth interfaces are bridged to pnet interfaces:
+
+```text
+# eth0 is bridged to pnet0
+iface eth0 inet manual
+auto pnet0
+iface pnet0 inet dhcp
+    bridge_ports eth0      ← eth0 traffic goes through pnet0
+    
+# eth1 is bridged to pnet1
+iface eth1 inet manual
+auto pnet1
+iface pnet1 inet manual
+    bridge_ports eth1      ← eth1 traffic goes through pnet1
+    
+# eth2 is bridged to pnet2
+iface eth2 inet manual
+auto pnet2
+iface pnet2 inet manual
+    bridge_ports eth2      ← eth2 traffic goes through pnet2
+```
+
+Translation:
+- eth0 → bridged to → pnet0
+- eth1 → bridged to → pnet1
+- eth2 → bridged to → pnet2
+The pnet number always matches the eth number!
+
+#### Step 3: pnet Interfaces → EVE-NG Cloud Objects
+
+In EVE-NG GUI, the Cloud objects map directly to pnet interfaces:
+
+- Cloud0 → pnet0
+- Cloud1 → pnet1
+- Cloud2 → pnet2
+- Cloud3 → pnet3
+- ...and so on
+
+The Cloud number always matches the pnet number!
+
+#### Complete Translation Example
+
+Your Current Setup
+
+VMware Fusion Settings:
+
+```text
+Network Adapter:    NAT (vmnet8)         ← Position 1
+Network Adapter 2:  Bridged (vmnet1)     ← Position 2
+Network Adapter 3:  Host-only (vmnet1)   ← Position 3
+```
+
+Inside EVE-NG Linux:
+
+```text
+eth0 → Connected to vmnet8 (first adapter)
+eth1 → Connected to vmnet1 (second adapter, even though it says bridged)
+eth2 → Connected to vmnet1 (third adapter)
+```
+
+In /etc/network/interfaces:
+
+```text
+eth0 → bridged to → pnet0 (192.168.33.130)
+eth1 → bridged to → pnet1 (no IP configured yet)
+eth2 → bridged to → pnet2 (no IP configured yet)
+```
+
+In EVE-NG GUI:
+
+```text
+Cloud0 → Uses pnet0 → Goes to eth0 → Exits via vmnet8 (NAT) → Internet
+Cloud1 → Uses pnet1 → Goes to eth1 → Exits via vmnet1 (Bridged? or Host-only?)
+Cloud2 → Uses pnet2 → Goes to eth2 → Exits via vmnet1 (Host-only)
+```
+
+### How to Verify the Mapping
+
+#### Method 1: Check from EVE-NG Console
+
+```bash
+# SSH to EVE-NG
+ssh root@192.168.33.130
+
+# Show all network interfaces
+ip link show
+```
+
+Output:
+
+```text
+1: lo: <LOOPBACK,UP,LOWER_UP>
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP>
+3: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP>
+4: eth2: <BROADCAST,MULTICAST,UP,LOWER_UP>
+5: pnet0: <BROADCAST,MULTICAST,UP,LOWER_UP>
+	bridge_ports eth0     ← See which eth is connected
+6: pnet1: <BROADCAST,MULTICAST,UP,LOWER_UP>
+	bridge_ports eth1
+7: pnet2: <BROADCAST,MULTICAST,UP,LOWER_UP>
+	bridge_ports eth2
+```
+
+Look for the bridge_ports line to see eth → pnet mapping
+
+#### Method 2: Check Bridge Configuration
+
+```bash
+# Show bridge details
+brctl show
+```
+
+Output:
+
+```text
+bridge name     bridge id               STP enabled     interfaces
+pnet0          8000.000c290f4dc6       no              eth0
+pnet1          8000.000c290f4dd0       no              eth1
+pnet2          8000.000c290f4dda       no              eth2
+```
+
+The "interfaces" column shows which eth is part of which pnet bridge
+
+#### Method 3: Check IP Addresses
+
+```bash
+ip addr show
+```
+
+Look for which pnet has an IP:
+
+```text
+5: pnet0: <BROADCAST,MULTICAST,UP,LOWER_UP>
+	inet 192.168.33.130/24   ← This is connected to vmnet8 (NAT)
+    
+6: pnet1: <BROADCAST,MULTICAST,UP,LOWER_UP>
+	inet6 fe80::...          ← No IPv4, only link-local IPv6
+    
+7: pnet2: <BROADCAST,MULTICAST,UP,LOWER_UP>
+	inet6 fe80::...          ← No IPv4, only link-local IPv6
+```
+
+### How to Determine Cloud Mapping in EVE-NG Lab
+
+When Building Topology in EVE-NG:
+
+#### Step 1: Identify Cloud objects
+
+Right-click → Add Node → Network → You'll see:
+
+```text
+Cloud0 (pnet0)
+Cloud1 (pnet1)
+Cloud2 (pnet2)
+Cloud3 (pnet3)
+...
+```
+
+#### Step 2: Check which pnet has what network
+
+```bash
+# On EVE-NG
+ip addr show | grep "inet "
+```
+
+# Output shows:
+```text
+pnet0: 192.168.33.130 → This is management (NAT, has internet)
+pnet1: 172.16.47.X    → This is host-only (isolated Site A)
+pnet2: 10.200.200.1   → This is host-only (isolated Site B)
+```
+
+#### Step 3: Connect your devices accordingly
+
+```text
+Need internet for management?     → Connect to Cloud0
+Need isolated lab Site A?          → Connect to Cloud1
+Need isolated lab Site B/WAN sim?  → Connect to Cloud2
+```
+
+### Quick Reference Table
+
+| VMware Adapter Position | EVE-NG eth | EVE-NG pnet | EVE-NG Cloud | Your Current Network |
+| --- | --- | --- | --- | --- |
+| Network Adapter (1st) | eth0 | pnet0 | Cloud0 | 192.168.33.0/24 (NAT) |
+| Network Adapter 2 (2nd) | eth1 | pnet1 | Cloud1 | 172.16.47.0/24 (Host-only) |
+| Network Adapter 3 (3rd) | eth2 | pnet2 | Cloud2 | Not configured yet |
+| Network Adapter 4 (4th) | eth3 | pnet3 | Cloud3 | Not configured yet |
+
+### Important Notes
+
+**The Numbers ALWAYS Match**
+
+```text
+Cloud0 = pnet0 = eth0 (always!)
+Cloud1 = pnet1 = eth1 (always!)
+Cloud2 = pnet2 = eth2 (always!)
+```
+
+But the vmnet number does NOT have to match!
+
+Example:
+
+- Cloud0 might connect to vmnet8
+- Cloud1 might connect to vmnet1
+- Cloud2 might connect to vmnet9
+
+It depends on the ORDER you added adapters in VMware settings, not the vmnet number.
+
+**Adapter Order Matters**
+
+If you change the order of network adapters in VMware settings, the eth numbers will change!
+Example:
+Before:
+Adapter 1: NAT (vmnet8)      → eth0 → Cloud0
+Adapter 2: Host-only (vmnet1) → eth1 → Cloud1
+After removing Adapter 1 and keeping only Adapter 2:
+Adapter 1: Host-only (vmnet1) → eth0 → Cloud0  (shifted!)
+The first adapter always becomes eth0/pnet0/Cloud0, regardless of vmnet!
+
+### Practical Lab Setup Guide
+
+When Starting a New Lab:
+
+1. Check your Cloud mappings:
+
+```bash
+# On EVE-NG
+ip addr show | grep -E "pnet|inet "
+```
+
+2. Document your network mapping:
+
+```text
+Cloud0 (pnet0) = Management network (192.168.33.0/24) - Has internet
+Cloud1 (pnet1) = Site A network (172.16.47.0/24) - Isolated
+Cloud2 (pnet2) = Site B/WAN network (10.200.200.0/24) - Isolated
+```
+
+3. In EVE-NG topology:
+
+- Management interfaces (e0/0) → Connect to Cloud0
+- Site A routers → Connect data interfaces to Cloud1
+- Site B routers → Connect data interfaces to Cloud2
+
+4. Configure devices with IPs from correct subnet:
+
+- Cloud0 devices: 192.168.33.X
+- Cloud1 devices: 172.16.47.X
+- Cloud2 devices: 10.200.200.X
+
+### Final Translation Summary
+
+The chain always goes:
+
+```text
+VMware VM Settings                    Inside EVE-NG Linux             EVE-NG GUI
+(Order matters!)                      (Fixed mapping)                 (Fixed mapping)
+
+Adapter Position 1  →  eth0  →  pnet0  →  Cloud0
+Adapter Position 2  →  eth1  →  pnet1  →  Cloud1
+Adapter Position 3  →  eth2  →  pnet2  →  Cloud2
+Adapter Position 4  →  eth3  →  pnet3  →  Cloud3
+
+## Key Takeaways
+
+- Completed Cisco Packet Tracer
+- Applied concepts from Using Cisco Packet Tracer for network simulations.
+- Ready to proceed to the next chapter

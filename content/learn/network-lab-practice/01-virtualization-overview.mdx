@@ -1,0 +1,613 @@
+---
+title: "Network Virtualization Overview"
+description: "Introduction to network simulation tools and virtualization concepts."
+---
+
+Many networking learners begin with Cisco Packet Tracer, which is excellent for CCNA-level switching and routing. But once you step into more advanced labs — using EVE-NG or GNS3 or PNETLABs (virtualization platforms based on QEMU/KVM running on Ubuntu/Debian, technically Type 2 hypervisors that run on top of a Linux OS) — you’re suddenly faced with dozens of mysterious file names like:
+
+- i86bi-linux-l2-adventerprisek9-15.1.201.bin
+- asav981.qcow2
+- fortios6.2.ova
+- PA-VM-10.1.8.ova
+
+It can be confusing at first, especially when you're unsure which is a router, which is a switch, or how ASA differs from Fortinet or Palo Alto.
+
+This blog is your step-by-step map to understanding these appliances — especially how to recognize and classify them — using real images
+
+## The Missing Link: "The Client Side Pack"
+
+Regardless of which app you choose, clicking a router in EVE-NG won't open it automatically unless you install the "Client Side Pack." This bridges the browser telnet:// link to your terminal app.
+
+How to set it up:
+
+1. Download: Go to the EVE-NG Download Page and look for "Apple OSX Client Side".
+2. Install: Run the installer. It includes a wrapper script.
+3. Select: During installation (or in the Default Apps settings on your Mac), select SecureCRT or iTerm2 as the default handler for telnet and ssh.
+
+This is a very common and frustrating problem for Mac users running EVE-NG! The message about "stability" you're seeing before the connection closes short is likely a generic network or operating system failure due to the older nature of the Telnet client itself on macOS.
+The root cause is that since newer versions of macOS, the built-in Telnet utility has been deprecated and sometimes removed entirely. When the EVE-NG Client Pack tries to use the default telnet command on your Mac, it either uses a broken version or can't find the tool at the expected location, causing the session to fail immediately after connecting.
+Here are the two steps you need to take to fix this instability issue, prioritizing the use of a more modern Telnet client:
+
+### 1. Install/Verify a Stable Telnet Client (Homebrew)
+
+The best fix is to install a known, stable, modern Telnet client using a package manager like Homebrew.
+
+1. Check if Homebrew is installed: Open iTerm2 and type:
+
+```bash
+brew --version
+```
+
+2. If you get a version number, proceed. If you get a "command not found" error, install it first using the command provided on the Homebrew website.
+3. Install Telnet: Run the following command in iTerm2 to install the required utility:
+
+```bash
+brew install telnet
+```
+
+4. Find the new path: Once installed, find the exact path to the new Telnet utility (it's often in /opt/homebrew/bin/telnet on newer Macs):
+
+```bash
+which telnet
+```
+
+5. Save the output of this command. You will need it in the next step.
+
+### 2. Reconfigure iTerm2's Telnet Profile
+The EVE-NG client pack relies on a custom URL scheme that tells iTerm2 (or other apps) to run a specific command. You need to ensure iTerm2 is running the correct, stable Telnet client you just installed.
+1. Open iTerm2 Settings: Press Command + ,.
+2. Go to the Profiles section.
+3. Duplicate your Default profile and rename the new one to EVE-NG Telnet.
+4. Select the EVE-NG Telnet profile and navigate to the General tab.
+5. Under the Command section, you need to change the command that runs when this profile is activated.
+6. Change the option from "Command" to "Custom Shell" or ensure the "Command" field has the following format (substituting the path you found in Step 1):
+
+Your Custom Command:
+
+```bash
+/opt/homebrew/bin/telnet $$HOST$$ $$PORT$$
+```
+
+Example Path:
+Replace /opt/homebrew/bin/telnet with the output you got from which telnet.
+
+Magic Variables:
+$$HOST$$ and $$PORT$$ are special iTerm2 variables that grab the IP and port from the telnet:// link.
+
+7. Set the URL Scheme: In the same profile settings, find the URL Schemes section and ensure telnet is checked.
+
+Reboot your Mac. This is essential to ensure the EVE-NG Client Pack's link-handling configuration updates with your new iTerm2 profile and the correct Telnet path.
+
+By using the Homebrew version of Telnet and explicitly telling iTerm2 where to find it, you bypass the unstable system version and should resolve the disconnect issue.
+
+This video provides troubleshooting tips for various connection issues in EVE-NG, which may offer further insight into your intermittent stability problem:
+
+Using the public DNS resolver (8.8.8.8) is a classic trick to bypass slow DNS resolution on shared virtual NAT services, which makes package installs feel much faster.
+
+## Understanding Cisco Image Naming & Evolution
+
+### Cisco IOU/IOU-L2 (e.g., i86bi-linux-l2-)
+
+- i86 = Intel x86 architecture
+- bi = Built-in
+- linux = Runs on Linux
+- L3 Image (i86bi_Linux-L3...): This is the Router version (Layer 3).
+- L2 Image (i86bi_Linux-L2...): This is the Switch version (Layer 2).
+- Based on IOS on Unix (IOU): A lightweight Cisco virtual image used internally by Cisco for testing, later leaked and adopted for GNS3/EVE-NG
+
+Use Cases: Great for VLAN, STP, OSPF, BGP labs without needing full hardware emulation.
+
+### Cisco Images Breakdown
+
+| Image Name | Category | Notes |
+|---|---|---|
+| c1700-c7200 series | IOS Routers | Legacy ISR platforms |
+| IOU/i86bi-linux-l3-* | L3 Routers | Virtual routers (OSPF, BGP, EIGRP capable) |
+| IOU/i86bi-linux-l2-* | L2 Switches | Emulated Catalyst-style switches |
+| asav* (e.g. asav981.qcow2, asav991.qcow2) | ASA Firewall | Modern ASAv virtual firewalls |
+| asa842-initrd.gz | ASA Firewall | Legacy ASA 8.x |
+| FTD (if included) | NGFW | Firepower Threat Defense (optional) |
+
+### Cisco Router Evolution: c1700 → c7200
+
+| Image | Era | Description |
+|---|---|---|
+| c1700 | Early | Entry-level ISR, basic routing only |
+| c2600 | Legacy | Adds modularity and more services |
+| c3725 | Mid-tier | Better for EIGRP/BGP labs, still old |
+| c7200 | High-end | Supports complex routing, VPN, multiple NICs |
+
+These are router images—physical router platforms that run IOS for routing functionalities:
+
+- c1700-adventerprisek9-mz.124-25d
+- c2600-adventerprisek9-mz.124-15.T14
+- c2691-adventerprisek9-mz.124-15.T14
+- c3620-a3jk8s-mz.122-26c
+- c3640-a3js-mz.124-25d
+- c3660-a3jk9s-mz.124-15.T14
+- c3725-adventerprisek9-mz.124-15.T14
+- c3745-adventerprisek9-mz.124-25d
+- c7200-adventerprisek9-mz.153-3.XB12
+- c7200-adventerprisek9-mz.152-4.S6
+- c7200-adventerprisek9-mz.124-24.T5
+
+### Abbreviations
+
+| Abbreviation | Full Meaning | Explanation / Usage |
+|---|---|---|
+| CSR1000v | Cloud Services Router 1000 Virtual | A virtualized IOS XE router used in cloud and enterprise labs; supports advanced features like VPN, MPLS, BGP |
+| IOSv | Internetwork Operating System Virtual | A virtual router running IOS inside a virtual machine (QEMU); good for general routing labs |
+| IOSvL2 | Internetwork Operating System Virtual Layer 2 | A virtual switch running IOS; simulates L2 switching features (basic STP, VLANs) |
+| IOL | IOS on Linux | Lightweight IOS used internally by Cisco; often used in labs via .bin files (e.g., i86bi) |
+| IOL-L2 | IOS on Linux Layer 2 | L2 switch simulation (VLANs, STP, EtherChannel); often more feature-rich than IOSvL2 |
+| IOL-L3 | IOS on Linux Layer 3 | L3 routing simulation; lighter than CSR but still powerful for labs |
+| XRv | IOS XR Virtual Router | Runs Cisco IOS XR (used in service provider gear); useful for MPLS, BGP SP simulations |
+| NX-OSv | Nexus Operating System Virtual | Nexus 9000/7000 simulator; used for data center labs |
+| ASA | Adaptive Security Appliance | Cisco firewall; asav is the virtual version for security labs |
+| vWLC | Virtual Wireless LAN Controller | Manages wireless networks; used in wireless architecture labs |
+| vNAM | Virtual Network Analysis Module | For network traffic analysis; not commonly used in most labs |
+| vFMC | Virtual Firepower Management Center | Manages Firepower security devices (e.g., NGFW) |
+| vFTD | Virtual Firepower Threat Defense | Unified threat firewall platform by Cisco |
+
+### Platform Comparison
+
+| Platform | OS Type | Target Use Case | CLI Style | Resource Usage | Best For |
+|---|---|---|---|---|---|
+| CSR1000v | IOS XE | Cloud/virtual branch routers | Traditional IOS-like | Medium (1-2GB RAM) | Routing, BGP, EIGRP, NAT, VPN |
+| IOS XRv / XRv9000 | IOS XR | Service provider core routers | XR CLI (different flow) | High (2-3GB+) | MPLS, IS-IS, SP Labs |
+| Catalyst 8000v | IOS XE | SD-WAN / advanced enterprise routing | IOS XE | Medium-High | CCNP Enterprise Core, SD-WAN concepts |
+| Catalyst 9000v | IOS XE | Modern campus switches (Access/Core) | IOS XE with DNA/SD-Access | High (2-4GB RAM) | Switching + SD-Access (Advanced Labs) |
+| ISRv (ISR 1000v) | IOS XE | Software-based ISR router | IOS XE | Medium | HQ/Branch routing, full IOS feature set |
+
+## Cisco IOU Images for GNS3
+These are IOU (IOS on UNIX) images used in simulation and split into Layer 2 (switching) and Layer 3 (routing) roles:
+
+| Image Name | Role |
+|---|---|
+| i86bi-linux-l2-adventerprise-15.1b / …-ipbasek9-15.1g | Layer 2 switch |
+| i86bi-linux-l2-upk9-12.2 / …-15.0b | Layer 2 switch |
+| i86bi-linux-l3-jk9s-15.0.1 / …l3-p-15.0a / …l3-p-15.0b | Layer 3 router |
+| i86bi-linux-l3-tpgen-adventerprisek9-12.4 | Layer 3 router |
+
+## Cisco ASA Firewall Images for GNS3
+ASA stands for Adaptive Security Appliance — it replaced Cisco PIX in the 2000s and became the standard Cisco firewall platform. These are firewall virtual images (ASAv or classic ASA): 
+
+| ASA Image | Notes |
+|---|---|
+| asa842 | Legacy ASA (8.4.2), limited memory.  
+* asa842-initrd.gz - classic ASA 8.4.2 |
+| asav981+ | Virtual ASA (ASAv), supports ASDM GUI.  
+asav981.qcow2 - ASAv 9.8.3 (also duplicate listed version 9.8.1)  
+asav991.qcow2 - ASAv 9.9.1  
+asav992-32.qcow2 - ASAv 9.9.2 |
+| FTD (optional) | Firepower Threat Defense (NGFW) |
+
+Let’s Compare on-premises Cisco ASAv (Adaptive Security Virtual Appliance) with a cloud-based Network Virtual Appliance (NVA) helps clarify how security solutions differ between traditional data centers and modern cloud environments.
+
+## Key Differences: Cisco ASAv vs Cloud NVA
+
+| Feature | Cisco ASAv (On-Premises) | Cloud NVA (e.g., Azure/AWS) |
+|---|---|---|
+| Deployment Location | Deployed on physical/virtual servers in on-prem or private cloud environments (e.g., VMware, Hyper-V, KVM) | Deployed in public cloud (Azure, AWS, GCP) within virtual networks (VNets/VPCs) |
+| Purpose | Acts as a virtual firewall, VPN concentrator, IPS/IDS | Acts as a cloud firewall, router, IDS/IPS, load balancer, etc. depending on vendor |
+| Control Plane | Full control over OS, updates, patches | Shared responsibility with cloud provider; some abstraction in management |
+| Networking Integration | Connects to VLANs, physical interfaces, subnets in data centers | Integrates with cloud-native constructs (e.g., Azure VNet, AWS VPC) using cloud routing tables, NICs, and UDRs |
+| Scalability | Manual scaling (CPU/RAM/storage) or via orchestration tools | Often scalable using cloud autoscaling groups, availability zones |
+| Licensing | BYOL (Bring Your Own License) or Smart Licensing | PAYG (Pay-as-you-go) or BYOL; cloud marketplace-based licensing |
+| Use Cases | Secure on-prem apps, remote access VPN, inter-DC security | Secure traffic between cloud subnets, hybrid VPN, cloud perimeter defense |
+| Performance Tuning | Hardware-dependent, tuned based on hypervisor resources | Cloud resource-based (VM size/SKU), optimized for IOPS and throughput |
+| High Availability (HA) | Manual configuration via clustering or failover pairs | Cloud-native HA (e.g., Azure Availability Zones, AWS Auto Recovery) or via cloud load balancers |
+
+### Example Use Cases
+
+Cisco ASAv (On-Prem)
+
+- Internal network segmentation in a private data center.
+- IPSec VPN termination for remote workers.
+- East-west firewall inside a private VMware environment.
+
+Cloud NVA (e.g., Cisco ASAv in Azure/AWS or native FortiGate/Checkpoint VM)
+
+- Secure ingress/egress traffic in Azure/AWS.
+- Cloud VPN gateway in a hub-and-spoke VNet topology.
+- IDS/IPS filtering between workloads in different subnets.
+
+### ASAv Can Be Both!
+
+You can actually deploy Cisco ASAv as a Cloud NVA too. Cisco offers ASAv images in AWS and Azure marketplaces that act as cloud NVAs. In that case:
+
+- It's still ASAv software, but running inside the cloud.
+- Integrates with cloud-native routing (UDRs, NSGs, route tables).
+- Useful for companies wanting to extend their Cisco-based security policies into the cloud.
+
+## What is Catalyst Edge 8000v/9000v?
+
+These are modern Cisco virtual routers, not switches, despite the "Catalyst" branding. These support modern features like SD-Access, high-throughput routing, and full IOS-XE support — ideal for enterprise WAN simulation, but not suitable as L2 switches. You can use IOU-L2 or Juniper vQFX when you need actual Layer 2 switch behavior.
+
+Though labeled “Catalyst,” these vIOS-XE Catalyst images act as routers, not true L2 switching platforms. Real Catalyst switch simulation (e.g., Cat3650/3850) is typically only available via IOU images or hardware. The virtual Catalyst 8K/9K primarily supports routing, policy, QoS, security, and other network services—akin to routers
+
+| Model | Function | Real Hardware Equivalent |
+|---|---|---|
+| C8000v * c8000v-17.06.03, catalyst8000v-17.04.01, catalyst8000v-17.06.01a These are software-based router appliances built on the IOS-XE platform (designed for edge/branch WAN routing). | Edge router, SD-WAN, IOS-XE | Catalyst 8000 Edge Platforms |
+| CAT9Kv * cat9kv-17.10.01-prd7 This is a virtualized Catalyst 9000 series router, also IOS-XE, suited for enterprise routing and policy enforcement in virtual/cloud environments. | Core routing, policy-aware | Catalyst 9300/9400 (routing mode) |
+
+| Image Type | Device Type | Primary Function |
+|---|---|---|
+| Catalyst 8000V Edge | Virtual Router | Branch/edge WAN routing (SD-WAN, secure connectivity, advanced services) |
+| Catalyst 9000V | Virtual Router | Enterprise/core routing, policy management, SD-Access, virtualization use-cases |
+
+## Notes per Vendor
+Here's a comparison table between Cisco images (IOS, IOU/IOL, ASA) and equivalent images or virtual platforms from other popular network/security vendors. This covers routers, switches, and firewalls — focusing on virtual images commonly used in GNS3, EVE-NG, or labs.
+### Cross-Vendor Comparison Table
+
+| Function | Cisco (IOS/IOU/ASA) | Fortinet (FortiGate) | Palo Alto (PA-VM) | MikroTik (RouterOS) | Sophos (XG/UTM) | Juniper (vSRX/vMX) |
+|---|---|---|---|---|---|---|
+| Router | IOS (c1700-c7200) Great for routing protocols (OSPF, BGP, etc.) IOU L3 (i86bi-linux-l3) Lightweight, fast for GNS3/EVE labs. Limited real switching functions. | Routing + UTM | Some static/DHCP + NAT | Full router (BGP, OSPF) | Limited (mainly gateway) | vMX (full routing stack) |
+| Switch | - IOU L2 (i86bi-linux-l2)- Limited L2 in vIOS | Not a switch | Not a switch | Router with bridging |  | vQFX (for switching) |
+| Firewall | - ASA 8.x/9.x- ASAv (9.x series)- FTD (optional) Classic firewall, supports NAT, VPN, ACLs. ASAv adds NGFW-like features (with FirePOWER). | FortiGate VM (NGFW, UTM) *support full NGFW functionality. | PA-VM NGFW (AppID, Threats)* Requires more CPU/RAM. | Basic NAT/firewall only | Sophos XG/UTM firewall | vSRX (Juniper NGFW/IPS) |
+| NGFW Features | Partial (with FirePOWER/FTD) | App control, SSL, IPS, AV | App-ID, WildFire, Threat | Basic filtering | AV, IPS, App Ctrl | Unified security + routing |
+| GUI | ASA: ASDMIOS: CLI/HTTP (limited) | FortiOS Web GUI | Panorama / WebUI | WinBox + WebUI | WebAdmin | J-Web or CLI |
+| License-Free Lab Use | IOU (limited), IOS (older) | FortiGate 6.2.x free eval | PA-VM trial (1 device) | RouterOS free (CHR trial) | 30-day XG Home Trial | vSRX/vMX trial |
+### Device Role Breakdown with Image Options
+
+| Role | Function | Cisco Image(s) | Other Vendor Image(s) |
+|---|---|---|---|
+| Edge Firewall | NGFW, NAT, VPN, ACL | asav9xx.qcow2, ASA 842, FTD (optional) | fortios.qcow2, PA-VM.ova, sophosXG.qcow2, vSRX |
+| Core Router | OSPF, BGP, static routes | c7200, IOU-L3, c8000v, cat9kv | RouterOS, vMX, FortiGate (routing), PA-VM (basic) |
+| L2 Switch | VLANs, trunking, STP | IOU-L2, limited L2 in cat9kv | vQFX (Juniper), MikroTik (limited bridging only) |
+| PCs/Hosts | Traffic generation/testing | VPCS, TinyCore, Alpine, Windows.qcow2 | — |
+| Server | Web, DNS, DHCP, AD | Alpine, Ubuntu, Windows Server | — |
+
+## Using a Mac with EVE-NG (VMware Fusion Player)
+
+Using a Mac with EVE-NG (running in VMware Fusion Player) is fully supported, and the process is similar to Windows. Here's how to do everything the Mac way, including the equivalent SCP/SFTP method and correct image directory paths.
+
+### 1. Transfer Images from macOS to EVE-NG using SCP or SFTP
+
+#### Method 1: Using Terminal (SCP)
+
+You can use your Mac’s built-in Terminal to copy files into EVE-NG over SSH:
+
+```bash
+scp your-image-file.qcow2 root@`<eve-ng-ip>`:/opt/unetlab/addons/qemu/`<image-folder>`/
+```
+
+- Replace ``<eve-ng-ip>`` with your EVE-NG VM's IP (e.g. 192.168.56.101)
+- ``<image-folder>`` should follow naming rules like:
+  - asav-981
+  - iosv-152
+  - fortinet-6.2.3
+- Example:
+
+```bash
+scp asav981.qcow2 root@192.168.56.101:/opt/unetlab/addons/qemu/asav-981/
+```
+
+You’ll be prompted for the root password (default: eve)
+
+#### Method 2: Using Cyberduck (GUI Alternative to FileZilla)
+
+1. Download Cyberduck for macOS
+2. Connect using:
+   - Protocol: SFTP (SSH File Transfer Protocol)
+   - Server: eve-ng-ip
+   - Username: root
+   - Password: eve
+3. Navigate to: /opt/unetlab/addons/qemu/
+4. Create a new folder (e.g. asav-981)
+5. Upload your .qcow2 or .vmdk image inside.
+
+### 2. Correct File Path for Router/Switch/Firewall Images
+
+All image files go into:
+
+/opt/unetlab/addons/qemu/`<image-folder-name>`/
+
+Examples:
+
+| Device | Folder Name | Path |
+|---|---|---|
+| Cisco IOSv | iosv-152 | /opt/unetlab/addons/qemu/iosv-152/ |
+| Cisco IOU (L2) | i86bi-linux-l2 | /opt/unetlab/addons/iol/bin/ (different) |
+| ASA Firewall | asav-981 | /opt/unetlab/addons/qemu/asav-981/ |
+| Fortinet FW | fortinet-6.2 | /opt/unetlab/addons/qemu/fortinet-6.2/ |
+| Palo Alto | pa-10.1.8 | /opt/unetlab/addons/qemu/pa-10.1.8/ |
+
+### 3. After Uploading — Fix Permissions & Reload
+
+Run these commands via SSH to fix permissions and parse the image:
+
+```bash
+/opt/unetlab/wrappers/unl_wrapper -a fixpermissions
+```
+
+Then refresh your EVE-NG web UI and the new image should appear when adding a node.
+
+| Vendor | Device Type | OSI Layer | Examples from Repo | Notes |
+|---|---|---|---|---|
+| Cisco | Router | Layer 3 | iosv, iosv-l3, c7200, c3725 | Virtual and emulated routers |
+| Cisco | Switch | Layer 2 | i86bi-linux-l2, iosvl2 | IOU-based and IOSv-L2 |
+| Cisco | Firewall | Layer 3/4 | asav, asa842 | Cisco ASA Virtual (ASAv) |
+| Juniper | Router/Switch | L2/L3 | vSRX, vMX, vQFX | vSRX = firewall, vMX = router |
+| Fortinet | Firewall | Layer 3/4 | fortinet-6.x | FortiGate NGFW virtual appliances |
+| Palo Alto | Firewall | Layer 3/4 | pa-vm, PA-10.1.8 | Full-featured NGFW |
+| Checkpoint | Firewall | Layer 3/4 | checkpoint-R80.30 | GAiA OS-based firewall |
+| Arista | Switch | Layer 2 | vEOS-lab | Used as virtual switch |
+| VyOS | Router/Firewall | Layer 3 | vyos-1.1.7 | Open-source routing and firewall |
+| MikroTik | Router | Layer 3 | chr-6.40.3 | Cloud Hosted Router |
+| F5 | Load Balancer | Layer 4-7 | BIG-IP | Application delivery controller |
+| Huawei | Router/Switch | Layer 2/3 | eNSP, AR-series, CE12800 | If supported, rare in repo |
+
+| Device Vendor | Device Type | Folder Name | Path |
+|---|---|---|---|
+| Cisco | Router | iosv-152 | /opt/unetlab/addons/qemu/iosv-152/ |
+| Cisco | Switch | i86bi-linux-l2 | /opt/unetlab/addons/iol/bin/ (IOU specific) |
+| Cisco | Firewall | asav-981 | /opt/unetlab/addons/qemu/asav-981/ |
+| Cisco | Legacy RTR | c7200 | /opt/unetlab/addons/dynamips/ (Dynamips) |
+| Juniper | Firewall | vsrx-20.3R1.8 | /opt/unetlab/addons/qemu/vsrx-20.3R1.8/ |
+| Juniper | Switch | vqfx-re | /opt/unetlab/addons/qemu/vqfx-re/ |
+| Fortinet | Firewall | fortinet-6.2 | /opt/unetlab/addons/qemu/fortinet-6.2/ |
+| Palo Alto | Firewall | pa-10.1.8 | /opt/unetlab/addons/qemu/pa-10.1.8/ |
+| Checkpoint | Firewall | checkpoint-R80 | /opt/unetlab/addons/qemu/checkpoint-R80/ |
+| Arista | Switch | veos-lab | /opt/unetlab/addons/qemu/veos-lab/ |
+| VyOS | Router | vyos-1.1.7 | /opt/unetlab/addons/qemu/vyos-1.1.7/ |
+| MikroTik | Router | chr-6.40.3 | /opt/unetlab/addons/qemu/chr-6.40.3/ |
+| F5 | Load Balancer | bigip-ve | /opt/unetlab/addons/qemu/bigip-ve/ |
+
+All legacy Cisco router platforms like c1700, c2600, c2691, c3725, and c7200 use Dynamips
+
+Important:
+
+- Dynamips is CPU-intensive and doesn’t scale well, making it mostly useful for small lab scenarios or legacy certification studies.
+- Modern labs should use IOSv, IOSv-L3, or cat8000v where possible, especially when simulating modern features like OSPFv3, EIGRP for IPv6, or Layer 3 switching.
+- IOSv/IOSv-L3/L2: Best for CCNA/CCNP route/switch training in EVE-NG — easy to set up.
+- C8000v: Emulates real-world enterprise routers with full IOS XE — great for advanced WAN/SD-WAN scenarios.
+- Cat9Kv: The most realistic Layer 2/3 Catalyst switch you can run virtually — excellent for enterprise switching labs.
+
+| Platform | Model | Folder Path | Type | Notes |
+|---|---|---|---|---|
+| c1700 | 1710/1720 | /opt/unetlab/addons/dynamips/ | Router | Very old ISR platform, minimal features |
+| c2600 | 2610/2620 | /opt/unetlab/addons/dynamips/ | Router | Better interface support, still legacy |
+| c2691 | 2691 | /opt/unetlab/addons/dynamips/ | Router | Higher throughput, limited by software image |
+| c3725 | 3725 | /opt/unetlab/addons/dynamips/ | Router | Supported in many CCNA/CCNP books for basic labs |
+| c7200 | 7200 series | /opt/unetlab/addons/dynamips/ | Router | Highest capacity in Dynamips, supports PA interfaces |
+
+### Calculating IDLE-PC
+First time it is recommended to check Dynamips image IDLE PC usage. The Idle-PC value is a Dynamips-specific optimization setting used to reduce CPU usage when emulating Cisco routers like c7200, c3725, c1700, etc. It only applies to Dynamips images, not to modern IOSv, C8000v, or Cat9Kv platforms.
+
+#### Why Is Idle-PC Important?
+Without setting an Idle-PC value, Dynamips emulation will peg your CPU at 100% — even if the router is doing nothing. This makes the lab sluggish and can overheat or drain system resources. Idle-PC tells Dynamips which CPU instruction pattern to treat as "idle," so it can pause CPU execution when the router is idle.
+
+#### When and How to Set Idle-PC (Mac-compatible Steps)
+
+When?
+
+- Only for Dynamips images: c1700, c2600, c2691, c3725, c7200
+- You need to set it once per image version, and EVE-NG will reuse it
+
+How to Set Idle-PC in EVE-NG
+You'll do this through the EVE-NG web GUI after dragging a Dynamips router into your lab.
+
+1. Start the router node (e.g., c7200) in the lab.
+2. Right-click the node → choose "Idle-PC Finder"
+3. EVE-NG will pause and show you a list of values (e.g., 0x6047c1f4, 0x607478cc, etc.)
+4. Pick the one marked with a * (best recommended).
+5. If none have a *, try the first one. Restart the node and check CPU usage.
+6. If CPU usage is still high, repeat and try another value from the list.
+
+Tip: How to Monitor CPU Usage (Mac)
+Use Activity Monitor or run in Terminal:
+
+```bash
+top -o cpu
+```
+
+Look for qemu-system-x86_64 or Dynamips processes. After applying a good Idle-PC value, CPU should drop significantly.
+
+Summary Table
+
+| Item | Applies To | Required? | Purpose |
+|---|---|---|---|
+| Idle-PC Value | c1700-c7200 (Dynamips) | Yes | Prevent 100% CPU usage |
+| Set From GUI | Yes (Right-click) | Yes | EVE-NG finds optimal values |
+| Modern IOSv Images |  | No | Use virtualization, not emu |
+
+IOL images must end with the “.bin” extension and must be executable. EVE-NG Pro has not required to generate iourc license. License must be stored under the same path. IOU/IOL license is bound to the hostname and domain name of the server. A test should be made to check if IOU/IOL images can run properly. Google for how to create iourc license file. Bellow is an EXAMPLE how it should look like: cat /opt/unetlab/addons/iol/bin/iourc [license] [license] Eve-ng = 972f30267ef51616; If the IOL/IOU instance doesn’t start, then you won’t be able to use IOL/IOU nodes inside EVE. This is critical knowledge for anyone using Cisco IOU/IOL images in EVE-NG Community Edition (non-Pro). Understand the licensing mechanism and setup steps for IOU/IOL images. The iourc license file belongs in the /opt/unetlab/addons/iol/ directory. Purpose: This folder holds Cisco IOL (IOS on Linux) images. iourc file: Required here to authorize and enable IOL images to run in EVE-NG.
+
+### Additional Notes
+
+- Make sure the iourc file is owned by root and has the correct permissions:
+
+```bash
+chown root:root /opt/unetlab/addons/iol/iourc
+chmod 644 /opt/unetlab/addons/iol/iourc
+```
+
+- After placing it:
+
+```bash
+/opt/unetlab/wrappers/unl_wrapper -a fixpermissions
+```
+
+### Where exactly does the iourc file go?
+Within the iol image directory (/opt/unetlab/addons/iol/), you may see two subdirectories:
+- /opt/unetlab/addons/iol/bin/ - holds the actual .bin IOL images.
+- /opt/unetlab/addons/iol/lib/ - rarely used unless the image depends on external libraries.
+👉 The **iourc** license file does not go into bin/ or lib/. It should be placed directly in the root of the iol directory:
+
+
+## Cisco IOU/IOL Image Setup in EVE-NG (Community)
+IOL (IOS on Linux) or IOU (IOS on Unix) are lightweight Cisco images primarily used internally at Cisco. They’re also supported in EVE-NG, but require a license file to run in the Community Edition.
+
+### Key Rules for IOU/IOL Setup
+
+| Requirement | Details |
+|---|---|
+| File Extension | Must end with .bin (e.g., i86bi-linux-l2-ipbasek9-15.1g.bin) |
+| Permissions | Must be executable (chmod +x) |
+| License File | Required in Community Edition (not needed in Pro) |
+| License Path | /opt/unetlab/addons/iol/bin/iourc |
+| License Format | Must match the EVE-NG hostname (e.g., unl01) |
+| Image Folder Location | /opt/unetlab/addons/iol/bin/ |
+| Image Testing | Required to verify it runs (drag IOL into a lab and start it) |
+### License File Example
+
+Create the file at: /opt/unetlab/addons/iol/bin/iourc
+
+With this content (example):
+
+```text
+[license]
+"Hostname" = 0123456789abcdef;
+```
+
+- Replace the license key with a valid 16-character hex string (you can find generators online or in forum discussions — typically for lab use only)
+
+### Set Executable Permissions
+
+Make sure your IOL images are executable:
+
+```bash
+chmod +x /opt/unetlab/addons/iol/bin/*.bin
+```
+
+Also apply correct ownership (for EVE-NG compatibility):
+
+```bash
+/opt/unetlab/wrappers/unl_wrapper -a fixpermissions
+```
+
+### Verifying IOL Functionality
+
+- After importing an IOL image and setting the license file, drag the device into a topology
+- Power it on
+- If it fails to boot, it likely means:
+  - The license file is incorrect
+  - The hostname mismatch
+  - The .bin file is not executable
+
+## Understanding QEMU Image Naming and Folder Structure in EVE-NG (Beginner Friendly Guide)
+If you're new to EVE-NG and coming from tools like Cisco Packet Tracer, the transition to working with real virtual network appliances can feel overwhelming. One common issue for beginners is incorrect QEMU image folder names or filenames, which prevents appliances from showing up in the EVE-NG web UI.
+In this post, you’ll learn how to correctly organize QEMU images, using reliable references from:
+
+- EVE-NG Documentation - QEMU Image Naming
+
+### Why Image Folder Name Matters
+EVE-NG scans for specific folder names inside the directory:
+/opt/unetlab/addons/qemu/
+Each folder name must match EVE’s expected naming convention (usually lowercase, no spaces), or the image won’t appear in the EVE-NG UI when adding nodes to your topology.
+
+### General Folder + File Structure
+When uploading .qcow2 images to EVE-NG:
+/opt/unetlab/addons/qemu/`<folder_name>`/`<correct_image_name>`.qcow2
+Then run:
+/opt/unetlab/wrappers/unl_wrapper -a fixpermissions
+This corrects ownership and permission errors (root:root, 755).
+
+### Folder Name and Image File Naming Table (Top QEMU Appliances)
+
+| Device/Platform | Folder Name | Required Filename | Notes |
+|---|---|---|---|
+| Cisco IOSv (Router) | vios | vios.qcow2 | Lightweight IOS virtual router |
+| Cisco IOSvL2 (Switch) | iol-switch | virtioa.qcow2 | L2 features, not full Cat9K |
+| Cisco IOS-XRv | xrv | xrv.qcow2 | IOS-XR based image |
+| Cisco CSR1000v | csr1000v | csr1000v-universalk9.qcow2 | High-end virtual router |
+| Cisco ASAv | asav | asav.qcow2 | Cisco ASA virtual firewall |
+| Cisco NX-OSv | nxosv | nxosv.qcow2 | Nexus platform |
+| Cisco Catalyst 8000v | c8000v | c8000v-universalk9.qcow2 | Modern high-performance router |
+| Cisco Catalyst 9000v | cat9kv | cat9kv.qcow2 | Enterprise-grade L2/L3 switching |
+| Arista vEOS | veos | veos.qcow2 | Arista switch OS |
+| Fortinet FortiGate | fortinet | fortios.qcow2 | NGFW, UTM appliance |
+| Juniper vSRX | vsrx | vsrx.qcow2 | Juniper firewall platform |
+| Palo Alto PAN-OS | pa | virtioa.qcow2 (rename if needed) | May require multiple interfaces |
+| VyOS | vyos | virtioa.qcow2 | Open-source router |
+| Checkpoint Gaia | checkpoint | virtioa.qcow2 | Used for firewall testing |
+
+### How to Rename and Move Your Image Correctly
+
+1. SSH into your EVE-NG VM (use Terminal or Cyberduck SCP):
+
+```bash
+ssh root@`<your-EVE-IP>`
+```
+
+2. Create the correct folder:
+
+```bash
+mkdir -p /opt/unetlab/addons/qemu/csr1000v
+```
+
+3. Upload and rename image:
+
+```bash
+mv csr1000v-universalk9.16.12.01.qcow2 /opt/unetlab/addons/qemu/csr1000v/csr1000v-universalk9.qcow2
+```
+
+4. Fix permissions:
+
+```bash
+/opt/unetlab/wrappers/unl_wrapper -a fixpermissions
+```
+
+### Naming Rules (Important!)
+
+- Folder names must be exactly as listed above — case-sensitive and no spaces.
+- Image files must end in .qcow2
+- Do not place multiple .qcow2 files in the same folder.
+- If your image still doesn’t show, double-check:
+  - File extension
+  - Folder spelling
+  - Permissions (chmod +x is not needed for .qcow2, only .bin in IOL)
+
+### Verify in EVE-NG UI
+
+- Refresh your browser
+- Click Add Node
+- Look under the correct vendor (e.g., Cisco, Fortinet)
+- Your image should appear, ready to drag into your topology!
+
+### Bonus: Check What’s Already Installed
+
+To list all QEMU images installed in your EVE-NG:
+
+```bash
+ls /opt/unetlab/addons/qemu/
+```
+
+### Summary for Beginners
+
+| Key Step | What to Do |
+|---|---|
+| Use the right folder name | Match EVE-NG official naming convention |
+| Rename .qcow2 file correctly | Use proper filename (e.g., vios.qcow2) |
+| Run fixpermissions after upload | To avoid permission issues |
+| Refresh EVE Web UI | Newly added images will now show up |
+Here’s the updated section of your blog in Markdown format, integrating your new discovery about extracting QEMU-compatible Cisco images (ASAv, IOL-XE, IOLV2-XE) from CML’s reference platform ISO — and how to correctly rename and integrate them into EVE-NG without hitting the 5-node limit of CML.
+
+## How I Extracted Cisco Images from CML Without the 5-Node Limit
+If you’ve used Cisco Modeling Labs (CML) Free Community Edition, you’re probably aware of the 5-node restriction. But here’s a little-known hack:
+
+The refplat.iso (Reference Platform ISO) provided with CML contains prebuilt QEMU-compatible images that work flawlessly on EVE-NG — without the CML licensing restrictions!
+
+### Images Extracted from CML refplat.iso That Work on EVE-NG
+
+| Image Type | Folder Name in EVE-NG | Final QEMU File Name | Notes |
+|---|---|---|---|
+| IOL-XE | iol-xe | virtioa.qcow2 | XE-based IOS, useful for routers |
+| IOLV2-XE | iolv2-xe | virtioa.qcow2 | L2/L3 XE image, more feature-rich |
+| ASAv | asav | asav.qcow2 | Virtualized ASA firewall |
+
+### Steps to Add CML .qcow2 Images to EVE-NG Properly
+These steps assume you’ve already extracted the .qcow2 files from refplat.iso.
+
+1. SSH into Your EVE-NG VM
+
+```bash
+ssh root@`<your-eve-ip>`
+```
+
+## Key Takeaways
+
+- Completed Network Virtualization Overview
+- Applied concepts from Introduction to network simulation tools and virtualization concepts.
+- Ready to proceed to the next chapter

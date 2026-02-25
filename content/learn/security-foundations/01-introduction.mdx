@@ -1,0 +1,51 @@
+---
+title: Introduction to Security Foundations
+description: Establish the scope, goals, and study flow for the course.
+---
+
+Security work starts with a clear understanding of what you are protecting, who might want it, and what failure would look like. Tools change. Principles, trade-offs, and good operational habits scale.
+
+<Callout title="What you will do" tone="info">
+- Build a security-first way of thinking, not just a checklist.
+- Learn how to reason about risk and choose controls.
+- Practice turning abstract principles into concrete engineering decisions.
+</Callout>
+
+## What "security" means in practice
+
+At a minimum, you are trying to preserve:
+
+- **Confidentiality:** prevent unauthorized disclosure.
+- **Integrity:** prevent unauthorized modification.
+- **Availability:** keep systems usable when needed.
+
+Most real systems also require **authenticity** (knowing something is genuine) and **accountability** (being able to trace actions). You will see these ideas reappear in identity, logging, change management, and incident response.
+
+## A simple mental model
+
+Think in four nouns:
+
+- **Assets:** what has value (data, credentials, systems, uptime, reputation).
+- **Threats:** who or what could cause harm (attackers, insiders, mistakes, outages).
+- **Vulnerabilities:** weaknesses that make harm easier (bugs, misconfigurations, missing controls).
+- **Controls:** what reduces likelihood or impact (technical, operational, managerial).
+
+You do not need a perfect model to start. You need a repeatable one.
+
+## Course flow
+
+1. **Define objectives**: what matters most for this system.
+2. **Set scope and constraints**: what you can and cannot change.
+3. **Choose principles**: least privilege, defense in depth, secure defaults.
+4. **Apply to scenarios**: take one decision at a time (auth, storage, network, deploy).
+5. **Operationalize**: logging, patching, incident readiness.
+
+## How to study (recommended)
+
+- Read each chapter once for vocabulary.
+- Re-read with a concrete system in mind (a homelab, a web app, a cloud account).
+- For every concept, answer: "What would I change in a real environment?"
+
+<Callout title="Check yourself" tone="warning">
+If you can only describe tools, but not outcomes (what risk is reduced and why), anchor back to objectives and trade-offs.
+</Callout>

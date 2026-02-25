@@ -1,0 +1,47 @@
+---
+title: "Governance and Billing"
+description: Manage costs, set budgets, and enforce organizational policies.
+---
+
+
+AWS Trusted Advisor is a web service that inspects your AWS environment and provides real-time recommendations in accordance with AWS best practices. Trusted Advisor compares its findings to AWS best practices in five categories: cost optimization, performance, security, fault tolerance, and service limits. For the checks in each category, Trusted Advisor offers a list of recommended actions and additional resources to learn more about AWS best practices.
+When you access the Trusted Advisor dashboard on the AWS Management Console, you can review completed checks for cost optimization, performance, security, fault tolerance, and service limits.
+For each category: The green check indicates the number of items for which it detected no problems. The orange triangle represents the number of recommended investigations. The red circle represents the number of recommended actions. The inspection includes security checks, such as Amazon S3 buckets with open access permissions.
+
+* Amazon CloudWatch is a web service that enables you to monitor and manage various metrics for the resources that run your applications.
+* AWS CloudTrail is a web service that enables you to review details for user activities and API calls that have occurred within your AWS environment.
+* Amazon GuardDuty is a service that provides intelligent threat detection for your AWS environment and resources. It identifies threats by continuously monitoring the network activity and account behavior within your AWS environment.
+
+To learn more about types of high availability, expand each of the following two categories.
+With an Active-Passive system, only one of the two instances is available at a time. One advantage of this method is that for stateful applications (where data about the client’s session is stored on the server), there won’t be any issues. This is because the customers are always sent to the server where their session is stored.
+A disadvantage of an active-passive system is scalability. This is where an active-active system shines. With both servers available, the second server can take some load for the application, and the entire system can take more load. However, if the application is stateful, there would be an issue if the customer’s session isn’t available on both servers. Stateless applications work better for active-active systems.
+
+## Billing & Support
+
+- Pay for what you use.
+- Pay less when you reserve.
+- Pay less with volume-based discounts when you use more.
+
+AWS Pricing Calculator lets you explore AWS services and create an estimate for the cost of your use cases on AWS. You can organize your AWS estimates by groups that you define. A group can reflect how your company is organized, such as providing estimates by cost center.
+
+AWS Billing & Cost Management Dashboard lets to pay your AWS bill, monitor your usage, and analyze and control your costs.
+
+The Consolidated Billing feature of AWS Organizations enables you to receive a single bill for all AWS accounts in your organization. By consolidating, you can easily track the combined costs of all the linked accounts in your organization. The default maximum number of accounts allowed for an organization is 4. This enables you to have greater transparency into your organization’s accounts while still maintaining the convenience of receiving a single monthly bill.
+
+AWS Budgets lets you can create budgets to plan your service usage, service costs, and instance reservations. The information in AWS Budgets updates three times a day. This helps you to accurately determine how close your usage is to your budgeted amounts or to the AWS Free Tier limits.
+
+AWS Cost Explorer is a tool that lets you visualize, understand, and manage your AWS costs and usage over time.
+AWS Cost Explorer includes a default report of the costs and usage for your top five cost-accruing AWS services. You can apply custom filters and groups to analyze your data.
+
+AWS offers four different Support plans(opens in a new tab) to help you troubleshoot issues, lower costs, and efficiently use AWS services. Basic, Developer, Business, Enterprise On-Ramp, and Enterprise Support.Basic Support is free for all AWS customers. It includes access to whitepapers, documentation, and support communities. With Basic Support, you can also contact AWS for billing questions and service limit increases.
+The Developer, Business, Enterprise On-Ramp, and Enterprise Support plans include all the benefits of Basic Support, in addition to the ability to open an unrestricted number of technical support cases. These Support plans have pay-by-the-month pricing and require no long-term contracts. Only the Business, Enterprise On-Ramp, and Enterprise Support plans include all AWS Trusted Advisor checks. Only The Enterprise On-Ramp and Enterprise Support plans include access to a Technical Account Manager (TAM)
+
+Technical Account Manager (TAM) -> . The TAM is your primary point of contact at AWS. If your company subscribes to Enterprise Support or Enterprise On-Ramp, your TAM educates, empowers, and evolves your cloud journey across the full range of AWS services. TAMs provide expert engineering guidance, help you design solutions that efficiently integrate AWS services, assist with cost-effective and resilient architectures, and provide direct access to AWS programs and a broad community of experts. AWS Marketplace offers products in several categories, such as Infrastructure Software, DevOps, Data Products, Professional Services, Business Applications, Machine Learning, Industries, and Internet of Things (IoT).
+
+AWS Marketplace is a digital catalog that includes thousands of software listings from independent software vendors. You can use AWS Marketplace to find, test, and buy software that runs on AWS.For each listing in AWS Marketplace, you can access detailed information on pricing options, available support, and reviews from other AWS customers.
+## Key Takeaways
+
+- Set budget alerts to prevent cost overruns
+- Use Cost Explorer/Azure Cost Management to identify optimization opportunities
+- Implement organizational policies (SCPs, Azure Policy) for compliance
+- Tag resources consistently for accurate cost allocation

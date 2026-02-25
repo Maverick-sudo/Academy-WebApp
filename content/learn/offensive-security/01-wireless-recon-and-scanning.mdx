@@ -1,0 +1,179 @@
+{/* frontmatter removed for clean UI */}
+
+## Pre-Connection Attacks(WIRELESS-HACKING) Use of Wireless Adapters 
+WiFi adapter that supports monitor mode(In wireless technology, the equivalent to a NIC (network interface card) set to promiscuous mode. 
+'Promiscuous' is a mode which some NICs can assume that would allow them to receive any packet that comes their way regardless of that packet's destination address. By default, NICs are supposed to discard all packets not addressed to them. Obviously, you'll want your NIC to be set to 'promiscuous' if you want to do any sniffing.. This enables us to sniff, capture and manipulate all wireless network traffic & packets transmitted by nearby devices and networks. Without this ability, we are limited to using our WiFi adapter to only connect to wireless Access Points (APs) that accept and authenticate us) and packet injection(A way to disrupt and manipulate network communication by allowing one to craft and inject malicious packets that appear as normal packets to the network. Most WiFi attacks require that we are able to inject packets into the AP while, at the same time, capturing packets going over the air).
+“RealTek RTL8812AU & Atheros AR9271” chip Supporting 2.4ghz & 5ghz frequency bands #Brand is Irrelevant.”
+
+*Kill Processes first using Syntax —> airmon-ng check kill
+*Enable Monitor mode SYntax—>airmon-ng start [interfaceName] 
+*To enable scans —>airodump-ng [interfaceName]
+*To enable 5ghz bands —>airodump-ng —band a [interfaceName]
+*to enable multiple bands(2.4&5ghz)—> airodump-ng —band abg [interfaceName]
+*To target a specific network, airodump-ng help and check the filter options 
+airodump-ng --bssid [MAC.addr] --channel [??] --write filename [interfaceName]  
+*Open the filename in wirecap and Analyze the file
+*Deauthenticating Users on an Access Point—>
+aireplay-ng --deauth #packets -a target.mac.addr -c  connected.target.mac.addr [interfaceName]
+Deauthenticate the main network aireplay-ng --deauth #packets -a target.mac.addr [interfaceName]
+*https://askubuntu.com/questions/393300/changing-adapter-back-to-manged-mode
+
+You can use the following command to change your wireless adapter to monitor mode using netsh:
+netsh interface set interface name="Wi-Fi" admin=disable && netsh interface set interface name="Wi-Fi" admin=enable && netsh wlan set interface name="INTERFACE_NAME" mode=monitor
+This command will disable and enable the Wi-Fi adapter and then set it to monitor mode. Please replace “Wi-Fi” with the name of your wireless adapter.
+
+*WEP(Wired equivalent privacy) encryption & cracking uses an algorithm called RC4, clients encrypts each data packets/frame using a unique key stream(i.e Random initialization vector is used to generate this key streams i.e I.V. + password = key stream) and it’s decrypted by the router and vice versa. 
+- To crack WEP, we need to Capture a large number of packets(I.e 10^6 frames) & Analyze the captured IVs and crack the key. However if the network Is not busy, it’ll take some time to capture enough IVs, to solve this we need to force the access points to generate new IVs. *We can’t communicate or connected with this AP, no attack can be initiated until we associate with the AP.
+*To capture large packets we use airodump-ng specifically for that network—> airodump-ng --bssid [MAC.addr] --channel [??] --write filename wlan0mon
+Note, You need to capture at least 5000IVs or
+* We first associate with the network using a fake authentication—> aireplay-ng --fakeauth 0 -a target.mac.addr -h interface.mac.addr [interfaceName]
+* Next we create more packets using ARPreplay attack—> aireplay-ng --arpreplay -b target.mac.addr -h interface.mac.addr wlan0mon
+*Analyse the captured IVs & crack the key using aircrack-ng—> 
+aircrack-ng filename.cap  
+
+*WPA/WPA2(Wi-Fi Protected Access) made to address the issues in WEP, much more secure, each packet is encrypted using a unique temporary key, packets contain no useful info.  Employs a per-packet key, meaning that it dynamically generates a new 128-bit key for each packet(I.e packet frames looks different block by block) and thus prevents the types of attacks that compromised WEP
+WPS is a feature that can be used with WPA/WPA2….allows clients to connect without the password, authentication is done using an 8-digit pin, this pin can be used to compute the actual password using several combo from a wordlists attack, this only works if the router is *not configured* to use PBC-public auth.
+- To exploit this feature & crack this WPS non-configured PBC Access Point, first we find wps access points around us—>wash --interface [interfaceName]
+- Next we use a fake authentication using exact same syntax as WEP above except instead of 0secs we use 30sec or thereabouts. but before we execute we use a program called reaver —> reaver --bssid target.mac.addr --channel # --interface [interfaceName] -vv —no-associate
+- Execute/associate with the network using fake-auth while reaver operates—> aireplay-ng --fakeauth 0 -a target.mac.addr -h interface.mac.addr [interfaceName]
+However if WPS is disabled or router is configured to use PBC
+- we need to capture the “handshake” packets. The handshake does not contain data that helps recover the WPA key, it contains data can be used to check if a key is valid or not. 
+- To capture the .cap file from the target address —> airodump-ng -b [MAC.addr] -c [??] --write filename [interfaceName] “+&&+” Deauthenticating Users on an Access Point && trying to capture the handshake—> aireplay-ng --deauth #packets -a target.mac.addr -c ctd.target.mac.addr [interfaceName] 
+*Once the handshake is captured, we can quit airodump-ng && airplay-ng* 
+ 
+- Using CRUNCH to create wordlist from a char_sets or download using link *https://github.com/danielmiessler/SecLists *, thereafter you can use syntax—> aircrack-ng captured.filename.cap -w wordlist.filename 
+- Other methods include, using online website software(LINODE Servers) with uploading captured.filename and password will b cracked, 
+- Also we can pipe crunch made wordlists with captured handshakes thereby using less storage space on our devices, lastly we can increase speed of cracking using GPU rather than CPU or manually add more cpu power. Check Aircrack-ng for more info. “crunch 4 20 abcdefghijklmnopqustuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 | aircrack-ng captured.filename.cap -e target.ESSID  -w- “
+- abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()~`";.,/[]-=
+
+✔️Step 2: Cracking WPA2 Passwords Using the New PMKID Hashcat Attack
+https://null-byte.wonderhowto.com/how-to/hack-wi-fi-cracking-wpa2-passwords-using-new-pmkid-hashcat-attack-0189379/
+
+```bash
+airmon-ng start wlan0
+hcxdumptool -i wlan1mon -o galleria.pcapng
+hcxpcaptool -E essidlist -I identitylist -U usernamelist -z galleriaHC.16800 galleria.pcapng
+hashcat -m 16800 galleriaHC.16800 -a 0 --kernel-accel=1 -w 4 --force [file_path]
+```
+
+How to Crack WPA & WPA2 Wi-Fi Passwords with Pyrit « Null Byte :: WonderHowTo
+
+## HYDRA is another very fast network-logon online password cracking tool,
+The password spraying technique involves circumventing common countermeasures against brute-force attacks, such as the locking of the account due to too many attempts, as the same password is sprayed across many users before another password is attempted which can perform rapid dictionary attacks against more than 50 Protocols, including Telnet, RDP, SSH, FTP, HTTP, HTTPS, SMB, several databases and much more.
+
+The general command-line syntax is: 
+```bash
+hydra -l username -P wordlist.txt [target_IP] service
+hydra -l username -P wordlist.txt service://[target_ip]
+hydra -L usernames.txt -p wordlist.txt [target_IP] service
+```
+where we specify the following options:
+    -l username: -l should precede the username, i.e. the login name of the target.
+    -P wordlist.txt: -P precedes the wordlist.txt file, which is a text file containing the list of passwords you want to try with the provided username.
+    Host is the hostname or IP address of the target server.
+    Service / Protocol indicates the service which you are trying to launch the dictionary attack. Telnet, RDP, SSH, FTP, HTTP, HTTPS, SMB, 
+There are some extra optional arguments that you can add:
+    -s PORT to specify a non-default port for the service in question.
+    -V or -vV, for verbose, makes Hydra show the username and password combinations that are being tried. This verbosity is very convenient to see the progress, especially if you are still not confident of your command-line syntax.
+    -t n where n is the number of parallel connections to the target. -t 16 will create 16 threads used to connect to the target.
+    -d, for debugging, to get more detailed information about what’s going on. The debugging output can save you much frustration; for instance, if Hydra tries to connect to a closed port and timing out, -d will reveal this right away.
+
+
+## NMAP Information Gathering https://nmap.org/book/toc.html
+Nmap Network Mapper Man Page common switches/flags - https://svn.nmap.org/nmap/docs/nmap.usage.txt 
+Host Discovery https://nmap.org/book/host-discovery-controls.html
+Network Mapper Is used to gather detailed information of clients connected to Access Points. It can be used as a pre and post enumeration.
+One of the very first steps in any network reconnaissance mission is to reduce a (sometimes huge) set of IP ranges into a list of active(I.e online) or interesting hosts. Normally, Nmap uses this stage to determine active machines for heavier scanning. Scanning every port of every single IP address is slow and usually unnecessary. 
+
+To disable port scanning >> -sn (This is often known as a “ping scan”) By default, Nmap does host discovery and then performs a port scan against each host it determines is online, This option tells Nmap not to do a port scan after host discovery, forcing it to rely primarily on ICMP echo packets (or ARP requests on a local ethernet network) to identify targets which are online., and only print out the available hosts that responded to the host discovery probes. The -sn option sends an ICMP echo request -PE, a TCP SYN packet to port 443 -PS443, a TCP ACK packet to port 80 -PA80, and an ICMP timestamp request -PP by default. Since unprivileged Unix users (or Windows users without Npcap installed) cannot send these raw packets, only SYN packets are sent instead in those cases. The SYN packet is sent using a TCP connect system call to ports 80 and 443 of the target host. When a privileged user tries to scan targets on a local ethernet network, ARP requests (-PR) are used unless the --send-ip option is specified. 
+
+To disable ping scan >> -Pn (No sending of ping probes) this flag/switch skip host discovery altogether and scan all target IP addresses (active & inactive).  By default, Nmap only performs heavy probing such as port scans, version detection, or OS detection against hosts that are found to be up. Disabling host discovery with the -Pn option (i.e where nmap can’t accurately determine active hosts) causes Nmap to attempt this requested scanning functions against every target IP address specified (active + inactive). So if a class B sized target address space (/16) is specified on the command line, all 65,536 IP addresses are scanned. Proper host discovery is skipped as with a list scan (-sL), but instead of stopping and printing the target list, Nmap continues to perform requested functions as if each target IP is active. 
+
+Note: There are times when you do not want to scan every IP address (-Pn), and other times when you want to perform host discovery without a port scan (-sn). 
+A great source of information about networked hosts is DNS, the domain name system. By default, Nmap performs reverse-DNS resolution for every IP which responds to host discovery probes (i.e. those that are online). If host discovery is skipped with -Pn, resolution is performed for all IPs.
+Note: In many cases, the most effective way to explore Nmap's behavior given a set of command-line options is to add the --packet-trace option, which prints out all of the packets sent and received by Nmap
+
+### What is Port Scanning?
+Port scanning is the act of remotely testing numerous ports to determine what state they are in. The most interesting state is usually open, meaning that an application is listening and accepting connections on the port. These states classified by NMAP are not intrinsic properties of the port itself, but describe how Nmap sees them. The six port states recognized by Nmap
+
+open >>
+    An application is actively accepting TCP connections or UDP packets on this port. Finding these is often the primary goal of port scanning. Open ports are also interesting for non-security scans because they show services available for use on the network. 
+closed >>
+    A closed port is accessible (it receives and responds to Nmap probe packets), but there is no detected application listening on it. They can be helpful in showing that a host is online and using an IP address (host discovery, or ping scanning), and as part of OS detection.
+filtered >>
+    Nmap cannot determine whether the port is open because packet filtering prevents its probes from reaching the port. 
+unfiltered >>
+    The unfiltered state means that a port is accessible, but Nmap is unable to determine whether it is open or closed. Only the ACK scan(i.e It is used to map out firewall rulesets, determining whether they are stateful or not and which ports are filtered) classifies ports into this state. Scanning unfiltered ports with other scan types such as Window scan, SYN scan, or FIN scan, may help resolve whether the port is open. 
+open|filtered >>
+    Nmap places ports in this state when it is unable to determine whether a port is open or filtered. This occurs for scan types in which open ports give no response. The lack of response could also mean that a packet filter dropped the probe or any response it elicited. So Nmap does not know for sure whether the port is open or being filtered. The UDP, IP protocol, FIN, NULL, and Xmas scans classify ports this way.
+closed|filtered >>
+    This state is used when Nmap is unable to determine whether a port is closed or filtered. It is only used for the IP ID Idle scan called “TCP Idle Scan (-sI)”. 
+
+“Ensure you wireless adapter is connected to the target wifi AP through Kali.”
+- NetDiscover Range Discovery—> netdiscover -r target.ip.addr./range
+- nmap -T4 -A -v target.ip.addr./range
+- nmap -sn target.ip.addr./range === “ping scan”
+- nmap -T4 -F target.ip.addr./range === “quick scan”
+- nmap -sV -T4 -O -F --version-light target.ip.addr./range === “detailed scan”
+- Cheat >> when using Nmap, if we know a hosts is online at a unique target IP, we can first check what ports are open using -p- (I.e checks ports 1-65535) after which we can use the -A aggressive mode to test specific open ports, that Nmap results will help with our enumeration process.
+
+```bash
+sudo masscan -p1-65535 Target.Ip --rate=1000 -e tun0 > ports
+ports=$(cat ports | awk -F " " '{print $4}' | awk -F "/" '{print $1}' | sort -n | tr '\n' ',' | sed 's/,$//')
+nmap -Pn -sV -sC -p$ports Target.IP
+```
+
+```bash
+ports=$(nmap -p1-65535 —min-rate=1000 -T Target.IP | grep ^[0-9] | cut -d ‘/‘ -f 1 | tr ‘\n\’ ‘,’ | sed 's/,$//')
+nmap -sV -sC -p$ports Target.IP
+```
+
+The Nmap Scripting Engine (NSE) is an incredibly powerful addition to Nmap, extending its functionality quite considerably. NSE Scripts are written in the Lua programming language, and can be used to do a variety of things: from scanning for vulnerabilities, to automating exploits for them. The NSE is particularly useful for reconnaisance, however, it is well worth bearing in mind how extensive the script library is. Nmap stores its scripts on Linux at /usr/share/nmap/scripts and MacOSx as /usr/local/share/nmap/scripts. All of the NSE scripts are stored in this directory by default -- this is where Nmap looks for scripts when you specify them.  Nmap uses this file to keep track of (and utilise) scripts for the scripting engine.
+
+-T (Set a timing template 0-5) paranoid (0), sneaky (1), polite (2), normal (3), aggressive (4), and insane (5). The first two are for IDS evasion. Polite mode slows down the scan to use less bandwidth and target machine resources. Normal mode is the default and so -T3 does nothing. Aggressive mode speeds scans up by making the assumption that you are on a reasonably fast and reliable network. Finally insane mode assumes that you are on an extraordinarily fast network or are willing to sacrifice some accuracy for speed.   While -T0 and -T1 may be useful for avoiding IDS evasion alerts, they will take an extraordinarily long time to scan thousands of machines or ports. For such a long scan, you may prefer to set the exact timing values you need rather than rely on the canned -T0 and -T1 values.
+The main effects of T0 are serializing the scan so only one port is scanned at a time, and waiting five minutes between sending each probe. T1 and T2 are similar but they only wait 15 seconds and 0.4 seconds, respectively, between probes. T3 is Nmap's default behavior, which includes parallelization. -T4 does the equivalent of --max-rtt-timeout 1250ms --min-rtt-timeout 100ms --initial-rtt-timeout 500ms --max-retries 6 and sets the maximum TCP and SCTP scan delay to 10ms. T5 does the equivalent of --max-rtt-timeout 300ms --min-rtt-timeout 50ms --initial-rtt-timeout 250ms --max-retries 2 --host-timeout 15m --script-timeout 10m --max-scan-delay as well as setting the maximum TCP and SCTP scan delay to 5ms. Maximum UDP scan delay is not set by T4 or T5, but it can be set with the --max-scan-delay option. 
+Function	Options
+Hostgroup (batch of hosts scanned concurrently) size	--min-hostgroup, --max-hostgroup
+Number of probes launched in parallel	--min-parallelism, --max-parallelism
+Probe timeout values	--min-rtt-timeout, --max-rtt-timeout, --initial-rtt-timeout
+Maximum number of probe retransmissions allowed	--max-retries
+Maximum time before giving up on a whole host	--host-timeout
+Control delay inserted between each probe against an individual host	--scan-delay, --max-scan-delay
+Rate of probe packets sent per second	--min-rate, --max-rate
+Defeat RST packet response rate by target hosts	--defeat-rst-ratelimit
+-sV (Version detection)
+Enables version detection, as discussed above. Alternatively, you can use -A Aggressive Scan, which enables version detection among other things. Having an accurate version number helps dramatically in determining which exploits a server is vulnerable to. Version detection helps you obtain this information. 
+-O (Enable OS detection)
+Enables OS detection, as discussed above. Alternatively, you can use -A to enable OS detection along with other things. One of Nmap's best-known features is remote OS detection using TCP/IP stack fingerprinting. Nmap sends a series of TCP and UDP packets to the remote host and examines practically every bit in the responses.
+ -A (Aggressive scan options)
+This option enables additional advanced and aggressive options. Presently this enables OS detection (-O), version scanning (-sV), script scanning (-sC) and traceroute (--traceroute)
+Runtime Interaction (press any of this keys whilst nmap is running in foreground)
+v / V Increase / decrease the verbosity level
+d / D Increase / decrease the debugging Level
+p / P Turn on / off packet tracing
+? Print a runtime interaction help screen
+
+### Techniques for bypassing firewalls during scans https://nmap.org/book/firewall-subversion.html
+*SYN stealth scans -sS, along with NULL -sN, FIN -sF and Xmas scans -sX); however, there is another very common firewall configuration which it's imperative we know how to bypass. Your typical Windows host will, with its default firewall, block all ICMP packets. -Pn, which tells Nmap to not bother pinging the host before scanning it. This means that Nmap will always treat the target host(s) as being alive, effectively bypassing the ICMP block; however, it comes at the price of potentially taking a very long time to complete the scan (if the host really is dead then Nmap will still be checking and double checking every specified port).
+There are a variety of other switches which Nmap considers useful for firewall evasion. We will not go through these in detail, however, they can be found here.
+
+    URG: Urgent flag indicates that the urgent pointer filed is significant. The urgent pointer indicates that the incoming data is urgent, and that a TCP segment with the URG flag set is processed immediately without consideration of having to wait on previously sent TCP segments.
+    ACK: Acknowledgement flag indicates that the acknowledgement number is significant. It is used to acknowledge the receipt of a TCP segment.
+    PSH: Push flag asking TCP to pass the data to the application promptly.
+    RST: Reset flag is used to reset the connection. Another device, such as a firewall, might send it to tear a TCP connection. This flag is also used when data is sent to a host and there is no service on the receiving end to answer.
+    SYN: Synchronize flag is used to initiate a TCP 3-way handshake and synchronize sequence numbers with the other host. The sequence number should be set randomly during TCP connection establishment.
+    FIN: The sender has no more data to send.
+
+The following switches are of particular note:
+-f >> Used to fragment the packets (i.e. split them into smaller pieces) making it less likely that the packets will be detected by a firewall or IDS.
+`--mtu <number>` >> accepts a maximum transmission unit size to use for the packets sent.  An alternative to -f, but providing more control over the size of the packets, Don't also specify -f if you use --mtu. The offset must be a multiple of eight.
+`--scan-delay <time>ms` >> used to add a delay between packets sent. This is very useful if the network is unstable, but also for evading any time-based firewall/IDS triggers which may be in place. Port scan detection is usually threshold based. The system watches for a given number of probes in a certain timeframe
+--badsum >> Send packets with a bogus TCP/UDP/SCTP checksum. Any real TCP/IP stack would drop this packet, however, firewalls may potentially respond automatically, without bothering to check the checksum of the packet. As such, this switch can be used to determine the presence of a firewall/IDS.
+
+“Skip the port scan (-sn) when you only need to determine what hosts are online/up.
+Limit the number of ports scanned. Specify -F to perform a quick scan popular ports on known-online hosts first. That lets you analyze the online hosts and most of the open ports while you start the huge -Pn scan of all TCP and UDP ports with version and OS detection in the background.
+Skip advanced scan types (-sC, -sV, -O, --traceroute, and -A) on the large scale scan and then perform them on individual ports as necessary later.
+Remember to turn off DNS resolution when it isn't necessary. “
+
+Misleading Intrusion Detection Systems
+https://nmap.org/book/subvert-ids.html

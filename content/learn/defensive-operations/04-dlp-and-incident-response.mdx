@@ -1,0 +1,408 @@
+---
+title: DLP and Incident Response Operations
+description: DLP concepts, incident response lifecycle, and monitoring data sources.
+---
+
+
+Software solutions that detect and prevent unauthorized storage or transmission of sensitive data.
+
+Components:
+
+* Policy Server
+* Endpoint Agents
+* Network Agents
+
+Supports:
+
+* Content inspection
+* Blocking, alerting, quarantining
+
+Vendors include:
+
+* McAfee
+* Symantec / Broadcom
+* Digital Guardian
+* Microsoft Office 365
+
+---
+
+## Privacy-Enhancing Technologies
+
+### Data Minimization
+
+Only necessary and sufficient data collected for stated purpose.
+
+### De-Identification
+
+Removing identifying information before distribution.
+
+### Pseudonymization
+
+Replacing identifiers; reversible with separate key storage.
+
+### Anonymization
+
+Permanent removal of identifiers (difficult to ensure utility).
+
+### Data Masking
+
+Irreversible redaction or substitution.
+
+### Tokenization
+
+Replacing data with tokens; reversible via secure vault.
+
+### Aggregation / Banding
+
+Generalizing values (e.g., age ranges).
+
+### Hashing & Salting
+
+Used for:
+
+* Indexing
+* De-identified referencing
+
+---
+
+PERFORMING INCIDENT RESPONSE
+
+Incident Response means investigating the alerts captured by the monitoring systems and issues reported by teams.
+A very critical security function for a security professional.
+
+• Ensure to summarize the phases of incident handling.
+• Utilize appropriate data sources to assist an investigation.
+• Apply mitigation techniques to secure the environment after an event.
+• Effective incident response is governed by formal policies and procedures, setting out roles and responsibilities for an IR team.
+
+---
+
+PREPARATION
+
+Incident Response policy sets the resources, processes, and guidelines for dealing with security incidents.
+A vital task to mitigating risk incident impact, as well as controlling the immediate specific threat to security.
+Effective incident response preserves organizational reputation.
+
+NIST Computer Security Incident Handling Guide, Special Publication 800-61, sets out principal stages and an incident response lifecycle.
+A well-defined lifecycle consists of multiple phases.
+
+PHASES OF INCIDENT RESPONSE LIFECYCLE
+
+• Preparation
+• Identification
+• Containment
+• Eradication
+• Recovery
+• Post-Incident Activity
+
+---
+
+1. Preparation:
+   • Make the system resilient to attack in the first place.
+   • Hardening the system.
+   • Creating policies and procedures.
+   • Setting up consistent lines of communication.
+   • Creating the required resources and procedures.
+
+2. Identification:
+   • Derived from information in alerts and report logs.
+   • Determining if an incident has taken place.
+   • Assess how severe it might be (triage).
+   • Notify stakeholders.
+
+3. Containment:
+   • Limit the scope and magnitude of the incident.
+   • The principal aim is to secure data while limiting immediate impact on customers and business operations.
+
+4. Eradication:
+   • After the incident is contained, remove the cause.
+   • Restore affected systems to a secure state.
+   • Apply secure configuration settings.
+   • Install patches and updates.
+
+5. Recovery:
+   • Reintegrating sanitized systems and networks back into business process workflows.
+   • Restore data.
+   • Prevent recurrence of the attack.
+
+6. Lessons Learned / Post-Incident Activity:
+   • Analyze the incident and responses.
+   • Identify whether procedures or systems could be improved.
+   • Imperative to document the incident.
+   • Output feeds back into a new preparation cycle.
+
+---
+
+Incident Response often requires coordinated action and authorization from several departments, adding further levels of complexity.
+Team members should be rotated periodically to reduce the possibility of insider infiltration.
+
+One challenge is defining and categorizing types of incidents.
+An incident is generally described as an event where security is breached or there is an attempted breach.
+NIST describes an incident as:
+“An act of violating an explicit or implied security policy.”
+
+TRIAGE
+
+To manage incidents, develop methods of reporting, categorizing, and prioritizing.
+Some troubleshooting support incidents can be logged similarly.
+A dedicated team serves as a single point of contact for notifications.
+
+Security incident response teams include:
+• SIRT – Security Incident Response Team
+• CERT – Computer Emergency Response Team
+• CIRT – Computer Incident Response Team
+• SOC-based Incident Response Teams
+
+These teams require a mixture of trained senior decision-makers who can authorize actions for serious incidents, and administrators and technicians who handle minor incidents.
+For major incidents, expertise from other business divisions may be required.
+
+Key Supporting Functions:
+• Legal – Evaluate IR from a compliance and regulatory perspective; liaison with law enforcement; impacts on employees.
+• Human Resources – Contracts, employee monitoring rights, mediation of negative impacts.
+• Marketing / PR – Managing publicity from serious incidents effectively.
+
+Availability:
+IR teams require 24/7 availability, which is expensive; some organizations outsource to third-party incident response providers.
+External agents may deal more effectively with insider threats.
+
+---
+
+IR POLICIES & COMMUNICATIONS
+
+IR policies define clear lines of communication:
+• Reporting incidents
+• Notifying affected parties
+• Preventing inadvertent release of information
+
+Trusted parties authorized to handle incidents must be identified.
+Status and event details should be circulated on a need-to-know basis.
+
+Stakeholders may include authorities and affected parties.
+Consider obligations to report attacks promptly.
+Maintain a document listing internal contacts for notification and collaboration.
+Consider monitoring and PR impact of incidents.
+Demonstrate to customers that systems have improved.
+
+Out-of-Band Communications:
+• Communication methods that cannot be intercepted by adversaries.
+• Do not alert adversaries to detection and remediation actions.
+• Do not use compromised communication channels.
+• Use separate systems for file/data exchange.
+• Use digital signatures and encryption keys.
+• End-to-end encryption or off-the-record (OTR) systems.
+• Ensure email systems support message encryption (S/MIME, PGP).
+• Do not release privileged information to untrusted parties.
+
+Incident Response fits into overall Enterprise Risk Management (ERM) and cybersecurity resilience.
+
+---
+
+INCIDENT RESPONSE PLAN
+
+Defines procedures, contacts, and resources available for various incident categories.
+IR teams develop profiles and scenarios of typical incidents.
+These guide prioritization and remediation.
+
+Playbooks:
+• Checklists of actions to detect and respond to specific incidents.
+• Runbooks – SOAR-integrated operational procedures.
+
+Incident categories and definitions ensure shared understanding among response team members.
+Definitions may vary by industry.
+
+---
+
+INCIDENT PRIORITIZATION FACTORS
+
+• Data Integrity – Value of data at risk.
+• Downtime – Degree of business disruption.
+• Asset Inventory and Risk Assessment.
+• Incidents may degrade or interrupt availability.
+• Scope – Number of systems affected (not always priority indicator).
+• Publicity – Short-term IR costs and lost opportunities.
+• Economic Impact – Long-term reputational damage.
+• Detection Time – Speed of detection and response.
+• Recovery Time – Length of remediation and restoration.
+
+Extended recovery periods can reduce alertness and control effectiveness.
+
+---
+
+THREAT INTELLIGENCE & FRAMEWORKS
+
+Effective Incident Response depends on threat intelligence and threat research.
+
+LOCKHEED MARTIN CYBER KILL CHAIN
+
+1. Reconnaissance – Gathering information on targets, personnel, systems, and supply chain.
+2. Weaponization – Coupling payload code with exploit.
+3. Delivery – Transmitting payload to the target environment.
+4. Exploitation – Executing weaponized code.
+5. Installation – Installing malware or RAT to achieve persistence.
+6. Command and Control (C2) – Establishing outbound channel to adversary-controlled server.
+7. Actions on Objectives – Data exfiltration or other goals.
+
+MITRE ATT&CK Framework:
+• Database of known TTPs.
+• Techniques tagged with unique IDs.
+• Free resource (attack.mitre.org).
+• Enables comparison of adversary behaviors.
+• Analysts interpret attack lifecycle contextually.
+
+DIAMOND MODEL OF INTRUSION ANALYSIS
+
+Analyzes intrusion events via relationships between:
+• Adversary
+• Capability
+• Infrastructure
+• Victim
+
+Each feature assigned a confidence level.
+
+---
+
+IR EXERCISES & TRAINING
+
+• Tabletop exercises
+• Walkthroughs
+• Simulations
+• Red Team vs Blue Team
+
+Exercises develop competencies and identify deficiencies.
+Incident Response, Disaster Recovery, and Business Continuity training may overlap.
+
+---
+
+DIGITAL FORENSICS
+
+Techniques to collect and preserve evidence demonstrating no tampering or manipulation.
+Forensic procedures are detailed and time-consuming, while IR is usually urgent.
+If forensic collection is required, it must be specified early.
+
+Retention Policy:
+Important for retrospective incident handling and threat hunting.
+Defines how long logs and data are retained.
+Without retention, later investigations may be impossible.
+
+---
+
+UTILIZING APPROPRIATE DATA SOURCES
+
+Incident identification involves prioritizing and investigating urgent alerts.
+Process includes collating:
+• Log files
+• Error messages
+• IDS alerts
+• Firewall alerts
+
+Establish baselines to identify anomalies.
+Determine whether events are incidents or precursors.
+
+Reporting Channels:
+• Automated systems
+• Manual or physical inspection
+• Confidential employee reporting
+• Vendor and third-party intelligence feeds
+
+FIRST RESPONDER
+
+First person or team to arrive at incident scene.
+Analyzes event, determines legitimacy, and initiates response.
+Training and awareness reduce false positives and negatives.
+
+---
+
+SIEM – SECURITY INFORMATION AND EVENT MANAGEMENT
+
+SIEM parses network traffic and logs from multiple sources.
+Normalizes data into standard fields.
+Runs correlation rules to detect incidents.
+Supports AI-assisted analysis and anomaly detection.
+Implements retention policies.
+Provides dashboards for analysts and managers.
+
+Correlation:
+Interpreting relationships between data points to identify significant events.
+
+Correlation Rule Outcomes:
+• Log Only – Event recorded.
+• Alert – Listed for analyst review.
+• Alarm – Automatically classified as critical.
+
+Challenges:
+• Tuning sensitivity to reduce false positives and negatives.
+• False Negative – Missed event.
+• False Positive – Incorrect alert.
+
+---
+
+TREND ANALYSIS
+
+Detecting patterns over time.
+Requires visualization tools.
+
+Types:
+• Frequency-based
+• Volume-based
+• Statistical deviation
+• Bandwidth analysis
+
+---
+
+LOGGING PLATFORMS
+
+• Syslog – UDP port 514, RFC 5424.
+• Rsyslog – TCP support, secure connections.
+• Syslog-NG – Advanced filtering.
+• Journald / journalctl – systemd logging.
+• NXLog – Windows log collection.
+
+---
+
+SYSTEM & NETWORK LOGS
+
+Windows Event Log Categories:
+• Security
+• Application
+• System
+• Setup
+• Forwarded Events
+
+Authentication Logs record login attempts.
+Vulnerability Scan Output identifies unpatched vulnerabilities.
+
+---
+
+NETWORK DATA SOURCES
+
+• Protocol Analyzers (Packet Capture)
+• Retrospective Network Analysis (RNA)
+• Flow Collectors – NetFlow / IPFIX
+
+---
+
+APPLICATION & SERVICE LOGS
+
+• DNS logs
+• VoIP / SIP / RTP logs
+• Web server HTTP access logs
+• Common Log Format (CLF) and W3C Extended
+
+HTTP Status Codes:
+• 400 range – Client errors
+• 500 range – Server errors
+
+---
+
+MEMORY & EMAIL METADATA
+
+• Dump files – System memory images.
+• Email headers – Sender, recipient, routing servers.
+• Metadata supports timeline reconstruction.
+
+FILE & MOBILE METADATA
+
+• File attributes and permissions.
+• Linux ls command for metadata.
+• Mobile CDRs – Calls, SMS, duration, towers.
+• Retention governed by law.

@@ -1,0 +1,84 @@
+---
+title: Core Security Concepts
+description: Map key principles to defensive outcomes.
+---
+
+Security fundamentals are decision tools. They help you pick the right control for the right problem, and explain why it matters.
+
+## CIA and beyond
+
+The CIA triad is the baseline:
+
+- **Confidentiality:** who is allowed to see it.
+- **Integrity:** who is allowed to change it.
+- **Availability:** when it must work.
+
+Common extensions you should keep in mind:
+
+- **Authenticity:** is this user, service, or message real.
+- **Accountability:** can actions be traced to an identity.
+- **Non-repudiation:** can an actor credibly deny an action.
+- **Privacy:** are you collecting and using data appropriately.
+
+<Callout title="Practical takeaway" tone="info">
+Most security controls are trade-offs. If you improve confidentiality, you may add friction or cost and impact availability. Being explicit about the trade makes you faster and safer.
+</Callout>
+
+## Core principles
+
+### Defense in depth
+
+Do not bet the system on one control. Layer controls so that a single failure is not catastrophic.
+
+Examples:
+
+- Authentication plus authorization plus network segmentation
+- Input validation plus output encoding plus CSP
+- Backups plus immutable logs plus incident runbooks
+
+### Least privilege
+
+Give identities the minimum permissions needed, for the minimum time, scoped to the minimum resources.
+
+Patterns:
+
+- Separate admin and daily accounts
+- Use role-based access rather than shared credentials
+- Prefer short-lived credentials and just-in-time elevation
+
+### Secure defaults
+
+Systems should be safe when nobody touches them.
+
+Examples:
+
+- Deny by default firewall rules
+- Private by default storage buckets
+- MFA required for privileged actions
+
+### Reduce attack surface
+
+If you do not need it, do not expose it.
+
+- Remove unused ports and services
+- Disable legacy protocols
+- Minimize third-party dependencies
+
+### Observability and feedback
+
+You cannot defend what you cannot see.
+
+- Log security-relevant events
+- Alert on high-signal changes
+- Measure and review regularly
+
+## Translating principles into decisions
+
+When you face a design choice, answer these questions:
+
+1. What asset are we protecting.
+2. What is the likely threat and failure mode.
+3. Which CIA property is most important here.
+4. What control reduces risk the most per unit of complexity.
+5. How will we know the control is working.
+

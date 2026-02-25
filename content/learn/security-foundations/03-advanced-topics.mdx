@@ -1,0 +1,207 @@
+---
+title: Advanced Topics
+description: Apply security thinking to threat modeling, architecture review, IR readiness, and risk prioritization.
+---
+
+Advanced topics extend the same core ideas into modern architectures and threat models. This chapter prepares you to tackle structured security thinking beyond configuration: how to model threats, review designs, prepare for incidents, and prioritize limited security resources.
+
+## Threat modeling
+
+Threat modeling is how you answer "What could go wrong?" before you build or deploy something. It is not a penetration test. It is structured paranoia.
+
+### Why it matters
+
+- Catches design flaws before they ship.
+- Aligns security with product decisions.
+- Identifies what is worth protecting and from whom.
+
+### Common frameworks
+
+**STRIDE** (Microsoft) categorizes threats by type:
+
+- **Spoofing:** attacker impersonates a user or service
+- **Tampering:** unauthorized modification of data or code
+- **Repudiation:** denial of performing an action
+- **Information Disclosure:** exposure of confidential data
+- **Denial of Service:** making a system unavailable
+- **Elevation of Privilege:** gaining unauthorized access level
+
+**PASTA** (Process for Attack Simulation and Threat Analysis) is risk-centric, focusing on business impact.
+
+**Attack Trees** map ways an attacker could achieve a goal.
+
+<Callout title="Pick what works" tone="info">
+STRIDE is good for feature-level threat modeling. PASTA is better for aligning business risk with engineering. Attack trees work well for specific high-value scenarios. Use what fits your team and scope.
+</Callout>
+
+### How to do it (practical)
+
+1. **Define boundaries:** draw a diagram showing components, trust zones, and data flows.
+2. **Enumerate threats:** for each boundary crossing or privileged component, ask: who might abuse this, and how?
+3. **Rank by likelihood and impact:** not all threats deserve equal attention.
+4. **Pick mitigations:** apply principles (least privilege, defense in depth, secure defaults).
+5. **Document decisions:** explain what you mitigated, what you accepted, and why.
+
+### Threat modeling checklist
+
+When modeling a new system or major change:
+
+- [ ] Identify assets (what has value)
+- [ ] Identify attackers and their capabilities (insider, external, nation-state)
+- [ ] Map trust boundaries (network zones, authentication levels, privilege tiers)
+- [ ] Enumerate likely attacks per boundary
+- [ ] For each threat: likelihood (Low/Med/High) and impact (Low/Med/High)
+- [ ] Select controls or accept risk explicitly
+- [ ] Review with stakeholders (security, engineering, product)
+
+## Incident response (IR) readiness
+
+Being ready for an incident is more valuable than having perfect prevention. Incidents will happen. The goal is to minimize blast radius and recovery time.
+
+### Core IR phases
+
+**Preparation → Detection → Containment → Eradication → Recovery → Lessons Learned**
+
+Most failures happen in Preparation and Detection.
+
+### What readiness looks like
+
+- **Runbooks:** step-by-step playbooks for common scenarios (compromised credentials, DDoS, data leak, ransomware).
+- **On-call rotation:** clear escalation paths and contact lists.
+- **Backup validation:** test restore procedures quarterly.
+- **Log retention:** retain logs long enough to investigate (90 days minimum for security-relevant logs).
+- **Tooling:** pre-authorized access to forensic tools, EDR, SIEM.
+- **Communication plan:** who talks to customers, press, legal, regulators.
+
+### IR readiness checklist
+
+- [ ] Defined roles (Incident Commander, Comms Lead, Tech Lead)
+- [ ] Runbooks for top 5 incident scenarios
+- [ ] Logging enabled for authentication, authorization, and privileged actions
+- [ ] Centralized log aggregation and retention
+- [ ] Contact list (internal team, legal, PR, third-party IR vendors)
+- [ ] Tested restore procedure from backups
+- [ ] Post-incident review template
+
+<Callout title="Test your IR" tone="warning">
+Run tabletop exercises quarterly. Walk through scenarios like "attacker has read access to production DB" or "leaked API keys on GitHub." You will find gaps.
+</Callout>
+
+## Secure architecture review
+
+Architecture reviews catch security problems early when they are cheap to fix. This is not a penetration test or a compliance audit. It is a structured conversation about design decisions.
+
+### What to review
+
+- Authentication and authorization flows
+- Secrets management (how are credentials stored and rotated)
+- Network segmentation (is the database directly internet-accessible?)
+- Data classification and encryption (at rest, in transit, in use)
+- Logging and monitoring (what gets logged, where, and for how long)
+- Deployment and CI/CD pipelines (who can push to production)
+
+### Questions to ask
+
+**Identity and access:**
+
+- How do users authenticate? MFA enforced?
+- How do services authenticate to each other?
+- What is the blast radius of a compromised credential?
+- Can actions be traced to an identity?
+
+**Data:**
+
+- What data is sensitive? How is it classified?
+- Where is it encrypted (in transit, at rest)?
+- Who can decrypt it?
+- Are backups encrypted and tested?
+
+**Network:**
+
+- What trust boundaries exist (VPC, subnets, security groups)?
+- Are privileged services isolated from public internet?
+- Is egress traffic monitored and filtered?
+
+**Operations:**
+
+- Who can deploy to production?
+- Are infrastructure changes reviewed before applying?
+- How are secrets rotated?
+- Are logs centralized and tamper-evident?
+
+### Architecture review checklist
+
+- [ ] Diagram trust zones and data flows
+- [ ] Identify critical assets and high-value targets
+- [ ] Verify least privilege for identities and services
+- [ ] Confirm secrets are not in code or logs
+- [ ] Ensure sensitive data is encrypted in transit and at rest
+- [ ] Validate logging covers authn/authz/privileged actions
+- [ ] Review deployment and change management controls
+- [ ] Document residual risks explicitly
+
+## Risk prioritization (triage)
+
+You have limited time, budget, and engineering resources. Not all security work is equal. Prioritize by likelihood, impact, and ease of exploitation.
+
+### Prioritization framework
+
+Use a simple 3x3 matrix:
+
+**Likelihood: Low | Medium | High**  
+**Impact: Low | Medium | High**
+
+**Critical (High likelihood + High impact):**
+
+- Address immediately.
+- Example: unpatched RCE vulnerability in internet-facing service.
+
+**High (High likelihood OR High impact):**
+
+- Schedule within current sprint.
+- Example: missing MFA on admin accounts.
+
+**Medium (Medium likelihood + Medium impact):**
+
+- Backlog for next quarter.
+- Example: outdated TLS cipher suites.
+
+**Low (Low likelihood + Low impact):**
+
+- Accept or defer.
+- Example: theoretical side-channel on non-sensitive data.
+
+### Common mistakes
+
+- Treating all CVEs as equal (vendor severity != your risk)
+- Ignoring operational risks (weak backups, no runbooks)
+- Over-indexing on compliance checkboxes
+- Under-investing in detection and response
+
+<Callout title="Risk prioritization checklist" tone="info">
+For each vulnerability or control gap:
+1. What asset is at risk?
+2. What is the attacker capability required?
+3. What is the blast radius if exploited?
+4. What is the cost of remediation?
+5. Can the risk be reduced another way (detection, response, isolation)?
+</Callout>
+
+### Example prioritization
+
+| Issue | Likelihood | Impact | Priority | Rationale |
+|-------|-----------|--------|----------|-----------|
+| Unpatched internet-facing SSH service | High | High | **Critical** | Actively scanned; RCE leads to full compromise |
+| No MFA on admin accounts | High | High | **Critical** | Credential stuffing is common; admin access = full control |
+| Logs retained for only 7 days | Med | Med | **High** | Limits incident investigation; easy fix |
+| Missing DNSSEC | Low | Low | **Low** | Theoretical; no active attacks observed |
+
+## Key takeaways
+
+- Threat modeling identifies design flaws before they ship.
+- IR readiness reduces incident blast radius and recovery time.
+- Architecture reviews catch systemic security problems early.
+- Risk prioritization ensures you work on what matters most.
+
+Security is not about being perfect. It is about being deliberate. Model threats. Prepare for incidents. Review designs. Prioritize ruthlessly.
+

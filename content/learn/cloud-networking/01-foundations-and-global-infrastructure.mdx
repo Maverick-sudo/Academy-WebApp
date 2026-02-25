@@ -1,0 +1,53 @@
+---
+title: Foundations and Global Infrastructure
+description: Cloud advantages, architecture pillars, and how regions and AZs shape network design.
+---
+
+
+The AWS Well-Architected Framework(opens in a new tab) helps you understand how to design and operate reliable, secure, efficient, and cost-effective systems in the AWS Cloud. It provides a way for you to consistently measure your architecture against best practices and design principles and identify areas for improvement.
+The Well-Architected Framework is based on six pillars: 
+
+1. Operational excellence is the ability to run and monitor systems to deliver business value and to continually improve supporting processes and procedures.
+2. Security pillar is the ability to protect information, systems, and assets while delivering business value through risk assessments and mitigation strategies.
+3. Reliability -> the ability of a workload to consistently and correctly perform its intended functions. Includes testing recovery procedures, scaling horizontally to increase aggregate system availability, Dynamically acquire computing resources to meet demand and automatically recovering from failure/disruption.
+4. Performance efficiency is the ability to use computing resources efficiently to meet system requirements and to maintain that efficiency as demand changes and technologies evolve.
+5. Cost optimization is the ability to run systems to deliver business value at the lowest price point. Which includes adopting a consumption model, analyzing and attributing expenditure, and using managed services to reduce the cost of ownership.
+6. Sustainability is the ability to continually improve sustainability impacts by reducing energy consumption and increasing efficiency across all components of a workload by maximizing the benefits from the provisioned resources and minimizing the total resources required.
+
+## Advantages of Cloud Computing (AWS)
+
+Advantages of cloud computing -> Operating in the AWS Cloud offers many benefits over computing in on-premises or hybrid environments. The six advantages of cloud computing:
+
+- Trade upfront expense for variable expense.
+- Benefit from massive economies of scale.
+- Stop guessing capacity.
+- Increase speed and agility.
+- Stop spending money running and maintaining data centers.
+- Go global in minutes.
+
+## Global Infrastructure (Regions, AZs, Edge Locations)
+
+“Four key factors to choose a Region: Compliance, proximity, feature availability, and pricing.”
+
+AWS/Azure has data centers, lots of data centers, all around the world, and each Region is made up of multiple data centers. AWS/Azure calls a single data center or a group of data centers, an Availability Zone or AZ. An Availability Zone is a single data center or a group of data centers within a Region. Availability Zones are located tens of miles apart from each other. This is close enough to have low latency (the time between when content requested and received) between Availability Zones. However, if a disaster occurs in one part of the Region, they are distant enough to reduce the chance that multiple Availability Zones are affected. Each Availability Zone is one or more discrete data centers with redundant power, networking, and connectivity. Inside every Region is a cluster of Availability Zones. They are connected using redundant high-speed and low-latency links.
+
+Availability Zones also have code names. Because they are located inside Regions, they can be addressed by appending a letter to the end of the Region code name
+
+When you launch an Amazon EC2 instance, it launches a virtual machine on a physical hardware that is installed in an Availability Zone. This means each AWS Region consists of multiple isolated and physically separate Availability Zones within a geographic Region.
+As a best practice with AWS, we always recommend you run across at least two Availability Zones in a Region. This means redundantly deploying your infrastructure in two different AZs.
+
+Regions are geographically isolated areas, where you can access services needed to run your enterprise.
+Regions contain Availability Zones, that allow you to run across physically separated buildings, tens of miles of separation, while keeping your application logically unified. Availability Zones help you solve high availability and disaster recovery scenarios, without any additional effort on your part.
+
+Amazon CloudFront is a Content Delivery Networked service that helps deliver data, video, applications, and APIs to customers around the world with low latency and high transfer speeds. Amazon CloudFront uses what are called Edge locations, all around the world, to help accelerate communication with users, no matter where they are.
+
+An EDGE LOCATION is a site that AWS CLOUDFRONT uses to store cached copies of your content closer to your customers for faster delivery. AWS Edge locations run Amazon CloudFront to help get content closer to your customers, no matter where they are in the world.
+
+Amazon CloudFront delivers your content through a worldwide network of edge locations. When a user requests content that is being served with CloudFront, the request is routed to the location that provides the lowest latency. So that content is delivered with the best possible performance. CloudFront speeds up the distribution of your content by routing each user request through the AWS backbone network to the edge location that can best serve your content.
+Edge locations are separate from Regions, so you can push content from inside a Region to a collection of Edge locations around the world, in order to accelerate communication and content delivery. AWS Edge locations, also run more than just CloudFront. They run a domain name service, or DNS, known as Amazon Route 53, helping direct customers to the correct web locations with reliably low latency.
+
+## Core Networking Equivalents
+
+- AWS Virtual Interface (VIF) is the same as an Azure Network Interface (NIC).
+- AWS Virtual Private Cloud (VPC) is the same as an Azure Virtual Network (VNET).
+- Region where the VPC/VNET will live – A VPC/VNET spans all the Availability Zones within the selected Region.

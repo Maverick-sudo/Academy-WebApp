@@ -1,0 +1,113 @@
+---
+title: ExpressRoute and Direct Connect
+description: Dedicated private connectivity models, peering types, and circuit design.
+---
+
+To establish a secure physical connection between your on-premises data center and your Amazon VPC/AZURE VNET, you can use DirectConnect / ExpressRoute. With DirectConnect / ExpressRoute, your internal network is linked to an AWS Direct Connect location/AZure ExpressRoute over a standard Ethernet fiber-optic cable. This connection allows you to create virtual interfaces directly to public AWS services or to your VPC.
+
+AZURE EXPRESSROUTE and AWS DIRECT CONNECT are very similar services offered by Microsoft Azure and Amazon Web Services (AWS) respectively. Both are designed to create a dedicated, private network connection between your on-premises infrastructure (data centers, offices, colocation environments) and their respective cloud platforms if you understand the purpose and benefits of AWS Direct Connect, you have a very good understanding of what Azure ExpressRoute offers, and vice versa. They address the same fundamental need for reliable, high-performance, and secure private connectivity to the cloud.
+
+Here's a breakdown of their similarities:
+*   Dedicated Connection: Both ExpressRoute and Direct Connect allow you to create a direct, physical connection that bypasses the public internet. Private Connectivity: Both services allow you to establish a direct network connection that bypasses the public internet. This offers more predictable performance, lower latency, and enhanced security compared to traditional internet-based VPN connections. Since ExpressRoute connections don't travel over the public Internet, this approach offers more reliability, faster speeds, consistent latencies, and higher security. With ExpressRoute, your data doesn’t travel over the public internet, so it's not exposed to the potential risks associated with internet communications. ExpressRoute is a private connection from your on-premises infrastructure to your Azure infrastructure. However, even if you have an ExpressRoute connection, certain requests are still sent over the public internet. Including, DNS queries, certificate revocation list checking, and Azure Content Delivery Network requests.
+*   Enhanced Performance: This dedicated connection offers more reliable and faster network speeds with lower latency compared to traditional internet-based connections.
+*   Increased Security: By not traversing the public internet, these connections provide enhanced security and data privacy.
+*   Hybrid Cloud Enablement: Both services are crucial for organizations adopting a hybrid cloud model, as they enable seamless integration between on-premises and cloud resources.
+*   Peering: Both offer different types of peering (e.g., private peering for connecting to your Virtual Private Clouds/Virtual Networks, public peering for accessing public services like storage and databases, and Microsoft/AWS peering for accessing SaaS services)
+In essence, both Azure ExpressRoute and AWS Direct Connect serve the same fundamental purpose: to provide a high-bandwidth, low-latency, and secure connection for extending your on-premises network into the cloud.
+
+With AWS, you can achieve that using what is called AWS Direct Connect. Direct Connect allows you to establish a completely private, dedicated fiber connection from your data center to your AWS VPC. You work with a Direct Connect partner in your area to establish this connection, because like my magic doorway, AWS Direct Connect provides a physical line that connects your network to your AWS VPC. The private connection that AWS Direct Connect provides helps you to reduce network costs and increase the amount of bandwidth that can travel through your network.
+This can also help you meet high regulatory and compliance needs, as well as sidestep any potential bandwidth issues. It's also important to note that one VPC might have multiple types of gateways attached for multiple types of resources all residing in the same VPC, just in different subnets.
+
+A corporate data center routes network traffic to an AWS Direct Connect location. That traffic is then routed to a VPC through a virtual private gateway. All network traffic between the corporate data center and VPC flows through this dedicated private connection.
+
+### Azure ExpressRoute / AWS DirectConnect
+*   Purpose: Provides a dedicated, private connection between your on-premises network and Azure.
+*   How it uses BGP: ExpressRoute uses BGP to exchange routing information between your on-premises network and the Azure network. This allows your on-premises network to learn the routes to your Azure resources, and vice versa.
+*   Use Case: Connecting your on-premises network to Azure. Replaces Internet for connecting to Azure/AWS Services
+
+| Connection | Azure services supported | Bandwidth | Protocols | Typical use case |
+| --- | --- | --- | --- | --- |
+| Virtual network, point-to-site | Azure IaaS and PaaS services (through private endpoints) | Based on the gateway SKU | Active/passive | Dev, test, and lab environments for cloud services and virtual machines. |
+| Virtual network, site-to-site | Azure IaaS and PaaS services (through private endpoints) | Typically < 1 Gbps aggregate | Active/passive | Dev, test, and lab environments. Small-scale production workloads and virtual machines. |
+| ExpressRoute | Azure IaaS and PaaS services, Microsoft Office 365 services | 50 Mbps up to 10 Gbps (100 Gbps for ExpressRoute Direct) | Active/active | Enterprise-class and mission-critical workloads. Big data solutions. |
+
+## Azure ExpressRoute Deep Dive
+
+### Overview
+
+Azure ExpressRoute is a service that establishes private, high-bandwidth network connections between your on-premises datacenter, colocation facility, or office and Microsoft's global network infrastructure. Unlike VPN Gateways which encrypt traffic and send it over the public internet, ExpressRoute connections operate over dedicated circuits provided by connectivity partners.
+
+### Key Characteristics
+
+| Characteristic | Description | Benefit |
+| --- | --- | --- |
+| Private Connectivity | Traffic travels over private, dedicated network path | Reduced exposure to internet threats, predictable environment |
+| Predictable Performance | Dedicated bandwidth not shared with internet traffic | Consistent latency, lower jitter, higher reliability |
+| Higher Bandwidth | Available from 50 Mbps up to 100 Gbps+ | Far exceeds typical VPN Gateway capabilities |
+| Lower Latency | Direct private connections | Significantly lower latency for geographically dispersed locations |
+| Enhanced Security | Traffic doesn't traverse public internet | Reduced attack surface (though not encrypted by default) |
+| Service Level Agreements | Robust SLAs from Microsoft and providers | Guaranteed uptime and network availability |
+
+### Connectivity Models
+
+#### CloudExchange Co-location
+
+Infrastructure already located in colocation facility offering direct physical cross-connects to Microsoft's network. Many large colocation providers (Equinix, Digital Realty, Coresite) have established ExpressRoute peering locations within their facilities.
+
+#### Point-to-Point Ethernet Connection
+
+Direct, dedicated Ethernet link (leased line, dark fiber) from on-premises location to location where Microsoft has network presence or to connectivity provider who can connect to Microsoft's network.
+
+#### Any-to-Any (IPVPN) Connection
+
+Using Multiprotocol Label Switching (MPLS) network or IP VPN service from network service provider (AT&T, Verizon, BT). Organization has multiple branch offices or datacenters connected to MPLS network.
+
+#### ExpressRoute Direct
+
+Requires highest bandwidth, lowest latency, and want direct ownership and control of physical connection to Microsoft's network. Designed for very large-scale deployments and service providers.
+
+### ExpressRoute Peering Types
+
+#### Private Peering (Azure Private Peering)
+
+Provides connectivity to Azure Virtual Networks (VNets). This is the peering type used to access Infrastructure as a Service (IaaS) resources like Virtual Machines, Storage Accounts, SQL Databases, and other Azure services deployed within VNets.
+
+#### Microsoft Peering (Azure Public Peering - Deprecated Term)
+
+Provides connectivity to Microsoft's public cloud services:
+
+- **Microsoft 365 Services** - Exchange Online, SharePoint Online, Teams, OneDrive for Business
+- **Dynamics 365 Services** - Dynamics 365 Customer Engagement, Finance and Operations
+- **Azure Public Services** - Azure services via public endpoints (Storage, SQL Database, Cosmos DB)
+
+### When to Choose Each Peering Type
+
+| Peering Type | When to Use | Primary Services |
+| --- | --- | --- |
+| Private Peering | Almost always required for connecting to Azure VNets and IaaS resources | Azure VMs, Storage, SQL Database, VNet services |
+| Microsoft Peering | Accessing Microsoft 365, Dynamics 365, or Azure PaaS public endpoints | Microsoft 365, Dynamics 365, Azure public endpoints |
+| Both | Need connectivity to both Azure VNets and Microsoft 365/public services | Complete hybrid cloud with SaaS integration |
+
+### ExpressRoute Circuits
+
+An ExpressRoute circuit is the fundamental unit of an ExpressRoute connection, representing a dedicated connection between your network and Microsoft's network, provisioned by a connectivity provider.
+
+#### Key Attributes
+
+| Attribute | Description | Considerations |
+| --- | --- | --- |
+| Peering Location | Physical location where your network connects to Microsoft | Choose location geographically close to on-premises infrastructure |
+| Bandwidth | Provisioned bandwidth (50 Mbps to 100 Gbps) | Maximum throughput capacity, affects pricing |
+| Service Provider | Telecom carrier, ISP, or colocation provider | Must support ExpressRoute and be available in your region |
+| SKU | Standard or Premium | Determines connectivity scope and limits |
+
+### SKU Comparison: Standard vs. Premium
+
+| Feature | Standard SKU | Premium SKU |
+| --- | --- | --- |
+| Connectivity Scope | Same geopolitical region as peering location | Global connectivity across all Azure regions |
+| VNet Limit | Limited number (e.g., 10 VNets per circuit) | Significantly higher limits |
+| Route Limits | Limited routes advertised over BGP | Higher limits on advertised routes |
+| Microsoft Peering Access | Services within same geopolitical region | Access to Microsoft's global services |
+| Cost | Lower cost | Higher cost due to added features |
+| Use Cases | Regional connectivity needs | Global presence, large-scale deployments |

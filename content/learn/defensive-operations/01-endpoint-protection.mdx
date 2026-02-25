@@ -1,0 +1,53 @@
+---
+title: Endpoint Protection and Sandboxing
+description: Deployment, EPP/EDR concepts, sandboxing, and NGFW integration.
+---
+
+### ENDPOINT PROTECTION DEPLOYMENT
+
+1. Configure management system to push the agent software and updates to all desktops and workstations.
+2. Assign hosts to appropriate groups for policy assignments (different endpoints have different security requirements).
+3. Test the different host group configuration settings to ensure that the expected range of threats is detected.
+4. Use a monitoring dashboard to verify status across all network hosts. Apart from detection events, if the agent itself is missing or disabled, there should be an alert.
+
+---
+
+### NEXT GENERATION ENDPOINT PROTECTION
+
+Where **EPP** provides mostly signature-based detection and prevention, **Next Generation Endpoint Protection** with **Automated Response** is focused on logging **Endpoint Observables** and **Indicators** combined with **Behavioral and Anomaly-Based Analysis**.
+
+#### Endpoint Detection and Response (EDR)
+
+Malware may evade detection by automated scans. **EDR** products aim not to prevent initial execution but to:
+
+* Provide **Real-time** and historical visibility into the compromise.
+* Contain the malware to a single host.
+* Facilitate remediation of the host to its original state.
+* Such agents are likely to be managed from a cloud portal and use **Artificial Intelligence (AI)** and **Machine Learning** to perform **User and Entity Behavior Analysis (UEBA)**.
+* **Managed Detection and Response (MDR)** is a class of hosted security services.
+
+#### Advanced Malware Tools
+
+Tools like **Sysinternals** are used when symptoms are identified but the **AV** scanner or **EPP** agent does not report an infection. Further analysis of the host for malware uses advanced tools. Indicators include:
+
+* Suspicious network connections.
+* Unexplained activity or behavioral analysis of **SIEM** and **IDS** logs.
+
+---
+
+### SANDBOXING
+
+A technique that isolates an untrusted host, app, script, or file in a segregated environment to conduct tests.
+
+* **Sandbox Environments** intentionally limit interfaces with external files and hosts.
+* Determine malicious activity of certain files.
+* Determine the effect if run outside the sandbox and what dependencies it might require.
+* Sandboxes offer more than anti-malware alone because you can apply a variety of different environments to the sandbox instead of just relying on how the malware might exist in your current configuration.
+
+---
+
+### NEXT GENERATION FIREWALL INTEGRATION
+
+An analytics-driven **Next-Gen Antivirus** product is likely to combine with the perimeter and local security offered by **Next-Gen Firewalls**.
+
+* **Example:** Detecting a threat on an endpoint would automate a firewall policy to block the covert channel at the zone, isolate the endpoint, and mitigate risks of the malware spreading.

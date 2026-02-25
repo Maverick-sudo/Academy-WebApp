@@ -1,0 +1,275 @@
+---
+title: XSS and Client-Side Risks
+description: Cross-site scripting variants, contexts, and DOM-based sinks.
+---
+
+
+Cross-Site Scripting (XSS) is a common web application vulnerability that occurs when a web application returns unsanitized input to the front end of an application. In a XSS attack, an attacker takes advantage of this vulnerability by inputting malicious code, generally in the form of JavaScript, through the browser. This can lead to the attacker stealing information from a user, redirecting users to malicious pages, or taking control of their browser.
+The three categories of XSS attacks differ in how the payload is stored and executed:
+- Stored/Persistent XSS
+- Reflected XSS
+- DOM-Based XSS
+- XSS cheat sheet
+
+Content security policy (CSP) is a browser mechanism that aims to mitigate the impact of cross-site scripting and some other vulnerabilities. If an application that employs CSP contains XSS-like behavior, then the CSP might hinder or prevent exploitation of the vulnerability. Often, the CSP can be circumvented to enable exploitation of the underlying vulnerability.
+
+### Stored, Reflected, and DOM XSS (Reference)
+A.) Stored XSS - Second Order Server-Side XSS. The most dangerous type of XSS. Often referred to as Persistent XSS where the malicious script comes from the website's database.  This arises when an application receives data from an untrusted source and includes that data within its later HTTP responses in an unsafe way. This often happens when a website allows user input that is not sanitised (remove the "bad parts" of a users input) when inserted into the DATABASE. The data in question might be submitted to the application via HTTP requests; for example, comments on a blog post, user nicknames in a chat room, or contact details on a customer order. In other cases, the data might arrive from other untrusted sources; for example, a webmail application displaying messages received over SMTP, a marketing application displaying social media posts, or a network monitoring application displaying packet data from network traffic. 
+As an Example,  A message board application lets users submit messages, which are displayed to other users: <p>Hello, this is my message!</p>  The application doesn't perform any other processing of the data, so an attacker can easily send a message that attacks other users:
+<p><script>/* Bad stuff here... */</script></p> The dangerous data is subsequently read back into the application and included in dynamic content. Stored XSS exploits occur when an attacker injects dangerous content into a data store that is later read and included in dynamic content. From an attacker’s perspective, the optimal place to inject malicious content is in an area that is displayed to either many users or particularly interesting users. Interesting users typically have elevated privileges in the application or interact with sensitive data that is valuable to the attacker. If one of these users executes malicious content, the attacker may be able to perform privileged operations on behalf of the user or gain access to sensitive data belonging to the user.
+A source outside the application stores dangerous data in a database or other data store, and the dangerous data is subsequently read back into the application as trusted data and included in dynamic content. 
+
+The first step in testing for stored XSS vulnerabilities is to locate the links between entry and exit points, whereby data submitted to an entry point is emitted from an exit point. The reasons why this can be challenging are that:
+Data submitted to any entry point could in principle be emitted from any exit point. For example, user-supplied display names could appear within an obscure audit log that is only visible to some application users. Data that is currently stored by the application is often vulnerable to being overwritten due to other actions performed within the application. For example, a search function might display a list of recent searches, which are quickly replaced as users perform other searches.
+To comprehensively identify links between entry and exit points would involve testing each permutation separately, submitting a specific value into the entry point, navigating directly to the exit point, and determining whether the value appears there
+
+
+Submit random alphanumeric values. For each entry point, submit a unique random value and determine whether the value is reflected in the response. 
+1. Determine the reflection context. For each location within the response where the random value is reflected, determine its context. This might be in text between HTML tags, within a tag attribute which might be quoted, within a JavaScript string, etc.
+2. Test a candidate payload. Based on the context of the reflection, test an initial candidate XSS payload that will trigger JavaScript execution if it is reflected unmodified within the response. The easiest way to test payloads is to send the request to Burp Repeater, modify the request to insert the candidate payload, issue the request, and then review the response to see if the payload worked.
+3. Test alternative payloads. If the candidate XSS payload was modified by the application, or blocked altogether, then you will need to test alternative payloads and techniques that might deliver a working XSS attack based on the context of the reflection and the type of input validation that is being performed. For more details, see cross-site scripting contexts
+4. Test the attack in a browser. Finally, if you succeed in finding a payload that appears to work within Burp Repeater, transfer the attack to a real browser (by pasting the URL into the address bar, or by modifying the request in Burp Proxy's intercept view, and see if the injected JavaScript is indeed executed. Often, it is best to execute some simple JavaScript like alert(document.domain) which will trigger a visible popup within the browser if the attack succeeds.
+
+
+
+B.) Reflected XSS - First Order Server-Side XSS. This happens when user-supplied data malicious script comes from the current HTTP request. It arises when an application receives data in an HTTP request and includes that data within the immediate response in an unsafe way. 
+As an example, https://insecure-website.com/status?message=<script>/*+Bad+stuff+here...+*/</script> Unsanitization results to this output <p>Status: <script>/* Bad stuff here. */</script></p>
+data is read directly from the HTTP request and reflected back in the HTTP response. If the Target user visits the URL constructed by the attacker, then the attacker's script executes in the user's browser, in the context of that user's session with the application. At that point, the script can carry out any action, and retrieve any data, to which the user has access. The most common mechanism for delivering malicious content is to include it as a parameter in a URL that is posted publicly or e-mailed directly to victims. URLs constructed in this manner constitute the core of many phishing schemes, whereby an attacker convinces victims to visit a URL that refers to a vulnerable site. After the site reflects the attacker’s content back to the user, the content is executed and proceeds to transfer private information, such as cookies that may include session information, from the user’s machine to the attacker or perform other nefarious activities.
+This attack is mounted when a user posts a malicious script to a forum so when another user clicks the link, an asynchronous HTTP Trace call is triggered which collects the user’s cookie information from the server, and then sends it over to another malicious server that collects the cookie information so the attacker can mount a session hijack attack. This is easily mitigated by removing support for HTTP TRACE on all web servers.
+
+Testing for reflected XSS vulnerabilities manually involves the following steps:
+Test every entry point - Test separately every entry point for data within the application's HTTP requests. This includes parameters or other data within the URL query string and message body, and the URL file path. 
+1. Entry points into the application's processing include:
+2. Parameters or other data within the URL query string and message body.
+3. The URL file path.
+4. HTTP request headers that might not be exploitable in relation to reflected XSS.
+5. Any out-of-band routes via which an attacker can deliver data into the application. The routes that exist depend entirely on the functionality implemented by the application
+The exit points for stored XSS attacks are all possible HTTP responses that are returned to any kind of application user in any situation.
+
+When testing for reflected and stored XSS, a key task is to identify the XSS context:
+The location within the response where attacker-controllable data appears.
+Any input validation or other processing that is being performed on that data by the application.
+Based on these details, you can then select one or more candidate XSS payloads, and test whether they are effective
+
+What is the difference between reflected XSS and stored XSS? Reflected XSS arises when an application takes some input from an HTTP request and embeds that input into the immediate response in an unsafe way. With stored XSS, the application instead stores the input and embeds it into a later response in an unsafe way. In terms of exploitability, the key difference between reflected and stored XSS is that a stored XSS vulnerability enables attacks that are self-contained within the application itself. The attacker does not need to find an external way of inducing other users to make a particular request containing their exploit. Rather, the attacker places their exploit into the application itself and simply waits for users to encounter it
+What is the difference between reflected XSS and self-XSS? Self-XSS involves similar application behavior to regular reflected XSS, however it cannot be triggered in normal ways via a crafted URL or a cross-domain request. Instead, the vulnerability is only triggered if the victim themselves submits the XSS payload from their browser. Delivering a self-XSS attack normally involves socially engineering the victim to paste some attacker-supplied input into their browser. As such, it is normally considered to be a lame, low-impact issue.
+
+1. An Access Key is a Keyboard Shortcut for clicking on certain elements, not all browsers support access key, Access Keys can be added as attributes to a hidden element such Canonical links in HEAD tags. For example you might have a link element with a rel attribute on canonical, if you inject the accesskey attribute with an onclick event then you have XSS. The access key is triggered with the Keyboard Shortcut so might only work on certain browsers && operating systems. 
+<link rel="canonical" accesskey="X" onclick="alert(1)" />
+Poc using link elements (Press ALT+SHIFT+X on Windows) (CTRL+ALT+X on OS X) To activate AccessKey event handler
+
+2. XSS into JavaScript -> When the XSS context is some existing JavaScript within the response, a wide variety of situations can arise, with different techniques necessary to perform a successful exploit. 
+In the simplest case, it is possible to simply terminate the existing script by closing the script tag that is enclosing the existing JavaScript, and introduce some new HTML tags that will trigger execution of JavaScript. For example, if the XSS context is as follows, then you can use the following payload to break out of the existing JavaScript and execute your own:
+
+```html
+...
+var input = 'controllable data here';
+...
+</script>
+```
+
+The reason this works is that the browser first performs HTML parsing to identify the page elements including blocks of script, and only later performs JavaScript parsing to understand and execute the embedded scripts. The above payload leaves the original script broken, with an un-terminated string literal. But that doesn't prevent the subsequent script being parsed and executed in the normal way.
+3. Breaking out of a JavaScript string -> In cases where the XSS context is inside a quoted string literal, it is often possible to break out of the string and execute JavaScript directly. It is essential to repair the script following the XSS context, because any syntax errors there will prevent the whole script from executing. Some useful ways of breaking out of a string literal are:
+'-alert(document.domain)-'   &&   ‘;alert(document.domain)//
+
+4. Some applications attempt to prevent input from breaking out of the JavaScript string by escaping any single quote characters with a backslash. A backslash before a character tells the JavaScript parser that the character should be interpreted literally, and not as a special character such as a string terminator. In this situation, applications often make the mistake of failing to escape the backslash character itself. This means that an attacker can use their own backslash character to neutralize the backslash that is added by the application. Here, the first backslash means that the second backslash is interpreted literally, and not as a special character. This means that the single quote ‘ is now interpreted as a string terminator, and so the attack succeeds.
+```text
+For example, suppose that the input: ';alert(document.domain)// gets converted to:  \';alert(document.domain)//
+```
+
+5. Making use of HTML-encoding -> When the XSS context is some existing JavaScript within a quoted tag attribute, such as an event handler, it is possible to make use of HTML-encoding to work around some input filters.
+```html
+When the browser has parsed out the HTML tags and attributes within a response, it will perform HTML-decoding of tag attribute values before they are processed any further. If the server-side application blocks or sanitizes certain characters that are needed for a successful XSS exploit, you can often bypass the input validation by HTML-encoding those characters.
+```
+and the application blocks or escapes single quote characters, you can use the following payload to break out of the JavaScript string and execute your own script:  &apos;-alert(document.domain)-&apos;
+```text
+The &apos; sequence is an HTML entity representing an apostrophe or single quote. Because the browser HTML-decodes the value of the onclick attribute before the JavaScript is interpreted, the entities are decoded as quotes, which become string delimiters, and so the attack succeeds.  
+```
+6. A few years ago I discovered a technique to call functions in JavaScript without parentheses using onerror and the throw statement. It works by setting the onerror handler to the function you want to call and the throw statement is used to pass the argument to the function: Some websites make XSS more difficult by restricting which characters you are allowed to use. This can be on the website level or by deploying a WAF that prevents your requests from ever reaching the website. In these situations, you need to experiment with other ways of calling functions which bypass these security measures. One way of doing this is to use the throw statement with an exception handler. This enables you to pass arguments to a function without using parentheses. The following code assigns the alert() function to the global exception handler and the throw statement passes the 1 to the exception handler (in this case alert). The end result is that the alert() function is called with 1337 as an argument.
+
+```text
+```html
+```
+<script>onerror=alert;throw 1337</script>
+```
+
+The onerror handler is called every time a JavaScript exception is created, and the throw statement allows you to create a custom exception containing an expression which is sent to the onerror handler. Because throw is a statement, you usually need to follow the onerror assignment with a semi-colon in order to begin a new statement and not form an expression.
+I encountered a site that was filtering parentheses and semi-colons, and I thought it must be possible to adapt this technique to execute a function without a semi-colon. The first way is pretty straightforward: you can use curly braces to form a block statement in which you have your onerror assignment. After the block statement you can use throw without a semi-colon (or new line):
+
+```html
+<script>{onerror=alert}throw 1337</script>
+```
+
+The block statement was good but I wanted a cooler alternative. Interestingly, because the throw statement accepts an expression, you can do the onerror assignment inside the throw statement and because the last part of the expression is sent to the onerror handler the function will be called with the chosen arguments. Here's how it works:
+Example of using the throw statement with an expression
+
+```html
+<script>throw onerror=alert,'some string',123,'haha'</script>
+```
+￼
+If you've tried running the code you'll notice that Chrome prefixes the string sent to the exception handler with "Uncaught".
+Removed toString Here’s a revised version of the proof of concept that avoids using toString and directly referencing window -> Replaced with valueOf, another method that JavaScript objects use for type conversion. When JavaScript expects a primitive value, valueOf is called before toString. 
+
+```text
+https://YOUR-LAB-ID.web-security-academy.net/post?postId=5&'},
+x=x=>{throw/**/onerror=alert,1337},
+valueOf=x,[]+'',
+{x:'
+VERSUS
+```text
+https://YOUR-LAB-ID.web-security-academy.net/post?postId=5&'},
+x=x=>{throw/**/onerror=alert,1337},
+toString=x,window+'',
+{x:'
+```
+
+7. This lab contains a reflected XSS vulnerability with some whitelisted tags, but all events and anchor href attributes are blocked. 
+```html
+<svg><a><animate attributeName=href values=javascript:alert(1) /><text x=20 y=20>Click me</text></a></svg>
+```
+
+SVG stands for Scalable Vector Graphics. It's an XML-based markup language for describing two-dimensional based vector graphics. SVG is used to define graphics for the Web. The `<svg>` tag is the container for SVG graphics. In the provided script, several SVG-specific elements are used:
+
+- `<a>`: This element is used within SVG just like in HTML to define a hyperlink.
+- `<animate>`: This element is used to animate an attribute or a set of attributes over time.
+- `<text>`: This element is used to define text in the SVG.
+
+	Attributes provide additional information about elements. Here are key attributes used in your script:
+attributeName-> Specifies the name of the CSS property or attribute of the target element that is going to be changed during the animation.
+values->Defines the values the attributeName will take over the course of the animation.
+x and y -> These attributes on the `<text>` element specify the position of the text in the SVG canvas.
+How the Exploit Works-> The exploit involves using the `<animate>` element to dynamically change an attribute value — in this case, the href attribute of the `<a>` element. By setting the attributeName to "href" and using values to change its content to javascript:alert(1), you create a scenario where interacting with the link triggers JavaScript execution.
+
+	Steps in the Exploit
+Animation Trigger: The `<animate>` element begins as soon as the SVG is rendered because no specific start time is defined.
+Attribute Manipulation: The href attribute of the parent `<a>` element is set to execute JavaScript (javascript:alert(1)), instead of navigating to a URL.
+User Interaction: When a user clicks on the text "Click me", which is nested inside the `<a>` element, the browser attempts to navigate to the href of the `<a>` element.
+JavaScript Execution: Instead of navigating, the browser executes the JavaScript code specified (alert(1)), popping up an alert box.
+
+	Explanation of the Code
+`x=x=>{throw/**/onerror=alert,1337}`: This function x is assigned an arrow function that throws an error. The comment `/**/` is used to bypass certain syntax constraints or filters.
+onerror=alert: Assigns the global error handler to alert, so any uncaught errors will trigger an alert box.
+1337: This is the value thrown by the error, intended to be caught by the onerror event handler, potentially showing an alert with this number.
+valueOf=x,[]+'': This triggers the valueOf function when JavaScript attempts to convert an object to a primitive type, here manipulated to trigger our payload.
+By using []+'', which simplifies to converting an empty array to a string, we indirectly force a type conversion without explicitly calling window.toString(). This results in a string representation, which in some contexts can be manipulated or exploited similarly as with window.
+
+8. XSS in JavaScript template literals -> JavaScript template literals are string literals that allow embedded JavaScript expressions. The embedded expressions are evaluated and are normally concatenated into the surrounding text. Template literals are encapsulated in backticks instead of normal quotation marks, and embedded expressions are identified using the `\${...}` syntax.
+For example, the following script will print a welcome message that includes the user's display name:
+
+When the XSS context is into a JavaScript template literal, there is no need to terminate the literal. Instead, you simply need to use the `\${...}` syntax to embed a JavaScript expression that will be executed when the literal is processed. For example, if the XSS context is as follows: 
+
+then you can use the following payload to execute JavaScript without terminating the template literal:
+
+```text
+${alert(document.domain)}
+```
+
+C. DOM-Based XSS - First Order Client-Side XSS. DOM stands for Document Object Model DOM Based XSS is where the JavaScript execution happens directly in the browser without any new pages being loaded or data submitted to backend code. Execution occurs when the website JavaScript code acts on input or user interaction. As a result, the payload is executed whenever the user's browser attempts to load the page containing your malicious post. DOM-based XSS vulnerabilities usually arise when JavaScript takes data from an attacker-controllable source, such as the URL, and passes it to a sink that supports dynamic code execution, such as eval() or innerHTML. This enables attackers to execute malicious JavaScript, which typically allows them to hijack other users' accounts. 
+To deliver a DOM-based XSS attack, you need to place data into a source so that it is propagated to a sink and causes execution of arbitrary JavaScript.
+The most common source for DOM XSS is the URL, which is typically accessed with the window.location object. An attacker can construct a link to send a victim to a vulnerable page with a payload in the query string and fragment portions of the URL. In certain circumstances, such as when targeting a 404 page or a website running PHP, the payload can also be placed in the path.
+
+How to test for DOM-based cross-site scripting - Testing HTML sinks
+1. To test for DOM XSS in an HTML sink, place a random alphanumeric string into the source (such as location.search), then use developer tools to inspect the HTML and find where your string appears. Recall some sinks - document.write function is populated with data from source - location.search which you can control using the website URL.  In Chrome's developer tools, you can use Control+F (or Command+F on MacOS) to search the DOM for your string. For each location where your string appears within the DOM, you need to identify the context. Based on this context, you need to refine your input to see how it is processed. For example, if your string appears within a double-quoted attribute then try to inject double quotes in your string to see if you can break out of the attribute.
+Note that browsers behave differently with regards to URL-encoding, Chrome, Firefox, and Safari will URL-encode location.search and location.hash, while IE11 and Microsoft Edge (pre-Chromium) will not URL-encode these sources. If your data gets URL-encoded before being processed, then an XSS attack is unlikely to work.
+2. Testing JavaScript execution sinks for DOM-based XSS is a little harder. With these sinks, your input doesn't necessarily appear anywhere within the DOM, so you can't search for it. Instead you'll need to use the JavaScript debugger to determine whether and how your input is sent to a sink. For each potential source, such as location, you first need to find cases within the page's JavaScript code where the source is being referenced. In Chrome's developer tools, you can use Control+Shift+F (or Command+Alt+F on MacOS) to search all the page's JavaScript code for the source.Once you've found where the source is being read, you can use the JavaScript debugger to add a break point and follow how the source's value is used. You might find that the source gets assigned to other variables. If this is the case, you'll need to use the search function again to track these variables and see if they're passed to a sink. When you find a sink that is being assigned data that originated from the source, you can use the debugger to inspect the value by hovering over the variable to show its value before it is sent to the sink. Then, as with HTML sinks, you need to refine your input to see if you can deliver a successful XSS attack.
+3. Testing for DOM XSS using DOM Invader
+Identifying and exploiting DOM XSS in the wild can be a tedious process, often requiring you to manually trawl through complex, minified JavaScript. If you use Burp's browser, however, you can take advantage of its built-in DOM Invader extension, which does a lot of the hard work for you.
+
+In principle, a website is vulnerable to DOM-based cross-site scripting if there is an executable path via which data can propagate from source to sink. In practice, different sources and sinks have differing properties and behavior that can affect exploitability, and determine what techniques are necessary. Additionally, the website's scripts might perform validation or other processing of data that must be accommodated when attempting to exploit a vulnerability. 
+Which sinks can lead to DOM-XSS vulnerabilities?
+The following are some of the main sinks that can lead to DOM-XSS vulnerabilities:
+document.write() document.writeln() document.domain element.innerHTML element.outerHTML
+element.insertAdjacentHTML element.onevent
+
+Modern web applications are typically built using a number of third-party libraries and frameworks, which often provide additional functions and capabilities for developers. It's important to remember that some of these are also potential sources and sinks for DOM XSS.
+The following jQuery functions are also sinks that can lead to DOM-XSS vulnerabilities:
+add() after() append() animate() insertAfter() insertBefore() before() html() prepend() replaceAll()
+replaceWith() wrap() wrapInner() wrapAll() has() constructor() init() index() jQuery.parseHTML()
+$.parseHTML()
+
+### DOM XSS in jQuery
+
+If a JavaScript library such as jQuery is being used, look out for sinks that can alter DOM elements on the page. For instance, jQuery's attr() function can change the attributes of DOM elements. If data is read from a user-controlled source like the URL, then passed to the attr() function, then it may be possible to manipulate the value sent to cause XSS. For example, here we have some JavaScript that changes an anchor element's href attribute using data from the URL:
+
+```js
+$(function() {
+  $('#backLink').attr('href', (new URLSearchParams(window.location.search)).get('returnUrl'));
+});
+```
+You can exploit this by modifying the URL so that the location.search source contains a malicious JavaScript URL. After the page's JavaScript applies this malicious URL to the back link's href, clicking on the back link will execute it:
+
+```text
+?returnUrl=javascript:alert(document.domain)
+```
+
+Another potential sink to look out for is jQuery's $() selector function, which can be used to inject malicious objects into the DOM.
+jQuery used to be extremely popular, and a classic DOM XSS vulnerability was caused by websites using this selector in conjunction with the location.hash source for animations or auto-scrolling to a particular element on the page. This behavior was often implemented using a vulnerable hashchange event handler, similar to the following:
+
+```js
+$(window).on('hashchange', function() {
+  var element = $(location.hash);
+  element[0].scrollIntoView();
+});
+```
+As the hash is user controllable, an attacker could use this to inject an XSS vector into the $() selector sink. More recent versions of jQuery have patched this particular vulnerability by preventing you from injecting HTML into a selector when the input begins with a hash character (#). However, you may still find vulnerable code in the wild.
+
+To actually exploit this classic vulnerability, you'll need to find a way to trigger a hashchange event without user interaction. One of the simplest ways of doing this is to deliver your exploit via an iframe:
+In this example, the src attribute points to the vulnerable page with an empty hash value. When the iframe is loaded, an XSS vector is appended to the hash, causing the hashchange event to fire.
+
+### DOM XSS in AngularJS
+AngularJS is a popular JavaScript library, which scans the contents of HTML nodes containing the ng-app attribute (also known as an AngularJS directive). When a directive is added to the HTML code, you can execute JavaScript expressions within double curly braces. This technique is useful when angle brackets are being encoded. If a framework like AngularJS is used, it may be possible to execute JavaScript without angle brackets or events. In this case, AngularJS will execute JavaScript inside double curly braces that can occur directly in HTML or inside attributes. I.e `{{ $on.constructor('alert(1)')() }}` bypasses AngularJS security feature against XSS, if we tried `{{ Function('alert(1)')() }}` it won’t work/. The constructor data property of an Object instance returns a reference to the constructor function that created the instance object. Note that the value of this property is a reference to the FUNCTION itself, not a string containing the function's name.
+Note: This .constructor is a property of JavaScript objects. Not The Constructor() method which is a special method of a Function / Class for creating and initializing an object instance of that Function/class.
+
+
+### Reflected DOM XSS && Stored DOM XSS
+In a reflected DOM XSS vulnerability, the server processes data from the request, and echoes the data into the response. The reflected data might be placed into a JavaScript string literal, or a data item within the DOM, such as a form field. A script on the page then processes the reflected data in an unsafe way, ultimately writing it to a dangerous sink. Websites may also store data on the server and reflect it elsewhere. In a stored DOM XSS vulnerability, the server receives data from one request, stores it, and then includes the data in a later response. A script within the later response contains a sink which then processes the data in an unsafe way.
+
+
+The eval() function eval() is a function property/method of the global object, it evaluates JavaScript code represented as a string and returns its completion value. The source is parsed as a script. eval(' var data = "reflected string" '); 
+The argument of the eval() function is a string. A string representing a JavaScript expression, statement, or sequence of statements. The expression can include variables and properties of existing objects. It will evaluate the source string as a script body, which means both statements and expressions are allowed. 
+The Return value - The completion value of evaluating the given code. If the completion value is empty, undefined is returned. If script is not a string primitive, eval() returns the argument unchanged. For expressions, it's the value the expression evaluates to.
+Warning: Executing JavaScript from a string is an enormous security risk. It is far too easy for a bad actor to run arbitrary code when you use eval(). See Never use direct eval()!, below.
+The Function() constructor is very similar to the indirect eval example above: it also evaluates the JavaScript source passed to it in the global scope without reading or mutating any local bindings, and therefore allows engines to do more optimizations than direct eval().
+There are two modes of eval() calls: direct eval and indirect eval. Direct eval, as the name implies, refers to directly calling the global eval function with eval(...). Everything else, including invoking it via an aliased variable, via a member access or other expression, or through the optional chaining ?. operator, is indirect.
+The difference between eval() and Function() is that the source string passed to Function() is parsed as a function body, not as a script. There are a few nuances — for example, you can use return statements at the top level of a function body, but not in a script.
+Explanation - Here’s how the exploitative script could look:
+
+```js
+// URL: http://example.com/?userInput=alert('Exploited!')
+
+// Simulated vulnerable JavaScript code on the webpage
+function executeUserInput() {
+	var userInput = new URLSearchParams(window.location.search).get('userInput');
+
+	// Dangerous use of eval to execute user input
+	eval(userInput);
+}
+window.onload = executeUserInput;
+```
+
+URL Parameter: The attacker modifies the userInput parameter in the URL to include an alert() function.
+Function executeUserInput(): This function retrieves the userInput parameter from the URL and executes it using eval().
+Use of eval(): The eval() function evaluates or executes the argument passed to it. In this case, it executes the JavaScript code provided in the URL parameter, leading to the execution of the alert() function.
+
+An XSS polyglot is a string of text which can escape attributes, tags and bypass filters all in one.
+
+```text
+jaVasCript:/*-/*`/*\`/*'/*"/**/(/* */onerror=alert('THM') )//%0D%0A%0d%0a//</stYle/</titLe/</teXtarEa/</scRipt/--!>\x3csVg/<sVg/oNloAd=alert('THM')//>\x3e
+```
+
+Some applications attempt to prevent input from breaking out of the JavaScript string by escaping any single quote characters with a backslash. A backslash before a character tells the JavaScript parser that the character should be interpreted literally, and not as a special character such as a string terminator. In this situation, applications often make the mistake of failing to escape the backslash character itself. This means that an attacker can use their own backslash character to neutralize the backslash that is added by the application. For example, suppose that the input:
+';alert(document.domain)// gets converted to \';alert(document.domain)//
+You can now use the alternative payload: 
+\';alert(document.domain)// gets converted to: \\';alert(document.domain)//
+Here, the first backslash means that the second backslash is interpreted literally, and not as a special character. This means that the quote is now interpreted as a string terminator, and so the attack succeeds.
+ 
+Dangling markup injection is a technique for capturing data cross-domain in situations where a full cross-site scripting attack isn't possible.
+Suppose an application embeds attacker-controllable data into its responses in an unsafe way:
+`<input type="text" name="input" value="CONTROLLABLE DATA HERE">`
+Suppose also that the application does not filter or escape the > or " characters. An attacker can use the following syntax to break out of the quoted attribute value and the enclosing tag, and return to an HTML context:
+`">`
+
+In this situation, an attacker would naturally attempt to perform XSS. But suppose that a regular XSS attack is not possible, due to input filters, content security policy, or other obstacles. Here, it might still be possible to deliver a dangling markup injection attack using a payload like the following:
+This payload creates an img tag and defines the start of a src attribute containing a URL on the attacker's server. Note that the attacker's payload doesn't close the src attribute, which is left "dangling". When a browser parses the response, it will look ahead until it encounters a single quotation mark to terminate the attribute. Everything up until that character will be treated as being part of the URL and will be sent to the attacker's server within the URL query string. Any non-alphanumeric characters, including newlines, will be URL-encoded.
+The consequence of the attack is that the attacker can capture part of the application's response following the injection point, which might contain sensitive data. Depending on the application's functionality, this might include CSRF tokens, email messages, or financial data.
+Any attribute that makes an external request can be used for dangling markup.

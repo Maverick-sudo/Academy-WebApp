@@ -1,5 +1,30 @@
 # Network Engineering Lab Series: Architecture Transformation (Packet Tracer Edition)
 
+## 📥 Download Lab Files
+
+> **Note:** These lab files require Cisco Packet Tracer to open. Download the latest version from [Cisco NetAcad](https://www.netacad.com/courses/packet-tracer).
+
+| Lab File | Description | Size | Download |
+|----------|-------------|------|----------|
+| **CCNA Complete Lab** | Comprehensive CCNA lab covering all major topics including routing protocols, switching, VLANs, ACLs, NAT, and WAN technologies. Perfect for exam preparation. | ~2.3 MB | [⬇️ Download](https://github.com/Maverick-sudo/network-engineering/raw/main/CCNA-LAB/CCNA_Complete_Lab.pkt) |
+| **Campus Network Design** | Real-world campus network design featuring hierarchical network architecture, redundancy, VLANs, inter-VLAN routing, and network services implementation. | ~1.8 MB | [⬇️ Download](https://github.com/Maverick-sudo/network-engineering/raw/main/CCNA-LAB/Campus%20Network%20Design.pkt) |
+| **Enterprise Networking Project** | Enterprise-grade network with multiple sites, WAN connectivity, advanced routing (OSPF/EIGRP), security policies, and network services (DHCP, DNS, NTP). | ~2.1 MB | [⬇️ Download](https://github.com/Maverick-sudo/network-engineering/raw/main/CCNA-LAB/Enterprise%20Networking%20Project.pkt) |
+| **Financial Enterprise Networking** | Financial sector network emphasizing security, segmentation, redundancy, and compliance. Includes DMZ, firewalls, VPNs, and secure network zones. | ~1.9 MB | [⬇️ Download](https://github.com/Maverick-sudo/network-engineering/raw/main/CCNA-LAB/Financial%20Enterprise%20Networking%20Project.pkt) |
+| **Modern Hotel Network** | Hospitality network design with guest Wi-Fi, IoT devices, POS systems, property management integration, and segmented network for security and performance. | ~1.7 MB | [⬇️ Download](https://github.com/Maverick-sudo/network-engineering/raw/main/CCNA-LAB/Modern%20Hotel%20Network.pkt) |
+
+### Quick Start Guide
+
+1. **Install Packet Tracer** - Download from [Cisco NetAcad](https://www.netacad.com/courses/packet-tracer) (requires free account)
+2. **Download Lab Files** - Click any download link above to get the .pkt file
+3. **Open in Packet Tracer** - Double-click the .pkt file or open through File → Open
+4. **Explore** - Review the network topology, device configurations, and documentation
+
+💡 **Tip:** Start with the "CCNA Complete Lab" for comprehensive practice, or choose specific scenarios based on your learning goals.
+
+📂 **View all files on GitHub:** [CCNA-LAB Repository](https://github.com/Maverick-sudo/network-engineering/tree/main/CCNA-LAB)
+
+---
+
 ## Project Overview
 
 Welcome to my hands-on network engineering lab series! This repository documents my journey to solidify foundational networking skills using Cisco Packet Tracer. This approach prioritizes rapid prototyping and concept verification to maintain motivation and efficient study flow. The core idea is to progressively build and transform a network topology across three common architectural models:

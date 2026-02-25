@@ -1,0 +1,231 @@
+---
+title: Embedded Systems, ICS, and IoT
+description: Embedded system characteristics, communications, ICS components, and IoT security concerns.
+---
+
+
+### EMBEDDED SYSTEM FUNCTIONALITY
+
+An embedded system is a complete system designed to perform a specific, dedicated function within a **Static Environment** (whereas a PC is a **Dynamic Environment**).
+
+* **Static Environment:** Requires/does not allow or require frequent changes. In terms of security, this can be ideal as unchanging environments are typically easier to protect and defend.
+* Functionality can be found in consumer devices and industrial devices (**IoT**).
+* Constrained by **processor capability** (cores and speed), **system memory** (low), and **low persistent storage**.
+* Characterized by predictable processing workloads and time-sensitive operations.
+
+#### Hardware Architecture: PC vs. Embedded
+
+* **PC Hardware:** **Root of Trust** in a **Trusted Platform Module (TPM)** is an **Explicit Trust Anchor**.
+* **Embedded Networks:** **Root of Trust** is often implied. Based on an **Implied Trust Model**, any device added to the network is trusted by the administrator.
+
+| Feature | Desktop PC Architecture | Embedded System Architecture |
+| --- | --- | --- |
+| **Components** | Generalized CPU, processors, controllers, I/O, system memory linked via **Motherboard**. | **System on Chip (SoC)** design where all components are on a **single processor DIE or microchip**. |
+| **Efficiency** | High compute resource usage. | Microchip packaging is space and power efficient (e.g., **Raspberry Pi**, **Arduino**). |
+| **Specialization** | General purpose. | **Application-Specific Integrated Circuits (ASICs)** or **Microcontrollers**. |
+
+* **Microcontroller:** A processing unit capable of performing sequential operations from a dedicated instruction set determined by the vendor at the time of manufacture. Software is converted to dedicated instructions by **Assembly Language**.
+* **Field Programmable Gate Array (FPGA):** A type of microcontroller with no default dedicated instruction set at the time of manufacture. The end administrator can configure the programming logic of the device to run specific applications.
+
+---
+
+### OPERATING SYSTEMS & CONSTRAINTS
+
+* **Real-Time Operating Systems (RTOS):** Embedded systems use OSs that are much more stable and reliable.
+* **Baseband Firmware:** Used in cellular communication.
+* **Performance Requirements:** Low tolerance for reboots, crashes, or lagging.
+* **Latency and Reliability:** Tend to be more important than high data rates. **RTOS** have fast response times predictable to microsecond tolerance.
+* **Security:** **RTOS** have as small an attack surface as possible but are still susceptible to **CVEs** and exploits.
+
+#### Power and Connectivity Constraints
+
+* **Smartphones:** WiFi/5G/4G are power-hungry, requiring antennas to maximize data rates, range, and bandwidth.
+* **Embedded Systems:** Rely on power-efficient data transfer of small amounts of data with high reliability and low power consumption.
+* Lack of compute resources often leads to a lack of security options like **Authentication** and **Identification** tools. This prompts the development of **Lightweight Ciphers** (low key size/digest) that don't require large processing resources.
+
+---
+
+### COMMUNICATIONS CONSIDERATIONS
+
+There is a need for closer integration with IT networks using standardized communication technology.
+
+* **Operational Technology (OT) Networks:** Refers to cabled networks for industrial applications.
+* Use **Serial Data** protocols or **Industrial Ethernet**.
+* Optimized for real-time deterministic transfers.
+
+
+* **Layer 2 Switching:** Ethernet switching performs Layer 2 switching only.
+* **Cellular Networks:** Facilitate long-distance communications.
+* **Baseband Radio:** Managed by a baseband processor acting as a cellular modem.
+* **Narrow Band-IoT (NB-IoT):** A low-power version of 4G LTE.
+* **LTE Machine Type Communication (LTE-M):** Compatible with 5G networks and does not interfere with 5G signaling. Use 5G tower relays.
+
+
+* **Microwave Radio Networks:** Cellular networks are essentially microwave radio networks.
+
+---
+### LTE AND CELLULAR RADIO
+
+LTE-based **Cellular Radio** uses a **SIM** (Subscriber Identity Module) as an identifier.
+
+* **NB-IoT** / **LTE-M** devices use the same function.
+* An **eSIM** (embedded SIM) incorporates the identifier as a chip on the System Board.
+* Encryption of frames between the Cell Tower and Endpoint is the responsibility of the network operator.
+* **Over-the-Air Encryption** is performed by encryption schemes defined by the cellular standard.
+* **Backhaul Security** (encryption from the network backhaul to internal routers) is usually enforced by **IPsec**.
+* Network and Application layer security should be used for added security.
+
+---
+
+### ZIGBEE AND Z-WAVE
+
+Wireless communication protocols used in creating **Mesh Topologies** with low power/low data rate requirements.
+
+* **Zigbee:** Based on the **IEEE 802.15.4** standard.
+* **Z-Wave:** Uses low-energy radio waves.
+* Both have communications encryption. The main threats are:
+* **Re-pairing Attacks:** Allows a threat actor to discover the network key by forcing a device off the network, causing it to try to re-connect (similar to De-auth attacks on IP networks).
+* **Rogue Devices:** Unauthorized devices connected to the network systems.
+
+
+
+---
+
+### INDUSTRIAL CONTROL SYSTEMS (ICS)
+
+* Industrial processes prioritize **Availability** and **Integrity** over **Confidentiality**—reversing the **CIA Triad**.
+* **ICS** provide mechanisms for workflow and process automation.
+* These systems control machinery in **Critical Infrastructure**.
+* **Data Transfer** occurs via **Machine-to-Machine (M2M)** communications.
+
+#### ICS Components
+
+* **Distributed Control System (DCS):** An **ICS** that manages process automation within a single site.
+* **Programmable Logic Controllers (PLCs):** Plant devices and equipment embedded with **PLCs**.
+* **Fieldbus:** A serial network used in **Operational Technology (OT)** to link **PLCs**.
+* **Industrial Ethernet:** Used to link **PLCs** and connect to **Actuators** and **Smart Devices** (Valves, motors, circuit breakers, sensors).
+* **Human-Machine Interface (HMI):** Used for output configurations and monitoring of a **PLC**.
+* **SCADA (Supervisory Control and Data Acquisition):** Takes the place of a control server in large-scale multi-site **ICS**.
+* Typically runs as software on ordinary PCs.
+* Uses **WAN** communications.
+* Gathers data from and manages plant devices and equipment (referred to as **Field Devices**, **Nodes**, or **Sensors**).
+
+
+
+#### ICS Application Sectors
+
+* **Power Generation & Energy Distribution.**
+* **Industrial:** Refineries and mining.
+* **Fabrication & Manufacturing/Assembling.**
+* **Logistics.**
+* **Facilities:** Building Management Systems (BMS), HVAC.
+
+---
+
+### INTERNET OF THINGS (IoT)
+
+Describes a global network of appliances and devices equipped with sensors, software, and network connectivity.
+
+* Each "thing" is identified with a **Unique Serial Number** or code embedded within the hardware.
+* Able to inter-operate within existing infrastructure either directly or via an intermediary hub or control system.
+* **IoT devices are Headless** (no local interface).
+* **Sensors:** Measure temperature, humidity, light levels, pressure, motion, proximity, gas, smoke, heart/breathing rates, etc.
+* Examples: Thermocouples, Thermistors, Infrared Detectors, Inductive Coils, Photoelectric Cells, Capacitive Cells, Accelerometers, Gyroscopes.
+
+---
+
+#### IoT Vulnerabilities
+
+* Vulnerable to attacks because of:
+* Poorly documented security factors.
+* Poor patch management.
+* Weak security response processes.
+* **Weak Default Configuration.**
+* Minimum configuration effort (ease of use over security).
+
+
+
+---
+
+### SPECIALIZED SYSTEMS
+
+#### Smart Buildings
+
+* **Building Automation Systems (BAS):** A specialized system for facility automation. Refers to the use of embedded systems or **IoT** devices for:
+* **Physical Access Controls (PACS):** Electronic locking, alarms, and metal detectors.
+* **HVAC Systems.**
+* **Fire Suppression.**
+* **Elevators and Escalators.**
+
+
+* **Typical Vulnerabilities:**
+* Memory vulnerabilities (e.g., **Buffer Overflow**).
+* Use of plaintext crypto keys/credentials within application code.
+* Code injection via UI interfaces used to configure the system.
+
+
+#### Smart Meters
+
+* Update reports of electric, gas, or water use back to the supplier.
+* Reduces need for manual inspection.
+* Communicates info via **IoT** protocols (**Zigbee**, **Z-Wave**) for integration with smart appliances.
+
+#### Surveillance
+
+* **PACS** involve a network of monitored locks, intruder alarms, and Video/Audio surveillance.
+* Often installed and maintained by an external supplier, leading to it being omitted from Risk and Vulnerability assessments.
+* **CCTV** vulnerabilities allow attackers to perform their own surveillance.
+* **Requirement:** Evaluate the supplier to demonstrate their security monitoring and remediation support.
+
+#### Multifunction Printers (MFPs)
+
+* Single device capable of **Print/Scan/Fax** functions.
+* Firmware must be patched and updated regularly.
+* Documents are frequently recoverable from these machines (internal storage).
+* Ensure proper sanitization of images, documents, and files.
+* Can be used as a **Pivot Point** to attack the rest of the network.
+
+#### Voice over IP (VoIP)
+
+* Embedded systems used to implement **VoIP** endpoints (handsets/conferencing units) and gateways.
+* **Media Gateway:** Uses separate firmware/OS stack.
+
+#### Specialized Systems for Vehicles and Drones
+
+* **Automobiles / Unmanned Aerial Vehicles (UAV):** Contain sophisticated electronics to control engines, power systems, braking/landing, stability, and suspension.
+* **Electronic Control Unit (ECU):** Connected via **CAN bus**.
+* **Controller Area Network (CAN) Bus:** A serial communication bus for **ECUs**.
+* Functions similarly to Ethernet.
+* **ECUs** transmit broadcast messages to all other **ECUs** on the same bus with **no concept of Message Authentication, Integrity checks, or Source Addressing.**
+
+
+* **Onboard Diagnostics Module (OBD-II):** A principal external interface and an **ECU**.
+* **Vulnerabilities:**
+* Breaching physical security.
+* Remote access of **CAN bus** via cellular features or navigation/entertainment systems.
+* Onboard WiFi broadens the attack surface.
+
+
+
+#### Medical Devices
+
+* An array of systems (e.g., infusion pumps, monitors) potentially vulnerable to:
+* Use of unsecure communication protocols.
+* Use of unsupported versions of **OS**.
+* High availability costs (updating software is disruptive to patient services).
+
+
+* **Goals of Attacks:**
+1. Hold units for **Ransom** by threatening service disruption.
+2. Kill or injure patients by tampering with device settings.
+3. Use compromised devices to pivot to networks and steal **Protected Health Information (PHI)**.
+
+
+
+---
+
+### SECURITY FOR EMBEDDED SYSTEMS
+
+1. **Network Segmentation:** Network access for **IoT** environments should only be required to apply firmware updates.
+2. **Wrappers:** Use of wrappers like **IPsec** for protecting traffic between trusted and untrusted networks.
+3. **Programming Security:** Logic in **FPGA** must have no **backdoors**.

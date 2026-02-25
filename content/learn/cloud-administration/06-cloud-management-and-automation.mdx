@@ -1,0 +1,41 @@
+---
+title: "Cloud Management and Automation"
+description: Automate infrastructure with CloudFormation, Terraform, and IaC tools.
+---
+
+---
+title: Cloud Management and Automation
+description: API-driven management, IaC tooling, and operational automation.
+---
+
+## Cloud Management & Automation (API, CLI, SDK, IaC)
+
+In AWS, everything is an API call. An API is an application programming interface. And what that means is, there are pre determined ways for you to interact with AWS services. And you can invoke or call these APIs to provision, configure, and manage your AWS resources. For example, you can launch an EC2 instance or you can create an AWS Lambda function. Each of those would be different requests and different API calls to AWS. You can use the
+1.  AWS Management Console 
+2. the AWS Command Line Interface 
+3. the AWS Software Development Kits, or various other tools like AWS CloudFormation(Orchestration and Automation), to create requests to send to AWS APIs to create and manage AWS resources.
+
+The AWS Command Line Interface, allows you to make API calls using the terminal on your machine. This is different than the visual navigation style of the Management Console. Writing commands using the CLI makes actions scriptable and repeatable. So, you can write and run your commands to launch an EC2 Instance. And if you want to launch another, you can just run the pre-written command again. This makes it less susceptible to human error. And you can have these scripts run automatically, like on a schedule or triggered by another process. Automation is very important to having a successful and predictable cloud deployment over time.
+
+There are also other ways you can manage your AWS environment using managed tools like AWS Elastic Beanstalk, and AWS CloudFormation.
+
+AWS ELASTIC BEANSTALK is a service that helps you provision Amazon EC2-based environments. Instead of clicking around the console or writing multiple commands to build out your network, EC2 instances, scaling and Elastic Load Balancers, you can instead provide your application code and desired configurations to the AWS Elastic Beanstalk service, which then takes that information and builds out your environment for you. AWS Elastic Beanstalk also makes it easy to save environment configurations, so they can be deployed again easily. AWS Elastic Beanstalk gives you the convenience of not having to provision and manage all of these pieces separately, while still giving you the visibility and control of the underlying resources. You get to focus on your business application, not the infrastructure.
+With AWS Elastic Beanstalk, you provide code and configuration settings, and Elastic Beanstalk deploys the resources necessary to perform the following tasks:
+*   Adjust capacity
+*   Load balancing
+*   Automatic scaling
+*   Application health monitoring
+
+Another service you can use to help create automated and repeatable deployments is AWS CloudFormation. AWS CloudFormation is an infrastructure as code tool that allows you to define a wide variety of AWS resources in a declarative way using JSON or YAML text-based documents called CloudFormation templates. A declarative format like this allows you to define what you want to build without specifying the details of exactly how to build it. CloudFormation lets you define what you want and the CloudFormation engine will worry about the details on calling APIs to get everything built out. With AWS CloudFormation, you can treat your infrastructure as code. This means that you can build an environment by writing lines of code instead of using the AWS Management Console to individually provision resources.
+AWS CloudFormation provisions your resources in a safe, repeatable manner, enabling you to frequently build your infrastructure and applications without having to perform manual actions. It determines the right operations to perform when managing your stack and rolls back changes automatically if it detects errors.
+It also isn't just limited to EC2-based solutions. CloudFormation supports many different AWS resources from storage, databases, analytics, machine learning, and more. Once you define your resources in a CloudFormation template, CloudFormation will parse the template and begin provisioning all the resources you defined in parallel. CloudFormation manages all the calls to the backend AWS APIs for you. You can run the same CloudFormation template in multiple accounts or multiple regions, and it will create identical environments across them. There is less room for human error as it is a totally automated process.
+
+Another way to interact with AWS is through the AWS Software Development Kits or SDKs. The SDKs allow you to interact with AWS resources through various programming languages. This makes it easy for developers to create programs that use AWS without using the low level APIs,
+
+AWS Systems Manager to automate operational tasks across AWS resources. You do not use AWS Systems Manager to deploy network infrastructure such as VPCs.
+## Key Takeaways
+
+- Infrastructure as Code (Terraform, CloudFormation) ensures reproducibility
+- Version control IaC templates for audit trails and rollback capability
+- Automate deployments with CI/CD pipelines
+- Use tagging strategies for cost allocation and resource organization

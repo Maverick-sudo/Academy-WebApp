@@ -121,7 +121,7 @@ export function getMarkdownFiles(dir: string, baseDir: string = dir): string[] {
       if (!shouldSkipDir(item)) {
         files.push(...getMarkdownFiles(fullPath, baseDir))
       }
-    } else if (item.endsWith('.md')) {
+    } else if (item.endsWith('.md') || item.endsWith('.mdx')) {
       files.push(path.relative(baseDir, fullPath))
     }
   }
@@ -171,13 +171,13 @@ export function buildFileTree(dir: string, relativePath: string = ''): FileTreeN
           })
         })
       }
-    } else if (item.endsWith('.md')) {
+    } else if (item.endsWith('.md') || item.endsWith('.mdx')) {
       try {
         const { data } = readAndParseFile(fullPath)
         
         tree.push({
-          name: item.replace(/\.md$/, ''),
-          path: itemRelativePath.replace(/\.md$/, ''),
+          name: item.replace(/\.(md|mdx)$/, ''),
+          path: itemRelativePath.replace(/\.(md|mdx)$/, ''),
           type: 'file',
           meta: data as DocMeta
         })
@@ -204,9 +204,13 @@ export function getDocBySlug(slug: string[]): Doc | null {
 
   const possiblePaths = [
     path.join(contentDir, ...slug) + '.md',
+    path.join(contentDir, ...slug) + '.mdx',
     path.join(contentDir, ...slug, 'README.md'),
+    path.join(contentDir, ...slug, 'README.mdx'),
     path.join(contentDir, ...slug, 'Readme.md'),
+    path.join(contentDir, ...slug, 'Readme.mdx'),
     path.join(contentDir, ...slug, 'readme.md'),
+    path.join(contentDir, ...slug, 'readme.mdx'),
   ]
 
   for (const filePath of possiblePaths) {
@@ -339,9 +343,9 @@ export function getDocsInDirectory(slug: string[]): Doc[] {
     const itemPath = path.join(dirPath, item)
     const stat = fs.statSync(itemPath)
 
-    if (stat.isFile() && item.endsWith('.md')) {
+    if (stat.isFile() && (item.endsWith('.md') || item.endsWith('.mdx'))) {
       const { data, content } = readAndParseFile(itemPath)
-      const itemSlug = [...slug, item.replace(/\.md$/, '')]
+      const itemSlug = [...slug, item.replace(/\.(md|mdx)$/, '')]
 
       docs.push({
         slug: itemSlug,
@@ -352,8 +356,11 @@ export function getDocsInDirectory(slug: string[]): Doc[] {
     } else if (stat.isDirectory() && !shouldSkipDir(item)) {
       const readmePaths = [
         path.join(itemPath, 'README.md'),
+        path.join(itemPath, 'README.mdx'),
         path.join(itemPath, 'Readme.md'),
+        path.join(itemPath, 'Readme.mdx'),
         path.join(itemPath, 'readme.md'),
+        path.join(itemPath, 'readme.mdx'),
       ]
       const existingReadme = readmePaths.find(candidate => fs.existsSync(candidate))
       if (existingReadme) {

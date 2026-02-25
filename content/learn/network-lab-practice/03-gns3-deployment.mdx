@@ -1,0 +1,610 @@
+---
+title: "GNS3 Setup and Usage"
+description: "Setting up GNS3 and importing network device images."
+---
+
+-nodefaults \
+-rtc base=utc
+```
+
+In EVE-NG labs you want a balance between up-to-date features and resource usage. Here’s a quick pick:
+
+Recommendation:
+- For resource-constrained setups, start with c8000v-17.04.01 (1.3 GiB).
+- For production-like CCNP Enterprise labs, use c8000v-17.09.01a (1.6 GiB) as a sweet spot.
+- If you need the latest enhancements, go with c8000v-17.16.01a (1.7 GiB).
+
+## Custom QEMU Template for CSR1000v
+If you’re using a custom QEMU template (shown below) and seeing CSR1000v boot failures:
+
+```bash
+-machine type=pc,accel=kvm \
+-cpu host \
+-serial mon:stdio \
+-nographic \
+-no-user-config \
+-nodefaults \
+-rtc base=utc
+```
+
+Recommended Template Settings
+Use EVE-NG’s built-in CSR1000v template or adjust your custom stanza to include the virtio devices and proper flags:
+
+```bash
+-machine type=pc,accel=kvm \
+-cpu host \
+-smp cores=2,threads=1,sockets=1 \
+-m 2048 \
+-device virtio-scsi-pci,id=scsi0 \
+-drive file=disk1.qcow2,if=none,id=hd0,cache=none,format=qcow2 \
+-device scsi-hd,drive=hd0 \
+-netdev type=tap,id=net0,script=/etc/qemu-ifup \
+-device virtio-net-pci,netdev=net0 \
+-nographic \
+-serial mon:stdio \
+-nodefaults \
+-rtc base=utc
+```
+Key differences:
+- -smp cores=2,threads=1,sockets=1 binds 2 vCPUs in one socket.
+- -device virtio-scsi-pci and -device scsi-hd for disk bus.
+- -device virtio-net-pci for network.
+- -m 2048 allocates 2 GB RAM.
+With these settings, CSR1000v will find its packages, start critical services (nesd, etc.), and boot cleanly.
+
+## CSR1000v User Access Verification
+On first boot, CSR1000v prompts for user access. Common credential pairs include:
+Username: cisco    Password: cisco
+# or sometimes
+Username: admin    Password: admin
+If neither pair works:
+	0.	Use the VM console (right-click node > Console) to log in if possible.
+	0.	At the firepower-bash prompt, enter configuration mode to reset or create a local user:
+
+```bash
+enable
+configure terminal
+username myuser privilege 15 secret MySecretPassword
+end
+write memory
+```
+
+	0.	Reconnect with your new credentials.
+If you cannot reach an enable prompt, ensure your template uses the builtin CSR1000v startup configuration, or reload the node and watch for the initial banner that shows the correct default credentials.
+
+## Recommended IOS XRv-9000 (XRv9k) Lab Images
+When choosing an XRv9k build for CCNP/MPLS or service-provider labs, you want enough features to practice routing protocols (OSPF, BGP, MPLS) but not so heavy it crashes your host. Below are the disk size (for reference) and the approximate RAM you should allocate:
+
+| Image | Disk Size | Approx. RAM Required | Feature Notes | Recommendation |
+|---|---:|---:|---|---|
+| iosxrv9000-7-7-1 | 1.5 GiB | 2 GiB | Early 7.x feature set; stable | ✅ Good balance of features and resources |
+| iosxrv9000-7-11-1 | 1.7 GiB | 2.5 GiB | More recent bug fixes and updates | ✅ Recommended if you have extra headroom |
+| xrv9k-fullk9-24.3.1 | 1.6 GiB | 3 GiB | Newest 24.x train; advanced features | ✔️ Use for feature-complete labs (if RAM allows) |
+| xrv9k-fullk9-6.4.1 | 1.2 GiB | 1.5 GiB | Lightweight 6.x build | ⚡ Fast boot and minimal resources |
+| xrv-k9-demo-6.3.1 | 431 MiB | 512 MiB | Demo mode (limited features) | ⚠️ Only use for very basic connectivity tests |
+Recommendation:
+- For CCNP/SP routing labs, start with iosxrv9000-7-7-1 (allocate 2 GiB RAM) or xrv9k-fullk9-6.4.1 (allocate 1.5 GiB RAM) for best stability.
+- If you need the latest enterprise features, pick iosxrv9000-7-11-1 (2.5 GiB RAM) or xrv9k-fullk9-24.3.1 (3 GiB RAM).
+- The demo build (xrv-k9-demo-6.3.1) is too limited and only requires ~512 MiB but lacks full features—avoid unless you’re only testing basic L2/L3 connectivity.
+
+## Infra Server Images for EVE-NG
+To round out your CCNA/CCNP infrastructure labs, you’ll need lightweight server images for DNS, DHCP, syslog, and Active Directory. Here are the recommended images and their pull commands:
+
+| Server Type | Image Name | Approx. RAM | ishare2 Pull Command |
+|---|---|---:|---|
+| Alpine Linux | alpine-3.18-x86_64.qcow2 | 128 MiB | python3 ishare.py --pull alpine-3.18.image |
+| Ubuntu Server | ubuntu-22.04-server-cloudimg | 512 MiB | python3 ishare.py --pull ubuntu-22.04.image |
+| Windows Server 2019 | windows-server-2019-standard.qcow2 | 2 GiB | Manual download (Microsoft Eval ISO) |
+
+Notes:
+- Alpine is perfect for lightweight services (DNS, DHCP, syslog).
+- Ubuntu Server offers richer distro support (RADIUS, NTP).
+- Windows Server requires a valid ISO; upload to /opt/unetlab/addons/qemu/windows/, then convert to QCOW2.
+
+## Converting a Windows Server ISO to QCOW2 for EVE-NG
+If you already have the Windows Server ISO on your host, follow these steps inside your EVE-NG VM to create a usable QCOW2 disk image:
+
+1. Create the target folder
+
+```bash
+mkdir -p /opt/unetlab/addons/qemu/windows/windows-server-2019-standard
+```
+
+2. Change into the folder
+
+```bash
+cd /opt/unetlab/addons/qemu/windows/windows-server-2019-standard
+```
+
+3. Copy the ISO into place
+
+```bash
+cp /path/to/windows-server-2019.iso .
+```
+
+4. Create a blank QCOW2 disk (e.g., 60 GiB)
+
+```bash
+qemu-img create -f qcow2 disk0.qcow2 60G
+```
+
+5. Install Windows via virt-install
+
+```bash
+virt-install \
+  --name win2019 \
+  --ram 2048 \
+  --vcpus 2 \
+  --disk path=disk0.qcow2,format=qcow2 \
+  --cdrom windows-server-2019.iso \
+  --os-type windows \
+  --os-variant win2k19 \
+  --network network=default,model=virtio \
+  --graphics none \
+  --boot cdrom,hd
+```
+
+6. Complete the Windows GUI install via VNC or serial console.
+
+7. Fix permissions and rename for EVE-NG
+
+```bash
+/opt/unetlab/wrappers/unl_wrapper -a fixpermissions
+```
+
+8. Add the node in the EVE-NG GUI
+- Choose QEMU > Windows > Windows Server 2019
+- Assign disk0.qcow2 as the image
+Your Windows Server VM will now boot from the installed QCOW2 disk. This approach avoids manual conversion pitfalls and ensures a fully installed, persistent OS in EVE-NG.
+
+This series of commands sets up a virtualized Ubuntu 16.04 desktop environment inside EVE-NG, using QEMU for virtualization. Here's what each step does, with an explanation of how it relates to virtualization concepts like VMDK in VMware Fusion:
+
+## Ubuntu 16.04 Desktop in EVE-NG (QEMU) — Step-by-Step Breakdown
+
+1. Rename ISO image
+
+```bash
+mv ubuntu-16.04.2-desktop-amd64.iso cdrom.iso
+```
+
+- This renames the Ubuntu ISO file to cdrom.iso.
+- EVE-NG expects a file named cdrom.iso when booting a VM from an ISO during the first boot.
+- The ISO acts like a virtual DVD drive.
+
+2. Navigate to QEMU image directory for the VM template
+
+```bash
+cd /opt/unetlab/addons/qemu/linux-ubuntu-desktop-16.04.02/
+```
+
+- This is the path where EVE-NG stores its QEMU-based VM images (one folder per node/template).
+- You're entering the directory specific to your custom Ubuntu Desktop node.
+
+3. Create a virtual hard drive
+
+```bash
+/opt/qemu/bin/qemu-img create -f qcow2 virtioa.qcow2 30G
+```
+
+- This is the key step: you're creating a virtual hard disk for your Ubuntu node.
+- qcow2 is QEMU’s advanced disk format (similar to .vmdk in VMware).
+- It supports compression, snapshots, and dynamic sizing.
+- virtioa.qcow2 is the name of the disk. "Virtio" refers to a high-performance virtualized driver used in KVM/QEMU VMs.
+- 30G specifies a max disk size of 30 GB (like allocating a 30 GB VMDK in VMware Fusion).
+- This is what Ubuntu will install onto during the first boot from the ISO.
+
+### Comparison to VMware Fusion
+Think of this as creating a new .vmdk for a VMware VM before installing an OS. You're defining how much space the VM can use, but actual disk usage grows as needed.
+
+4. Create a lab and add the node
+- You now go into EVE-NG's web interface and create a lab.
+- Add a node that uses the linux-ubuntu-desktop-16.04.02 QEMU template.
+- When this node boots, it will load the cdrom.iso to install Ubuntu onto virtioa.qcow2.
+
+5. Remove the ISO after installation
+
+```bash
+rm -f cdrom.iso
+```
+
+- After the OS has been installed onto the virtual hard disk, the ISO is no longer needed.
+- Removing it simulates "ejecting the installation disc."
+- Ensures the VM boots from the disk next time instead of looping back to the ISO.
+
+This summary is conceptually identical to:
+- Creating a new virtual disk (VMDK) in VMware,
+- Mounting an ISO to boot and install the OS, and
+- Removing the ISO after installation to boot normally from the virtual hard disk.
+But here you're doing it manually with QEMU inside EVE-NG, which runs as a nested virtualization environment (on top of VMware, Proxmox, etc.).
+
+
+Absolutely! Here's a unified, clean, custom guide for installing your own Linux or Windows Server host in EVE-NG, abstracted from the official EVE-NG documentation. It works for both platforms and is structured for reuse with minimal manual steps.
+
+## EVE-NG Custom Image Installation Guide (Linux or Windows Host)
+
+✅ Applies to: Linux Desktops, Linux Servers, Windows Desktop, Windows Server
+🖥 Tested with: Ubuntu, Kali, TinyCore, Windows 10/11, Server 2016/2019/2022
+
+### Step 1: Prepare Environment & ISO
+
+```bash
+# Upload the ISO to EVE via SCP (e.g., using FileZilla or scp)
+scp your-image.iso root@`<eve-ng-ip>`:/opt/unetlab/addons/qemu/
+
+# Rename ISO to cdrom.iso
+mv your-image.iso cdrom.iso
+```
+
+### Step 2: Create the Image Folder
+Use naming convention: linux-[name]-version or windows-[name]-version.
+
+```bash
+mkdir /opt/unetlab/addons/qemu/`<custom-folder-name>`
+mv cdrom.iso /opt/unetlab/addons/qemu/`<custom-folder-name>`/
+cd /opt/unetlab/addons/qemu/`<custom-folder-name>`
+```
+
+✅ Example:
+
+```bash
+mkdir /opt/unetlab/addons/qemu/linux-kali-2022.1
+mv kali-linux-2022.1-installer-amd64.iso /opt/unetlab/addons/qemu/linux-kali-2022.1/cdrom.iso
+```
+
+
+### Step 3: Create HDD (qcow2 format)
+Choose desired size (e.g., 40 GB for Windows, 15-30 GB for Linux).
+
+```bash
+/opt/qemu/bin/qemu-img create -f qcow2 virtioa.qcow2 30G
+```
+
+### Step 4: Boot and Install OS
+	0.	Open EVE Web UI
+	0.	Create a new Lab
+	0.	Add Node using the name of the folder you created
+	0.	Start the VM — it will boot from the ISO
+	0.	Install the OS manually
+- For Linux: Install to /dev/vda
+- For Windows: Use the VirtIO drivers if required
+
+### Step 5: Post-Install Cleanup (Commit)
+After the OS is installed:
+	0.	Power off the VM
+	0.	SSH back into EVE and run:
+
+```bash
+cd /opt/unetlab/addons/qemu/`<your-image-folder>`
+rm -f cdrom.iso
+/opt/unetlab/wrappers/unl_wrapper -a fixpermissions
+```
+✅ This finalizes the image so it can be cloned as a reusable node.
+Boot Kali VM in your EVE-NG lab with the cdrom.iso attached
+Install Kali to the virtioa.qcow2 hard disk
+- This is the key step — ensure Kali is fully installed onto the virtual HDD
+Reboot Kali
+- During reboot, Kali should boot from virtioa.qcow2, not the ISO
+- If it boots correctly and logs you into the installed OS, the ISO is no longer needed
+✅ At this point, you can safely delete cdrom.iso
+
+
+### Optional Enhancements
+
+#### For Windows
+
+- Use VirtIO drivers during install: Download Red Hat VirtIO ISO
+- Place the ISO alongside your main one:
+
+```bash
+mv virtio-win.iso /opt/unetlab/addons/qemu/`<your-image-folder>`/
+```
+
+- Load it during Windows install for disk/network drivers.
+
+#### For Cloud-Like Linux
+
+- Pre-install qemu-guest-agent
+- Configure SSH access or cloud-init (advanced)
+
+### Final Test
+	0.	Add the node to a new lab
+	0.	Boot it — confirm it loads from disk (virtioa.qcow2)
+	0.	Save it as part of your personal reusable image library
+
+
+### Naming Convention (Recommended)
+
+| OS Type | Example Folder Name |
+|---|---|
+| Linux | linux-ubuntu-server-22.04 |
+| Linux | linux-kali-rolling-2024 |
+| Windows | windows-server-2022 |
+| Windows | windows10-enterprise-21h2 |
+
+### Script Template (Advanced Automation)
+You can turn this into a shell script:
+
+```bash
+#!/bin/bash
+# Custom EVE-NG image initializer
+
+read -p "Enter image folder name (e.g., linux-ubuntu-server-22.04): " IMGDIR
+read -p "Enter HDD size (e.g., 30G): " SIZE
+
+mkdir -p /opt/unetlab/addons/qemu/$IMGDIR
+mv cdrom.iso /opt/unetlab/addons/qemu/$IMGDIR/
+cd /opt/unetlab/addons/qemu/$IMGDIR
+/opt/qemu/bin/qemu-img create -f qcow2 virtioa.qcow2 $SIZE
+/opt/unetlab/wrappers/unl_wrapper -a fixpermissions
+
+echo "✅ Folder $IMGDIR is ready. Add to a lab and install OS."
+```
+
+
+Quick summary of what that means:
+- When you boot into emergency mode (via GRUB or a recovery environment), you’re actually running a minimal Linux shell on your real system, but without starting all the usual services.
+- You have direct access to your files (like /etc/network/interfaces) and can edit them to fix problems blocking normal boot.
+- So yes, you are “in” your Linux filesystem, but it’s a minimal environment designed for troubleshooting.
+
+How to ask an AI to get the recovery steps again:
+Try asking something like:
+- “How do I recover a Linux system that won’t boot because of a bad network config?”
+- “Steps to boot into emergency mode on Ubuntu/EVE-NG and fix /etc/network/interfaces”
+- “How to fix networking errors causing systemd networking service failure on Linux?”
+- “How to repair broken network config in Linux when system won’t start networking?”
+
+Explanation:
+- eth0 and eth1 are the physical NICs on your EVE-NG host.
+- pnet0 and pnet1 are Linux bridge interfaces connected to eth0 and eth1 respectively.
+- Both bridges are set to get IP via DHCP from your home LAN/network (or wherever your EVE-NG host is connected).
+- This allows your VMs or nodes attached to these clouds (pnet0, pnet1) to get IPs from your DHCP server and access the internet.
+- bridge_fd 0 disables forwarding delay (good for faster bridge startup).
+
+Troubleshooting tips:
+- Make sure eth0 and eth1 are physical interfaces actually present on your host (ip link show).
+- Make sure your DHCP server is active on the physical network your EVE-NG host is connected to.
+- If you want to use only one interface, configure only pnet0 as above.
+- Don’t mix manual and dhcp on the same interface in confusing ways; keep physical interfaces manual, bridges dhcp.
+
+A clear explanation of how macOS turns bridge101 into a NAT gateway and what it means for your EVE-NG lab:
+
+Think of a server—the hardware—as one computer. It can be one of the blades, a powerful computer you can buy at the local computer store... whatever. Traditionally, when you think of one server, that one server runs one OS. Inside, the hardware includes a CPU, some RAM, some kind of permanent storage (like disk drives), and one or more NICs. And that one OS can use all the hardware inside the server and then run one or more applications.
+With the physical server model shown in Figure 15-2, each physical server runs one OS, and that OS uses allthe hardware in that one server. That was true of servers in the days before server virtualization. Today, most companies instead create a virtualized data center. That means the company purchases server hardware, installs it in racks, and then treats all the CPU, RAM, and so on as capacity in the data center. Then, each OS instance is decoupled from the hardware and is therefore virtual (in contrast to physical). Each piece of hardware that we would formerly have thought of as a server runs multiple instances of an OS at the same time, with each virtual OS instance called a virtual machine, or VM.
+A single physical host (server) often has more processing power than you need for one OS. Thinking about processors for a moment, modern server CPUs have multiple cores (processors) in a single CPU chip. Each core may also be able to run multiple threads with a feature called multithreading. So, when you read about a particular Intel processor with 8 cores and multithreading (typically two threads per core), that one CPU chip can execute 16 different programs concurrently. The hypervisor (introduced shortly) can then treat each available thread as a virtual CPU (vCPU) and give each VM a number of vCPUs, with 16 available in this example.
+A VM—that is, an OS instance that is decoupled from the server hardware—still must execute on hardware. Each VM has configuration as to the minimum number of vCPUs it needs, minimum RAM, and so on. The virtualization system then starts each VM on some physical server so that enough physical server hardware capacity exists to support all the VMs running on that host. So, at any one point in time, each VM is running on a physical server, using a subset of the CPU, RAM, storage, and NICs on that server. To make server virtualization work, each physical server (called a host in the server virtualization world) uses a hypervisor. The hypervisor manages and allocates the host hardware (CPU, RAM, etc.) to each VM based on the settings for the VM. Each VM runs as if it is running on a self-contained physical server, with a specific number of virtual CPUs and NICs and a set amount of RAM and storage. For instance, if one VM happens to be configured to use four CPUs, with 8 GB of RAM, the hypervisor allocates the specific parts of the CPU and RAM that the VM actually uses. Server virtualization tools provide a wide variety of options for how to connect VMs to networks. Normally, an OS has one NIC, maybe more. To make the OS work as normal, each VM has (at least) one NIC, but for a VM, it is a virtual NIC. (For instance, in VMware’s virtualization systems, the VM’s virtual NIC goes by the name vNIC.)
+Finally, the server must combine the ideas of the physical NICs with the vNICs used by the VMs into some kind of a network. Most often, each server uses some kind of an internal Ethernet switch concept, often called (you guessed it) a virtual switch, or vSwitch. Interestingly, the vSwitch can be supplied by the hypervisor vendor or by Cisco. For instance, Cisco offers the Nexus 1000VE virtual switch (which replaces the older and popular Nexus 1000V virtual switch). The Nexus 1000VE runs the NX-OS operating system found in some of the Cisco Nexus data center switch product line.
+The vSwitch shown in Figure 15-4 uses the same networking features you now know from your CCNA studies; in fact, one big motivation to use a vSwitch from Cisco is to use the same networking features, with the same configuration, as in the rest of the network. In particular:
+Ports connected to VMs: The vSwitch can configure a port so that the VM will be in its own VLAN, or share the same VLAN with other VMs, or even use VLAN trunking to the VM itself.
+Ports connected to physical NICs: The vSwitch uses the physical NICs in the server hardware so that the switch is adjacent to the external physical LAN switch. The vSwitch can (and likely does) use VLAN trunking.
+Automated configuration: The configuration can be easily done from within the same virtualization software that controls the VMs. That programmability allows the virtualization software to move VMs between hosts (servers) and reprogram the vSwitches so that the VM has the same networking capabilities no matter where the VM is running.
+
+
+## VMware Fusion Network Adapters: Complete Technical Guide
+
+### Core Concept: Physical vs Virtual Networks
+
+**The Foundation:**
+
+- Physical adapters = Hardware on your Mac (WiFi, Ethernet, USB-C)
+- Virtual networks = Software-created networks by VMware (vmnet1, vmnet8, etc.)
+- Bridge interfaces = Connect VMs to networks (pnet0, pnet1, pnet2 in EVE-NG)
+
+### The Three Network Adapter Types
+
+#### 1. NAT (Network Address Translation)
+
+**What it is:**
+
+- VMware creates a private virtual network with its own DHCP server
+- A virtual NAT router translates VM traffic to your Mac's IP
+- VMs share your Mac's internet connection (hidden behind NAT)
+
+**Network topology:**
+
+```text
+Internet → Mac (172.20.10.3) → NAT Router (192.168.33.2) → vmnet8 (192.168.33.1) → VM
+```
+
+**Characteristics:**
+
+- VMs get internet access
+- VMs are hidden from external network (security)
+- Independent of Mac's physical network
+- VMs don't appear on your home/office network
+- External devices cannot initiate connections to VMs
+
+**Example (your Mac):**
+
+- Network: 192.168.33.0/24
+- Your Mac interface: 192.168.33.1
+- NAT gateway: 192.168.33.2
+- DHCP range: 192.168.33.128-254
+- EVE-NG gets: 192.168.33.130 (DHCP)
+
+#### 2. Host-Only
+
+**What it is:**
+
+- VMware creates an isolated private network
+- Only your Mac and VMs can communicate
+- Completely cut off from internet and external networks
+
+**Network topology:**
+
+```text
+        ISOLATED BUBBLE
+    +-------------------+
+    | Mac ↔ VM          |
+    | No internet       |
+    | No home network   |
+    +-------------------+
+```
+
+**Characteristics:**
+
+- Complete isolation (security for dangerous tests)
+- VMs can talk to each other and Mac
+- Stable IPs under your control
+- No internet access
+- No access to home/office network
+
+**Example (your Mac):**
+
+- Network: 172.16.47.0/24
+- Your Mac interface: 172.16.47.1
+- DHCP range: 172.16.47.128-254
+- No NAT, no gateway to outside
+
+#### 3. Bridged
+
+**What it is:**
+
+- VM adapter connects DIRECTLY to one of your Mac's physical adapters
+- VM appears as a real device on that physical network
+- Acts like plugging a physical cable into your network
+
+**Network topology:**
+
+```text
+Home Router → Mac's WiFi adapter → VM (gets IP from home router)
+```
+
+**Characteristics:**
+
+- VMs appear on real network (same as your Mac)
+- Direct internet access (no NAT)
+- External devices can reach VMs
+- Depends on Mac having active physical connection
+- Exposed to network (less secure)
+
+**Critical constraint:**
+
+- Can only bridge to physical adapters that are ACTIVE
+- Multiple bridged adapters share the SAME physical connection unless Mac has multiple active connections
+
+### How Devices "See" Each Other
+
+**Same Cloud/Network**
+
+```text
+pnet0 (192.168.33.0/24) acts as Layer 2 switch
+	|
+	+--- R1 (192.168.33.201)
+	+--- R2 (192.168.33.202)
+```
+
+Result: R1 and R2 CAN communicate (same broadcast domain)
+Why: pnet0 is a bridge - all connected devices are on the same "virtual wire"
+
+**Different Clouds/Networks**
+
+```text
+pnet0 (192.168.33.0/24)     pnet2 (10.200.200.0/24)
+	|                            |
+   R1                           R2
+```
+
+Result: R1 and R2 CANNOT communicate (separate Layer 2 domains)
+Why: The two bridges are completely separate - no connection between them
+
+To enable communication, you need:
+- Routing enabled on EVE-NG host (iptables forwarding), OR
+- A router device with interfaces in both networks
+
+### Your MacBook's Current Network Configuration
+
+**Physical Reality**
+
+```text
+SmartPhone Hotspot: 172.20.10.0/28
+	└── Your Mac: 172.20.10.3 (ONLY active internet connection)
+
+WiFi (en0): INACTIVE
+Ethernet (en1): INACTIVE
+```
+
+**VMware Virtual Networks**
+
+```text
+vmnet8 (NAT):
+- Network: 192.168.33.0/24
+- Mac interface: 192.168.33.1
+- NAT gateway: 192.168.33.2
+- DHCP: 192.168.33.128-254
+- Purpose: Management + Internet
+
+vmnet1 (Host-only):
+- Network: 172.16.47.0/24
+- Mac interface: 172.16.47.1
+- DHCP: 172.16.47.128-254
+- Purpose: Isolated lab environment
+```
+
+**EVE-NG Mapping**
+
+```text
+pnet0 (eth0) → vmnet8 → 192.168.33.130 (has internet)
+pnet1 (eth1) → vmnet1 → Not configured yet
+pnet2 (eth2) → Not assigned → Not configured yet
+```
+
+### The Physical Adapter Constraint (Key Insight)
+
+Question that caused confusion: "If I have 2 bridged adapters, do they get separate networks?"
+Answer depends on physical reality:
+
+**Scenario A: Only SmartPhone Hotspot Active (Your Current State)**
+
+Mac has ONE active connection: SmartPhone Hotspot (172.20.10.0/28)
+
+```text
+Bridged Adapter 1 → SmartPhone Hotspot (172.20.10.x)
+Bridged Adapter 2 → SmartPhone Hotspot (172.20.10.x)  SAME NETWORK!
+```
+
+Result: Both on 172.20.10.0/28 - they CAN communicate
+Limitation: Only 14 usable IPs (.1 to .14) - very small!
+
+**Scenario B: WiFi + SmartPhone Hotspot Both Active**
+
+Mac has TWO active connections:
+
+```text
+├── WiFi: 192.168.1.0/24
+└── SmartPhone: 172.20.10.0/28
+
+Bridged Adapter 1 → WiFi (192.168.1.x)
+Bridged Adapter 2 → SmartPhone (172.20.10.x)  DIFFERENT NETWORKS!
+```
+
+Result: Separate networks - they CANNOT communicate directly
+Key principle: Bridged mode is limited by physical adapters. NAT and Host-only are not.
+
+### Doubling Network Adapters: Consequences & Advantages
+
+#### Adding 2 NAT Adapters
+
+Default behavior:
+
+- Both connect to same vmnet8 (192.168.33.0/24)
+- Get different IPs from same DHCP pool
+- Devices on both CAN communicate (same subnet)
+
+To separate them: Create vmnet9 in /Library/Preferences/VMware Fusion/networking:
+
+```text
+answer VNET_9_DHCP yes
+answer VNET_9_HOSTONLY_NETMASK 255.255.255.0
+answer VNET_9_HOSTONLY_SUBNET 10.10.10.0
+answer VNET_9_NAT yes
+answer VNET_9_VIRTUAL_ADAPTER yes
+```
+
+Result:
+
+
+## Key Takeaways
+
+- Completed GNS3 Setup and Usage
+- Applied concepts from Setting up GNS3 and importing network device images.
+- Ready to proceed to the next chapter

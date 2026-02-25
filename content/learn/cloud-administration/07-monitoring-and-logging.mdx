@@ -1,0 +1,28 @@
+---
+title: "Monitoring and Logging"
+description: Implement CloudWatch, Log Analytics, and observability best practices.
+---
+
+The act of collecting, analyzing, and using data to make decisions or answer questions about your IT resources and systems is called monitoring.
+Monitoring provides a near real-time pulse on your system and helps answer the previous questions. You can use the data you collect to watch for operational issues caused by events like overuse of resources, application flaws, resource misconfiguration, or security-related events. Think of the data collected through monitoring as outputs of the system, or metrics. Each individual data point that a resource creates is a metric. Metrics that are collected and analyzed over time become statistics.
+Amazon CloudWatch is a web service that enables you to monitor and manage various metrics and configure alarm actions based on data from those metrics.
+CloudWatch uses metrics to represent the data points for your resources. AWS services send metrics to CloudWatch. CloudWatch then uses these metrics to create graphs automatically that show how performance has changed over time. CloudWatch aggregates statistics according to the period of time that you specify when creating your graph or requesting your metrics.  CloudWatch Logs is centralized place for logs to be stored and analyzed. With this service, you can monitor, store, and access your log files from applications running on EC2 instances, AWS Lambda functions, and other sources.
+CloudWatch alarms 🚨 With CloudWatch, you can create alarms that automatically perform actions if the value of your metric has gone above or below a predefined threshold. You can create CloudWatch alarms to automatically initiate actions based on sustained state changes of your metrics. You configure when alarms are invoked and the action that is performed. An alarm can be invoked when it transitions from one state to another. After an alarm is invoked, it can initiate an action. Actions can be an Amazon EC2 action, an automatic scaling action, or a notification sent to Amazon Simple Notification Service (Amazon SNS).
+To learn more about the three possible states of an alarm:
+
+- OK: The metric is within the defined threshold. Everything appears to be operating like normal.
+- ALARM: The metric is outside the defined threshold. This might be an operational issue.
+- INSUFFICIENT_DATA: The alarm has just started, the metric is not available, or not enough data is available for the metric to determine the alarm state.
+Prevent and troubleshoot issues with CloudWatch alarms: CloudWatch Logs uses metric filters to turn the log data into metrics that you can graph or set an alarm on. The following timeline indicates the order of the steps to complete when setting up an alarm. 1. Set up a Metric Filter, 2. Define an Alarm, 3. Define an Action.
+
+AWS CloudTrail records API calls for your account. The recorded information includes the identity of the API caller, the time of the API call, the source IP address of the API caller, and more. You can think of CloudTrail as a “trail” of breadcrumbs (or a log of actions) that someone has left behind them.
+Recall that you can use API calls to provision, manage, and configure your AWS resources. With CloudTrail, you can view a complete history of user activity and API calls for your applications and resources.
+
+- Track user activities and API requests throughout your AWS infrastructure
+- Filter logs to assist with operational analysis and troubleshooting
+## Key Takeaways
+
+- Implement centralized logging (CloudWatch, Log Analytics) for all resources
+- Set actionable alerts on key metrics (CPU, memory, error rates)
+- Retain logs long enough for compliance and incident investigation
+- Use dashboards for real-time visibility into system health

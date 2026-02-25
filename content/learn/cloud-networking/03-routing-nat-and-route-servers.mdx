@@ -1,0 +1,53 @@
+---
+title: Routing, NAT, and Route Servers
+description: How Azure and AWS handle routing, NAT gateways, and dynamic routing exchanges.
+---
+
+
+### AZURE VNET ROUTING
+*   AZURE Network Address Translation (NAT): Lets Internal Resources on a private VNet share routable (public) IP addresses. Rather than issuing an IP address for each resource that requires Internet access, you can configure a NAT Gateway Service to map outgoing requests from Internal Resources to an external IP address. No further Config is necessary; you don't need to create any user-defined routes. NAT takes precedence Over other outbound Scenarios & replaces the default Internet destination of a subnet. NAT supports up to 16 addresses, while Port NAT supports up to 64,000 Concurrent flows for each public IP.
+*   Azure automatically creates a Route table for each subnet within an Azure Virtual Network.
+    1.  Default System Routes: Auto-generated routes to each subnet in a virtual Network. They can't be removed but can be overridden by custom Routes (User Defined Routes). Azure creates default system routes for each subnet & adds other optional default routes to specific subnets. Each System Route contains an address prefix & next hop type; no requirement for subnet mask. A Hop Is a WAYPOINT (POINT ON THE WAY) to the Overall Route. Next hop = Next Waypoint that the traffic is directed to on its Journey to its ultimate Destination. The Next hop types are defined below:
+        *   Virtual Network: Azure creates a Route with an address prefix that corresponds to each address defined within the address space of a VNet. Routes traffic b/w subnets using Routes created for each address range.
+        *   INTERNET: Routes traffic specified by an address prefix to the Internet. Routes traffic for any address not specified by an address range within a VNet to the Internet, unless its Destination is an Azure Service. Routes destined for Azure services are sent over the Backbone network rather than through the Internet.
+        *   NONE: Traffic Routed to the None Next Hop type is dropped rather than routed over the Internet.
+    2.  Optional Default system Routes: Are added for any AZURE Capabilities that you enable. Depending on the Capability, Azure adds Optional default routes to either specific subnets or all subnets within a VNet.
+        *   VNet Peering: A route is added when you create a VNet peering b/w 2 VNets. Routes for each address within the address space of each virtual Network.
+        *   VNet Gateway: When you add a VNet Gateway to a VNet, Azure adds one or more routes with Virtual Network Gateway as the next hop type. The Gateway adds the Routes to the subnet.
+        *   Virtual Network Service ENDPOINT: Azure adds the public IP address for certain services to the route table when you enable a service endpoint to the service. Service Endpoint Routes are subnet specific.
+    3.  User Defined Routes/Custom Routes: When you want to ensure that traffic b/w 2 Subnets passes through a firewall Appliance. These custom routes override Azure's default routes; such a technique is mostly useful. The next hop type [VIRTUAL Appliance] is specified as a next hop IP address to a destination subnet or the Internet. A Network Virtual Appliance is also known as a firewall.
+
+### AWS VPC Routing
+*   AWS NAT:
+    *   AWS also provides NAT Gateways for enabling instances in a private subnet to connect to the internet or other AWS services, while preventing the internet from initiating connections with those instances.
+*   Route Tables:
+    *   Similar to Azure, AWS uses route tables to control network traffic within a VPC.
+    *   Every VPC has a default route table, and you can create custom route tables.
+    *   Each subnet in a VPC must be associated with a route table, which controls the routing for that subnet.
+*   Route Types:
+    *   Default Routes: AWS automatically adds default routes, similar to Azure.
+    *   Custom Routes: You can add custom routes to route traffic to various destinations, including:
+        *   Internet Gateway: To connect to the internet.
+        *   Virtual Private Gateway: For VPN connections.
+        *   AWS Direct Connect: For direct connections.
+        *   Peering connections: To peer with other VPCs.
+        *   Network interfaces: To route traffic to specific instances.
+        *   Gateway endpoints or interface endpoints: To access AWS services.
+*   Security Groups and Network ACLs:
+    *   While not directly part of routing, AWS uses Security Groups (stateful) and Network Access Control Lists (stateless) to control inbound and outbound traffic at the instance and subnet levels, respectively. These work in conjunction with route tables.
+
+### Key Differences and Similarities
+*   Similarities:
+    *   Both Azure and AWS use route tables as a fundamental component of network routing.
+    *   Both provide NAT services to allow private resources to access the internet.
+    *   Both support default routes and custom routes to control traffic flow.
+    *   Both enable connections to other networks (peering, VPN) and services.
+*   Differences:
+    *   Terminology: While the concepts are similar, the terminology differs slightly (e.g., UDRs in Azure vs. custom routes in AWS).
+    *   NAT Implementation: While both provide NAT, the specifics of how it's configured and integrated into the routing architecture can vary.
+    *   Security Controls: AWS has Security Groups and Network ACLs, which provide more granular control over traffic than route tables alone. Azure uses Network Security Groups (NSGs) for similar purposes.
+
+### AZURE VNET Route Server / AWS VPC Route Server
+*   Purpose: Simplifies dynamic routing between your Azure virtual network (VNet) and network virtual appliances (NVAs).
+*   How it uses BGP: Route Server acts as a route exchange point. It exchanges routes between your NVAs (like firewalls) and your Azure VNet using BGP. This eliminates the need for you to manually configure static routes, making your network more dynamic and easier to manage.
+*   Key Use Case: Dynamic routing within your Azure virtual network. Replaces User-defined routes (UDRs) for NVA communication

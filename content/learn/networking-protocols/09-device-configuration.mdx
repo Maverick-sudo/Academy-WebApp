@@ -1,0 +1,347 @@
+---
+title: "Device Configuration"
+description: Configure network devices including IOS boot process and command-line interfaces.
+---
+
+
+The InterOperating System (IOS) is the proprietary operating system used on Cisco Systems routers and network switches. Understanding its boot phase is crucial for network administrators to troubleshoot startup issues and manage device configurations. The IOS boot phase involves a sequence of steps that the device performs to load its operating system and configuration.
+
+**The Cisco IOS Boot Sequence:**
+
+1.  **Power-On Self-Test (POST):**
+    * **Function:** This is the initial diagnostic routine executed immediately after the device is powered on or reset.
+    * **Operation:** The CPU tests its own subsystem, then checks the basic hardware components like the CPU, memory (RAM), NVRAM (Non-Volatile RAM), and interfaces.
+    * **Outcome:** If POST fails, the device may not boot or may indicate a hardware fault via LEDs.
+
+2.  **Load Bootstrap (Boot Loader):**
+    * **Function:** After a successful POST, the CPU looks for and loads the bootstrap program. The bootstrap is a small program stored in ROM (Read-Only Memory).
+    * **Operation:** Its primary role is to initialize the CPU and manage the booting of the Cisco IOS image. It performs low-level CPU initialization.
+    * **Purpose:** The bootstrap essentially tells the router how to load the IOS.
+
+3.  **Locate and Load Cisco IOS Image:**
+    * **Function:** The bootstrap program then searches for the Cisco IOS image (the actual operating system software).
+    * **Search Order (default):** The default search order for the IOS image typically includes:
+        1.  **Flash Memory:** The primary location where the IOS image is usually stored.
+        2.  **TFTP Server:** If not found in Flash, the router can attempt to download the IOS image from a TFTP (Trivial File Transfer Protocol) server on the network. This requires a `boot system` command configured with a TFTP path.
+        3.  **ROM Monitor (ROMmon) Mode:** If no valid IOS image is found or loaded, the device enters ROMmon mode (or Boot ROM mode). This is a command-line interface for basic operations like recovering a lost password or manually booting an IOS image.
+    * **Configuration Register (Con-Reg):** The boot sequence is heavily influenced by the Configuration Register, a 16-bit software register in NVRAM. Its last four bits (bit 3 to bit 0) determine the boot process:
+        * `0x2102` (default): Tells the router to attempt to load an IOS image from Flash, then ROM.
+        * `0x2101`: Boots directly into ROMmon mode.
+        * `0x2142`: Tells the router to ignore the startup-config during boot. (Useful for password recovery).
+
+4.  **Load Configuration File (Startup-config):**
+    * **Function:** Once the Cisco IOS image is successfully loaded, the operating system looks for the startup configuration file.
+    * **Location:** The `startup-config` file is stored in NVRAM.
+    * **Operation:** If found, the `startup-config` is copied into RAM and becomes the `running-config`. This applies all the saved configurations (interface settings, routing protocols, passwords, etc.) to the device.
+    * **No Startup-config:** If no `startup-config` is found in NVRAM, the device enters **Setup Mode** (or initial configuration dialog), prompting the user to perform a basic configuration. This typically happens on a brand-new device or after erasing the NVRAM.
+
+5.  **Running Configuration:**
+    * **Function:** The device is now fully operational based on the loaded IOS and `running-config`.
+    * **Operation:** All changes made to the configuration during active operation are stored in the `running-config` in RAM. These changes are lost upon reboot unless explicitly saved to `startup-config` in NVRAM using the `copy running-config startup-config` command (or `write memory`).
+
+IOS exists as a file—a single file—that the router then loads into RAM to use as its operating system. To better understand the process, you need to understand the IO file system (IFS), which defines how IOS stores files (including the IOS file). The IOS image upgrade process occurs by copying new IOS files into the router and then booting the router with that new IOS. Every OS creates file systems to store files. A computer needs some type of permanent storage, but it needs more than just a place to store bytes. The OS organizes the storage into a file system, which includes directories, structure, and filenames, with the associated rules. By using a file system, the OS can keep data organized so the user and the applications can find the data later. As for the physical storage, Cisco routers typically use flash memory, with no hard disk drive. Flash memory is re-writeable, permanent storage, which is ideal for storing files that need to be retained when the router loses power. Cisco purposefully uses flash memory rather than hard disk drives in its products because there are no moving parts in flash memory, so there is a smaller chance of failure as compared with disk drives. Some routers have flash memory on the motherboard. Others have flash memory slots that allow easy removal and replacement of the flash card, but with the intent that the card remain in the device most of the time. Also, many devices have USB slots that support USB flash drives. Flash memory is where the IOS image (or multiple images) is permanently stored when the device is powered off. Think of it as the hard drive for your IOS.
+
+Flash memory is electrically erasable programmable read-only memory (EEPROM), which allows for updates and storage of multiple IOS versions. For each physical memory device in the router, IOS creates a simple IOS file system and gives that device a name. IOS uses these file systems for other purposes as well, with these types:
+
+* **Opaque:** To represent logical internal file systems for the convenience of internal functions and commands
+* **Network:** To represent external file systems found on different types of servers for the convenience of reference in different IOS commands
+* **Disk:** For external flash
+* **Usbflash:** For USB flash
+* **NVRAM:** A special type for NonVolatileRAM memory, the default location of the startup-config file.
+
+Many IOS commands refer to files in an IFS, but only some commands refer directly to the files by their formal names. The `more` command itself displays the contents of a file. However, many commands use a keyword that indirectly refers to a formal filename, to reduce typing. For example:
+
+* `show running-config` command: Refers to file `system:running-config`
+* `show startup-config` command: Refers to file `nvram:startup-config`
+* `show flash` command: shows the files in the default flash file system (`flash0:`)
+
+```cli
+Router# show file systems
+```
+
+* `boot system filepath` → This command tells the router the location of the Upgraded IOS image to boot from on device startup. I.e. `boot system flash:c2900-universalk9-mz.SPA.155-2.T1.bin`
+* `delete filepath` → `delete flash:c2900-universalk9-mz.SPA.155-2.T1.bin`
+
+The more general `dir flash0:` command lists the contents of that same file system, with similar information. You can use the `dir` command to display the contents of any local IFS.
+
+```cli
+Router# dir flash0:
+```
+
+### Upgrading IOS Images
+
+One of the first steps to upgrade a router’s IOS to a new version is to obtain the new IOS image and put it in the right location. Typically, Cisco routers have their IOS in one of the local physical file systems, most often in permanent flash. The only requirement is that the IOS be in some reachable file system—even if the file sits on an external server and the device loads the OS over the network. However, the best practice is to store each device’s IOS file in flash that will remain with the device permanently.
+
+The process to upgrade an IOS image into flash memory, using the following steps:
+
+1.  **Step 1.** Obtain the IOS image from Cisco, usually by downloading the IOS image from Cisco.com using HTTP or FTP.
+2.  **Step 2.** Place the IOS image someplace that the router can reach. Locations include TFTP or FTP servers in the network or a USB flash drive that is then inserted into the router.
+3.  **Step 3.** Issue the `copy` command from the router, copying the file into the flash memory that usually remains with the router on a permanent basis. (Routers usually cannot boot from the IOS image in a USB flash drive.)
+
+```cli
+Router# copy tftp|ftp flash
+```
+The `copy tftp|ftp flash` command Copies the IOS Image to Flash Memory.
+
+The `copy` command does a simple task—copy a file—but the command also has several small items to check. It needs a few pieces of information from the user, so the command prompts the user for that information by showing the user some text and waiting for the user’s input. The command works through these kinds of questions:
+
+* What is the IP address or host name of the TFTP/FTP server?
+* What is the name of the file?
+* Ask the server to learn the size of the file, and then check the local router’s flash to ask whether enough space is available for this file in flash memory.
+* Does the server actually have a file by that name?
+* Do you want the router to erase any old files in flash?
+
+The router prompts you for answers to some of these questions, as necessary. For each question, you should either type an answer or press Enter if the default answer (shown in square brackets at the end of the question) is acceptable. Afterward, the router erases flash memory if directed, copies the file, and then verifies that the checksum for the file shows that no errors occurred in transmission.
+
+The `copy` command allows you to use a URI for the source and/or destination, which lets you put most or all of the information in the command line itself. Each URI refers to the formal name of a file in the IFS. The “ftp” part identifies the protocol, of course. After the `//`, the text references the username and password, as well as the FTP server’s IP address. After the single `/` comes the filename on the server. Although the command is long, it has only two parameters, with the long first parameter and the short keyword flash as the second parameter. The `COPY` command lists the source location as the first parameter and the destination as the second. The destination in this case, flash, is a keyword that refers to the default flash, typically `flash0:`, but it does not identify a specific filename. As a result, IOS prompts the user for a specific destination filename, with a default (in brackets) to keep the source filename. In this case, the user just pressed Enter to accept the default. To avoid being prompted at all, the command could have listed `flash:c2900-universalk9-mz.SPA.155-2.T1.bin` as that second parameter, fully defining the destination file.
+
+The IOS `copy` command, when using the `tftp` or `ftp` keyword, makes the command act as a client. The client connects to a TFTP or FTP server and then attempts to transfer the file.
+
+### Verifying IOS Code Integrity with MD5
+
+Cisco provides a means to check the integrity of the IOS file to prevent malicious downloads. First, when Cisco builds a new IOS image, it calculates and publishes an MD5 hash value for that specific IOS file. That is, Cisco uses as input the IOS file itself, runs the MD5 math algorithm against that file, producing a hex code. Cisco places that code at the download site for all to see. Then, you run that same MD5 math on your router against the IOS file on the router, using the IOS `verify` command. That command will list the MD5 hash as recalculated on your router. If both MD5 hashes are equal, the file has not changed.
+
+**MD5 Verification of IOS Images—** The `verify /md5` command generates the MD5 hash on your router/switch. Note that you can include the hash value computed by Cisco as the last parameter or leave it off. If you include it, IOS will tell you if the locally computed value matches what you copied into the command. If you leave it out, the `verify` command lists the locally computed MD5 hash, and you have to do the picky character-by-character check of the values yourself.
+
+```cli
+Router# verify /md5 flash:c2900-universalk9-mz.SPA.155-2.T1.bin [MD5_HASH_FROM_CISCO]
+```
+
+Device provisioning involves the automated setup and configuration of new network devices. This includes applying initial configurations, setting up interfaces, assigning IP addresses, and implementing basic security policies. Automating these steps eliminates manual, repetitive tasks, significantly speeding up the deployment process and minimizing the risk of human error.
+
+Compliance checks automate the process of verifying if device configurations adhere to predefined standards and policies. While important for maintaining network health and security, they don't directly involve the initial configuration process.
+
+Device software management focuses on automating the upgrading, patching, and managing of software versions on network devices. This is crucial for maintenance but not the primary task of initial configuration.
+
+Data collection and telemetry involve the automated gathering of performance metrics and operational data from network devices. This provides valuable insights but doesn't directly impact the efficiency and accuracy of the configuration process itself.
+
+### General Device Access and Mode Changes
+
+* `SW/RT>enable` → Enter privileged mode
+* `SW/RT>Exit` → Exit privileged exec mode or cli terminal
+* `SW/RT# configure terminal` → Enter Global Configuration Mode Terminal
+
+### Write Configuration to Memory Buffer
+
+* `Write` or `Write Memory`
+* `copy run start`
+* `copy running-config startup-config`
+
+### HostName Configuration
+
+* `SW(config)# hostname Office` → Change Switch Hostname
+
+---
+
+## Security and Encryption
+
+The ultimate way to protect passwords in Cisco IOS devices is to not store passwords in IOS devices. That is, for any functions that can use an external authentication, authorization, and accounting (AAA) server, use it. The configuration labelled SSH and TELNET in the figure supports both SSH and Telnet, but consider allowing SSH only by instead using the `transport input ssh` command. The Telnet protocol sends all data unencrypted, so any attacker who copies the message with a Telnet login will have a copy of the password.
+
+```cli
+SW/RT# enable passwd Cisco123
+```
+This sets password to protect privileged mode with a password. Cisco used the `enable password password` global command to define the password that users had to use to reach enable mode (after using the `enable` EXEC command).
+
+```cli
+SW/RT# service password-encryption
+```
+Encrypt the Clear Text password. Cisco attempted to solve this clear-text problem by adding a command to encrypt those passwords: the `service password-encryption` global configuration command. This command encrypts passwords that are normally held as clear text, specifically the passwords for these commands:
+
+* `password password` (console or vty mode)
+* `username name password password` (global)
+* `enable password password` (global)
+
+IOS adds the encryption or encoding type of “7” to the command, which specifically refers to passwords encrypted with the `service password-encryption` command. While the `service password-encryption` global command encrypts passwords, the `no service password-encryption` global command does not immediately decrypt the passwords back to their clear-text state. Instead, after you enter the `no service password-encryption` command, the passwords remain encrypted until you change a password. Unfortunately, the `service password-encryption` command does not protect the passwords very well. Armed with the encrypted value, you can search the Internet and find sites with tools to decrypt these passwords.
+
+Cisco has never removed the much weaker `enable password` command from IOS. So, on a single switch (or router), you can configure one or the other, both, or neither. What, then, does the switch expect us to type as the password to reach enable mode? It boils down to these rules:
+
+1.  **Both commands configured:** Users must use the password in the `enable secret password` command (and ignore the `enable password password` command).
+2.  **Only one command configured:** Use the password in that one command.
+3.  **Neither command configured (default):** Console users move directly to enable mode without a password prompt; Telnet and SSH users are rejected with no option to supply an enable password.
+
+The Cisco `enable secret` command protects the password value by never even storing the clear-text password in the configuration. However, that one sentence may cause you a bit of confusion: If the router or switch does not remember the clear-text password, how can the switch know that the user typed the right password after using the `enable` command?
+
+1.  **Step 1.** IOS computes the MD5 hash of the password in the `enable secret` command and stores the hash of the password in the configuration.
+2.  **Step 2.** When the user types the `enable` command to reach enable mode, a password that needs to be checked against that configuration command, IOS hashes the clear-text password as typed by the user.
+3.  **Step 3.** IOS compares the two hashed values: if they are the same, the user-typed password must be the same as the configured password.
+
+As a result, IOS can store the hash of the password but never store the clear-text password; however, it can still determine whether the user typed the same password.
+
+```cli
+SW/RT# enable secret password
+```
+However, using `secret` uses a more secure encryption algorithm (MD5 Hashing \{5\}, PBKDF2 \{4\}, SHA-256 \{8\}, scrypt \{9\}) for encrypting the enable password stored in the configuration file.
+
+* `enable [algorithm-type md5] secret password`
+* `enable algorithm-type sha256 secret password`
+* `enable algorithm-type scrypt secret password`
+
+```cli
+SW/RT# username user password pass
+```
+Encoding the Passwords for Local Usernames.
+
+```cli
+SW/RT# login local
+```
+Login to the Local User; Request for Username:password.
+
+IOS does not use the same logic for the `username` command as it does for allowing both the `enable secret` plus `enable password` commands to exist in the same configuration. IOS allows:
+
+* Only one `username` command for a given username—either a `username user password password` command or a `username user secret password` command.
+* A mix of commands (`username password` and `username secret`) in the same router or switch (for different usernames).
+
+You should use the `username secret` command instead of the `username password` command when possible. However, note that some IOS features require that the router knows a clear-text password via the `username` command (for instance, when performing some common authentication methods for serial links called PAP and CHAP). In those cases, you still need to use the `username password` command.
+
+#### TELNET
+
+```cli
+SW1(config)#ip default-gateway 192.168.1.254
+```
+Configure the switch's default gateway. If SW1 doesn't have a default gateway, it can't communicate with devices outside its subnet.
+
+```cli
+SW1(config)#enable secret ccna
+```
+If an enable password/secret isn't configured, you won't be able to access privileged exec mode when connecting via Telnet.
+
+```cli
+SW1(config)#username maverick secret ccna
+```
+
+```cli
+SW1(config)#access-list 1 permit host 192.168.2.1
+```
+Configure an ACL to limit which devices can connect to the VTY lines.
+
+```cli
+SW1(config)#line vty 0 15
+```
+Telnet/SSH access is configured on the VTY lines. There are 16 lines available, so up to 16 users can be connected at once. (VTY stands for Virtual TeleType).
+
+```cli
+SW1(config-line)#login local
+```
+
+```cli
+SW1(config-line)#exec-timeout 5 0
+```
+
+```cli
+SW1(config-line)#transport input telnet|ssh|all|none
+```
+Allows either Telnet/SSH or Both/No transport connections on the Virtual Teletypewriter console line configured.
+
+```cli
+SW1(config-line)#access-class 1 in
+```
+Apply the ACL to the VTY lines. `*access-class` applies an ACL to the VTY lines, `ip access-group` applies an ACL to an interface.
+
+#### SSH (Secure Shell)
+
+SSH (Secure Shell) was developed in 1995 to replace less secure protocols like Telnet. In computing, a shell is a computer program which exposes an operating system's services to a human user or other program. In general, operating system shells use either a command-line interface (CLI) or graphical user interface (GUI), depending on a computer's role and particular operation. It is named a shell because it is the outermost layer around the operating system. SSHV2, a major revision of SSHV1, was released in 2006. If a device supports both version 1 and version 2, it is said to run 'version 1.99'.
+
+* Provides security features such as data encryption and authentication.
+* IOS images that support SSH will have 'K9' in their name.
+    * Cisco exports NPE (No Payload Encryption) IOS images to countries that have restrictions on encryption technologies. NPE IOS images do not support cryptographic features such as SSH.
+* To enable and use SSH, you must generate an RSA public and private key pair.
+* The keys are used for data encryption/decryption, authentication, etc.
+
+1.  Configure HostName
+2.  Configure DNS domain name
+3.  Generate RSA key pair
+4.  Configure enable PW, username/PW
+5.  Enable SSHV2 (only)
+6.  Configure VTY lines
+
+**Connect:** `ssh -L username ip-address` or `ssh username@ip-address`
+
+```cli
+SW(config)# hostname Office
+```
+Change Switch Hostname.
+
+```cli
+SW1(config)#ip domain name jeremysitlab.com
+```
+The FQDN of the device is used to name the RSA keys. FQDN = Fully Qualified Domain Name (host name + domain name).
+
+```cli
+SW1(config)#crypto key generate rsa
+```
+Generate the RSA keys.
+
+```cli
+SW1(config)#crypto key generate rsa modulus Length is an alternate method.
+```
+`*length must be 768 bits or greater for SSHv2`
+
+```cli
+SW1(config)#enable secret ccna
+```
+or
+
+```cli
+SW1(config)#username Maverick secret ccna
+```
+
+```cli
+SW1(config)#access-list 1 permit host 192.168.2.1
+```
+
+```cli
+SW1(config)#ip ssh version 2
+```
+(optional, but recommended) Restrict SSH to version 2 only.
+
+```cli
+SW1(config)#line vty 0 15
+```
+Configure all VTY lines, just like Telnet.
+
+```cli
+SW1(config-line)#login local
+```
+Enable local user authentication. `*you can only use login local for SSH.`
+
+```cli
+SW1(config-line)#exec-timeout 5 0
+```
+(optional, but recommended) Configure the exec timeout.
+
+```cli
+SW1(config-line)#transport input ssh
+```
+Best practice is to limit VTY line connections to SSH only.
+
+```cli
+SW1(config-line)#access-class 1 in
+```
+(optional, but recommended) Apply the ACL to restrict VTY line connections. When an external user connects to a router or switch using Telnet or SSH, IOS uses a vty line to represent that user connection. IOS can apply an ACL to the vty lines, filtering the addresses that can telnet or SSH into the router or switch. If filtered, the user never sees a login prompt. ACL checks the source IP address of packets for incoming Telnet/SSH connections.
+
+IOS also supports using ACLs to filter outbound Telnet and SSH connections. For example, consider a user who first uses Telnet or SSH to connect to the CLI and now sits in user or enable mode. With an outbound vty filter, IOS will apply ACL logic if the user tries the `telnet` or `ssh` commands to connect out of the local device to another device.
+
+To configure an outbound VTY ACL, use the `access-class acl out` command in VTY configuration mode. Once configured, the router filters any attempts made by current vty users to use the `telnet` and `ssh` commands to initiate new connections to other devices.
+
+Of the two options—to protect inbound and outbound connections—protecting inbound connections is by far the more important and more common. However, to be complete, outbound VTY ACLs have a surprisingly odd feature in how they use the ACL. When the `out` keyword is used, the standard IP ACL listed in the `access-class` command actually looks at the destination IP address, and not the source. That is, it filters based on the device to which the `telnet` or `ssh` command is trying to connect.
+
+### Command Summaries
+
+| Command / Context                 | Description                                                                                                                                                                                                            |
+| :-------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `line console 0`                  | Command that changes the context to console configuration mode.                                                                                                                                                        |
+| `line vty 1st-vty last-vty`       | Command that changes the context to vty configuration mode for the range of vty lines listed in the command.                                                                                                           |
+| `login` (Console and vty config)  | Tells IOS to prompt for a password.                                                                                                                                                                                    |
+| `password pass-value` (Console and vty config) | Lists the password required if the `login` command is configured.                                                                                                                                                      |
+| `login local` (Console and vty config) | Tells IOS to prompt for a username and password, to be checked against locally configured `username` global configuration commands.                                                                                      |
+| `username name [algorithm-type md5 | sha256 | scrypt] secret pass-value` (Global) | Defines one of possibly multiple usernames and associated passwords, stored as a hashed value (default MD5), with other hash options as well.                        |
+| `username name password pass-value` (Global) | Defines a username and password, stored in clear text in the configuration by default.                                                                                                                                 |
+| `crypto key generate rsa [modulus 512 | 768 | 1024]` (Global) | Creates and stores (in a hidden location in flash memory) the keys required by SSH.                                                                                                                    |
+| `transport input {telnet | ssh | all | none}` (vty line config) | Defines whether Telnet and/or SSH access is allowed into this switch.                                                                                                                    |
+| `[no] service password-encryption` (Global) | Global command that encrypts all clear-text passwords in the running-config. The `no` version of the command disables the encryption of passwords when the password is set.                                         |
+| `enable password pass-value` (Global) | Global command to create the enable password, stored as a clear text instead of a hashed value.                                                                                                                        |
+| `enable [algorithm-type md5 | sha256 | scrypt] secret pass-value` (Global) | Global command to create the enable password, stored as a hashed value instead of clear text, with the hash defined by the algorithm type.                           |
+| `no enable secret` (Global)       | Global command to delete the enable secret command.                                                                                                                                                                    |
+| `no enable password` (Global)     | Global command to delete the enable password command.                                                                                                                                                                  |
+
+---

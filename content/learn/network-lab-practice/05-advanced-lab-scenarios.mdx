@@ -1,0 +1,700 @@
+---
+title: "Advanced Lab Scenarios"
+description: "Complex multi-device scenarios and troubleshooting exercises."
+---
+
+```
+
+Key insight:
+
+- The position in VMware determines eth number
+- eth number determines pnet number (always same)
+- pnet number determines Cloud number (always same)
+- The vmnet type (NAT/Host-only/Bridged) determines what network the Cloud connects to
+
+To know which Cloud to use: Check ip addr show on EVE-NG to see which pnet has which network, then use the corresponding Cloud number!
+
+### All VMware Networking Commands for macOS
+
+#### Viewing Current Configuration
+
+Check Mac's Network Interfaces
+
+```bash
+ifconfig
+
+# Show only IP addresses
+ifconfig | grep "inet "
+
+# Show specific interface
+ifconfig en0
+ifconfig vmnet8
+```
+
+View VMware Networking Configuration
+
+```bash
+# View main networking config file
+cat /Library/Preferences/VMware\ Fusion/networking
+
+# List networking directory contents
+ls -la /Library/Preferences/VMware\ Fusion/
+
+# View vmnet directories
+ls -la /Library/Preferences/VMware\ Fusion/vmnet1
+ls -la /Library/Preferences/VMware\ Fusion/vmnet8
+```
+
+View DHCP Configuration
+
+```bash
+# vmnet1 DHCP config
+cat /Library/Preferences/VMware\ Fusion/vmnet1/dhcpd.conf
+
+# vmnet8 DHCP config
+cat /Library/Preferences/VMware\ Fusion/vmnet8/dhcpd.conf
+```
+
+View NAT Configuration
+
+```bash
+# vmnet8 NAT config (only NAT networks have this)
+cat /Library/Preferences/VMware\ Fusion/vmnet8/nat.conf
+
+# View NAT MAC address
+cat /Library/Preferences/VMware\ Fusion/vmnet8/nat.mac
+```
+
+#### Stopping and Starting VMware Networking
+
+```bash
+# Stop VMware Networking
+sudo /Applications/VMware\ Fusion.app/Contents/Library/vmnet-cli --stop
+
+# Start VMware Networking
+sudo /Applications/VMware\ Fusion.app/Contents/Library/vmnet-cli --start
+
+# Restart VMware Networking
+sudo /Applications/VMware\ Fusion.app/Contents/Library/vmnet-cli --stop
+sudo /Applications/VMware\ Fusion.app/Contents/Library/vmnet-cli --start
+```
+#### Configure/Reload VMware Networking
+
+```bash
+sudo /Applications/VMware\ Fusion.app/Contents/Library/vmnet-cli --configure
+```
+
+#### Creating New Virtual Networks
+
+Backup Current Configuration
+
+```bash
+sudo cp /Library/Preferences/VMware\ Fusion/networking /Library/Preferences/VMware\ Fusion/networking.backup
+```
+
+Edit Networking Configuration
+
+```bash
+sudo nano /Library/Preferences/VMware\ Fusion/networking
+```
+
+Create New NAT Network (vmnet9)
+
+```bash
+# Stop networking first
+sudo /Applications/VMware\ Fusion.app/Contents/Library/vmnet-cli --stop
+
+# Edit the file
+sudo nano /Library/Preferences/VMware\ Fusion/networking
+```
+
+Add these lines:
+
+```text
+answer VNET_9_DHCP yes
+answer VNET_9_DHCP_CFG_HASH `<generate_hash_or_leave_blank>`
+answer VNET_9_HOSTONLY_NETMASK 255.255.255.0
+answer VNET_9_HOSTONLY_SUBNET 10.10.10.0
+answer VNET_9_HOSTONLY_UUID `<generate_uuid_or_leave_blank>`
+answer VNET_9_NAT yes
+answer VNET_9_VIRTUAL_ADAPTER yes
+```
+
+Save and restart networking:
+
+```bash
+sudo /Applications/VMware\ Fusion.app/Contents/Library/vmnet-cli --start
+```
+
+Create New Host-Only Network (vmnet2)
+
+```bash
+# Stop networking first
+sudo /Applications/VMware\ Fusion.app/Contents/Library/vmnet-cli --stop
+
+# Edit the file
+sudo nano /Library/Preferences/VMware\ Fusion/networking
+```
+
+Add these lines:
+
+```text
+answer VNET_2_DHCP no
+answer VNET_2_HOSTONLY_NETMASK 255.255.255.0
+answer VNET_2_HOSTONLY_SUBNET 10.100.100.0
+answer VNET_2_HOSTONLY_UUID `<generate_uuid_or_leave_blank>`
+answer VNET_2_VIRTUAL_ADAPTER yes
+```
+
+Save and restart networking:
+
+```bash
+sudo /Applications/VMware\ Fusion.app/Contents/Library/vmnet-cli --start
+```
+
+Create New Host-Only Network with DHCP (vmnet3)
+
+```bash
+# Stop networking first
+sudo /Applications/VMware\ Fusion.app/Contents/Library/vmnet-cli --stop
+
+# Edit the file
+sudo nano /Library/Preferences/VMware\ Fusion/networking
+```
+
+Add these lines:
+
+```text
+answer VNET_3_DHCP yes
+answer VNET_3_DHCP_CFG_HASH `<optional>`
+answer VNET_3_HOSTONLY_NETMASK 255.255.255.0
+answer VNET_3_HOSTONLY_SUBNET 10.200.200.0
+answer VNET_3_HOSTONLY_UUID `<optional>`
+answer VNET_3_VIRTUAL_ADAPTER yes
+```
+
+Save and restart networking:
+
+```bash
+sudo /Applications/VMware\ Fusion.app/Contents/Library/vmnet-cli --start
+```
+
+#### Verifying Changes
+
+```bash
+# List all vmnet directories
+ls -la /Library/Preferences/VMware\ Fusion/ | grep vmnet
+
+# Check if new interface exists
+ifconfig | grep vmnet
+
+# Check if vmnet9 exists
+ifconfig vmnet9
+
+# Check if vmnet2 exists
+ifconfig vmnet2
+```
+
+#### Complete Example: Adding vmnet2 (Host-Only)
+
+```bash
+# 1. Backup current config
+sudo cp /Library/Preferences/VMware\ Fusion/networking /Library/Preferences/VMware\ Fusion/networking.backup
+
+# 2. Stop VMware networking
+sudo /Applications/VMware\ Fusion.app/Contents/Library/vmnet-cli --stop
+
+# 3. Edit networking file
+sudo nano /Library/Preferences/VMware\ Fusion/networking
+
+# 4. Add these lines at the end:
+answer VNET_2_DHCP no
+answer VNET_2_HOSTONLY_NETMASK 255.255.255.0
+answer VNET_2_HOSTONLY_SUBNET 10.200.200.0
+answer VNET_2_VIRTUAL_ADAPTER yes
+
+# 5. Save file (Ctrl+O, Enter, Ctrl+X)
+
+# 6. Start VMware networking
+sudo /Applications/VMware\ Fusion.app/Contents/Library/vmnet-cli --start
+
+# 7. Verify it was created
+ifconfig vmnet2
+
+# 8. Check the directory was created
+ls -la /Library/Preferences/VMware\ Fusion/vmnet2
+```
+
+#### Troubleshooting Commands
+
+```bash
+# List all VMware processes
+ps aux | grep vmnet
+
+# Check if vmnet services are running
+sudo launchctl list | grep vmware
+
+# System logs
+tail -f /var/log/system.log | grep vmware
+
+# VMware Fusion logs
+tail -f ~/Library/Logs/VMware\ Fusion/vmware.log
+```
+
+Reset VMware Networking (Nuclear Option)
+
+```bash
+# Stop everything
+sudo /Applications/VMware\ Fusion.app/Contents/Library/vmnet-cli --stop
+
+# Remove all network configurations
+sudo rm -rf /Library/Preferences/VMware\ Fusion/networking
+sudo rm -rf /Library/Preferences/VMware\ Fusion/vmnet*
+```
+
+Restart VMware Fusion (it will recreate defaults)
+Then reconfigure as needed
+
+#### Permissions Issues
+
+```bash
+# Fix ownership
+sudo chown -R root:wheel /Library/Preferences/VMware\ Fusion/
+
+# Fix permissions on networking file
+sudo chmod 644 /Library/Preferences/VMware\ Fusion/networking
+
+# Fix permissions on vmnet directories
+sudo chmod 755 /Library/Preferences/VMware\ Fusion/vmnet*
+```
+
+#### Quick Reference: File Locations
+
+```text
+# Main config
+/Library/Preferences/VMware Fusion/networking
+
+# DHCP configs
+/Library/Preferences/VMware Fusion/vmnet1/dhcpd.conf
+/Library/Preferences/VMware Fusion/vmnet8/dhcpd.conf
+
+# NAT config (vmnet8 only)
+/Library/Preferences/VMware Fusion/vmnet8/nat.conf
+
+# VMware CLI tool
+/Applications/VMware Fusion.app/Contents/Library/vmnet-cli
+```
+
+#### Summary of Most Used Commands
+
+```bash
+# View current networks
+ifconfig | grep vmnet
+cat /Library/Preferences/VMware\ Fusion/networking
+
+# Stop networking
+sudo /Applications/VMware\ Fusion.app/Contents/Library/vmnet-cli --stop
+
+# Edit config
+sudo nano /Library/Preferences/VMware\ Fusion/networking
+
+# Start networking
+sudo /Applications/VMware\ Fusion.app/Contents/Library/vmnet-cli --start
+
+# Verify changes
+ifconfig vmnetX
+```
+
+Note: Always backup the networking file before making changes. If something breaks, you can restore from backup:
+
+```bash
+sudo cp /Library/Preferences/VMware\ Fusion/networking /Library/Preferences/VMware\ Fusion/networking.backup
+sudo /Applications/VMware\ Fusion.app/Contents/Library/vmnet-cli --configure
+```
+
+**answer VNET_3_DHCP yes**
+
+- VMware runs a DHCP server on this network
+- VMs automatically get IP addresses (like 10.200.200.128, .129, .130, etc.)
+- You don't need to manually configure IPs on each VM
+
+**answer VNET_3_DHCP no**
+
+- No DHCP server
+- You MUST manually configure static IPs on every VM
+- More control, but more work
+
+With DHCP = yes
+
+```text
+# On EVE-NG
+iface pnet2 inet dhcp    ← Gets IP automatically (e.g., 10.200.200.150)
+```
+
+With DHCP = no
+
+```text
+# On EVE-NG
+iface pnet2 inet static   ← Must specify manually
+    address 10.200.200.1
+    netmask 255.255.255.0
+```
+
+## Docker Engine, Networking & Volumes Explained Like a Network Engineer
+
+(with Hypervisor-Level Analogies)
+
+### Containers (Docker)
+
+Containers (Docker): Run in containers and provide fully isolated virtual environments solely for running a single application stack or framework, leveraging OS-level virtualization features (like namespaces and cgroups) rather than full hardware virtualization.
+
+Docker uses a client-server architecture. The Docker client talks to the Docker daemon, which does the heavy lifting of building, running, and distributing your Docker containers. The Docker client and daemon can run on the same system, or you can connect a Docker client to a remote Docker daemon. The Docker client and daemon communicate using a REST API, over UNIX sockets or a network interface. Another Docker client is Docker Compose, that lets you work with applications consisting of a set of containers. The Docker daemon (dockerd) listens for Docker API requests and manages Docker objects such as images, containers, networks, and volumes. A daemon can also communicate with other daemons to manage Docker services.
+
+The Docker client (docker) is the primary way that many Docker users interact with Docker. When you use commands such as docker run, the client sends these commands to dockerd, which carries them out. The docker command uses the Docker API. The Docker client can communicate with more than one daemon.
+
+Docker uses a technology called namespaces to provide the isolated workspace called the container. When you run a container, Docker creates a set of namespaces for that container. These namespaces provide a layer of isolation. Each aspect of a container runs in a separate namespace and its access is limited to that namespace.
+
+Volumes are persistent storage mechanisms managed by the Docker daemon. They retain data even after the containers using them are removed. Volume data is stored on the filesystem on the host, but in order to interact with the data in the volume, you must mount the volume to a container. Directly accessing or interacting with the volume data is unsupported, undefined behavior, and may result in the volume or its data breaking in unexpected ways.
+
+Volumes are ideal for performance-critical data processing and long-term storage needs. Since the storage location is managed on the daemon host, volumes provide the same raw file performance as accessing the host filesystem directly.
+
+1. Bind mounts create a direct link between a host system path and a container, allowing access to files or directories stored anywhere on the host. Since they aren't isolated by Docker, both non-Docker processes on the host and container processes can modify the mounted files simultaneously.
+
+Use bind mounts when you need to be able to access files from both the container and the host.
+
+2. A tmpfs mount stores files directly in the host machine's memory, ensuring the data is not written to disk. This storage is ephemeral: the data is lost when the container is stopped or restarted, or when the host is rebooted. tmpfs mounts do not persist data either on the Docker host or within the container's filesystem.
+
+These mounts are suitable for scenarios requiring temporary, in-memory storage, such as caching intermediate data, handling sensitive information like credentials, or reducing disk I/O. Use tmpfs mounts only when the data does not need to persist beyond the current container session.
+
+3. Named Pipes can be used for communication between the Docker host and a container. Common use case is to run a third-party tool inside of a container and connect to the Docker Engine API using a named pipe.
+
+Multiple containers can mount a file or directory containing the shared information, using a Docker volume.
+Multiple containers can be started together using docker-compose and the compose file can define the shared variables.
+
+### Docker Networking Modes/Drivers
+
+Docker has 7 major networking modes/drivers. Think of each as a different virtual switch or NIC attachment type — exactly like hypervisors do.
+
+Below is the mapping:
+
+#### 1. Docker default bridge NAT behavior
+
+- Outbound NAT (iptables MASQUERADE)
+- Port forwarding for inbound connections
+- Internal DNS for container names
+- Per-bridge isolation enforced by filtering rules
+- Containers attach to a Linux bridge (docker0).
+- They get private RFC1918 addresses.
+- Docker NATs outbound traffic with iptables.
+
+Hypervisor equivalent:
+
+- VM attached to a vSwitch + NAT (VMware NAT / VirtualBox NAT adapter)
+- Container → vNIC → Linux bridge → NAT → Host NIC → Outside
+- No inbound connections unless port-forwarded.
+- On the default bridge network, containers can't resolve (DNS) each other by name.
+
+General development, isolated labs.
+
+#### 2. user-defined bridge
+
+Docker Concept
+
+Bridge networks apply to containers running on the same Docker daemon host. For communication among containers running on different Docker daemon hosts, you can either manage routing at the OS level, or you can use an overlay network.
+
+Similar to the default bridge but fully customizable:
+
+- your own subnets
+- better DNS
+- container isolation
+- predictable IPAM
+
+Hypervisor equivalent:
+
+- A custom vSwitch you create (not the default).
+
+Same as default-bridge mode, but you architect the network. On user-defined networks, containers can resolve each other by name.
+Automatic service discovery only resolves custom container names, not default automatically generated names. Containers connected to the same user-defined bridge network effectively expose all ports to each other
+
+Multi-container apps needing segmentation.
+
+#### 3. host network mode
+
+Docker Concept
+
+- Container shares the host’s network stack.
+- No NAT, no bridge.
+- Container = same IP as host.
+- No veth pair
+- No virtual switch
+- No NAT
+- The container is the host from a networking perspective
+
+Hypervisor equivalent:
+
+- VM set to "Host Network" / "Shared with Host" mode
+- Process running natively on the hypervisor with no vSwitch
+
+Container bypasses virtual switching. Listening on port 80 inside container = host listens on port 80.
+High-performance apps or network daemons.
+
+#### 4. none
+
+Docker Concept
+
+- Container has no network.
+- No interfaces except loopback.
+- Container gets a network namespace but no interfaces except loopback.
+
+Hypervisor equivalent:
+
+- VM with its vNIC disconnected from any switch (equivalent to “cable unplugged”).
+
+Self-contained. No outbound or inbound.
+Security, debugging, Strict sandbox isolation or sidecar workloads.
+
+#### 5. macvlan
+
+Some applications, especially legacy applications or applications which monitor network traffic, expect to be directly connected to the physical network. In this type of situation, you can use the macvlannetwork driver to assign a MAC address to each container's virtual network interface, making it appear to be a physical network interface directly connected to the physical network. In this case, you need to designate a physical interface on your Docker host to use for the Macvlan, as well as the subnet and gateway of the network. You can even isolate your Macvlan networks using different physical network interfaces.
+
+- Docker gives the container its own MAC address on the host NIC.
+- Looks like a physical device on the LAN.
+- No NAT
+
+Hypervisor equivalent:
+
+- VM connected directly to a physical NIC using Promiscuous Mode (similar to: ESXi "bridged" mode with unique MACs per VM)
+- Container → Host NIC (with separate MAC) → Physical Switch → LAN
+- Packets bypass Linux bridge.
+
+Use Case
+When containers must appear as real devices on the subnet.
+
+```bash
+docker network create -d macvlan \
+  --subnet=172.16.86.0/24 \
+  --gateway=172.16.86.1 \
+  -o parent=eth0 pub_net
+```
+
+#### 6. ipvlan
+
+Two high level advantages of these approaches are, the positive performance implications of bypassing the Linux bridge and the simplicity of having fewer moving parts. Removing the bridge that traditionally resides in between the Docker host NIC and container interface leaves a simple setup consisting of container interfaces, attached directly to the Docker host interface. This result is easy to access for external facing services as there is no need for port mappings in these scenarios.
+
+- Similar to macvlan but only IP addresses differ, not MACs.
+- Parent interface keeps a single MAC.
+
+Hypervisor Equivalent
+
+- SR-IOV-like behavior or a VM NIC with multiple IPs but one MAC
+- Host NIC (one MAC) routes traffic internally using L3 logic.
+
+Use Case
+High-density networks where MAC flooding is a concern(e.g., 1000+ containers on one host).
+
+```bash
+docker network create -d ipvlan \
+  --subnet=172.16.86.0/24 \
+  --gateway=172.16.86.1 \
+  -o parent=eth0 pub_net
+```
+
+#### 7. overlay
+
+Docker Concept
+
+The overlay network driver creates a distributed network among multiple Docker daemon hosts. This network sits on top of (overlays) the host-specific networks, allowing containers connected to it to communicate securely when encryption is enabled. Docker transparently handles routing of each packet to and from the correct Docker daemon host and the correct destination container. Distributed microservices across many hosts.
+
+- Multi-host networking across a Swarm or clustered environment.
+- VXLAN-based encapsulation.
+
+Hypervisor equivalent:
+
+- NSX / VMware VXLAN, GENEVE, GRE tunnels for inter-host VM networks
+
+Adding containers to an overlay network gives them the ability to communicate with other containers without having to set up routing on the individual Docker daemon hosts. A prerequisite for doing this is that the hosts have joined the same Swarm.
+
+Docker default bridge NAT behavior
+
+- Outbound NAT (iptables MASQUERADE)
+- Port forwarding for inbound connections
+- Internal DNS for container names
+- Per-bridge isolation enforced by filtering rules
+
+### Summary Cheat Table
+
+| Docker Network | Hypervisor Analogy | Routing/NAT Behavior | Best Use |
+| --- | --- | --- | --- |
+| bridge | NAT vSwitch | NAT outbound | Dev, default use |
+| user-defined bridge | Custom vSwitch | NAT outbound | Multi-tier apps |
+| host | No vNIC (uses host stack) | No NAT | High performance |
+| none | vNIC disconnected | None | Security, isolation |
+| macvlan | VM with unique MAC on LAN | No NAT | Appliances, L2 presence |
+| ipvlan | Single MAC + multiple IPs | No NAT | Dense container hosts |
+| overlay | VXLAN/NSX | Encapsulation | Multi-host clusters |
+
+## Ansible Overview
+
+- Purpose: Automation of device support and configuration. Ideal for recurring tasks.
+- Architecture: Agent-less solution for network automation.
+- Model: Uses a Push model (sends configs to nodes), unlike Pull models (e.g., Puppet) which use agents to pull from a master server.
+
+### How Ansible Works
+
+Control Host:
+
+- Connects to devices via SSH or APIs.
+- Executes Python code (modules).
+- Returns a JSON object per task.
+
+Process:
+
+- Ansible sends modules to managed nodes.
+- Modules take care of the work (e.g., ios_command).
+- Can manage Windows, AWS, Azure, network devices (NXOS, IOS-XE), etc.
+
+### The Principle: "Separation of Concerns"
+
+Rule of thumb:
+
+- Is it about WHAT devices to manage? → inventory/
+- Is it about HOW to connect to devices? → group_vars/
+- Is it about HOW Ansible behaves? → ansible.cfg
+
+| File | Purpose | What It Contains |
+| --- | --- | --- |
+| inventory/hosts.ini | Pure inventory | Host names, IPs, groups - NOTHING else |
+| group_vars/all.yml | Device-specific vars | Credentials, network_os, connection type |
+| ansible.cfg | Ansible engine settings | Host key checking, Python interpreter, timeouts |
+
+
+### Ansible Inventory
+Defines the device list and details. Can be in INI or YAML format.
+
+- Details included: Device type, IP/FQDN, Ansible Playbook reference name, Connection type, Username/Password (use Vault for production), Variables (device specific or groups).
+
+Example (ansible inventory.ini) (INI):
+
+```ini
+[ioxse]
+csr1 ansible_host=10.10.20.48 ansible_network_os=ios
+
+[all:vars]
+ansible_user=developer
+ansible_ssh_pass=C1sco12345
+ansible_connection=network_cli
+```
+
+### Ansible Playbooks
+A YAML file using indentation to indicate logical nesting/hierarchy.
+
+- Function: A list of tasks to execute upon a device/group from the inventory.
+- Execution: Sequentially executes each task in threads for each device. Execution is defined by module inputs (one module per task).
+
+Example (pb-configure-snmp.yaml) (YAML):
+
+```yaml
+- name: PLAY 1 - DEPLOYING SNMP CONFIGURATIONS ON IOS
+  hosts: "csr1"
+  connection: network_cli
+  gather_facts: no
+  tasks:
+    - name: "TASK 1 in PLAY 1 CONFIGURE SNMP LINES"
+      cisco.ios.ios_config:
+        lines:
+          - snmp-server community belk-demo RO
+          - snmp-server location VEGAS
+          - snmp-server contact JASON_BELK
+    - name: "TASK 2 in PLAY 1 - VERIFY SNMP LINES PRESENT"
+      cisco.ios.ios_command:
+        commands:
+          - "show run | include snmp-server"
+```
+
+### Ansible Modules
+
+- Scope: Over 750 modules available.
+- Uses: Configuring network devices, gathering network state, updating ServiceNow, sending chat messages (Slack/WebEx).
+- Structure: Modules have structured required/optional inputs and predefined output structures.
+
+### Ansible Application Config (ansible.cfg)
+Controls application settings and turns features on/off (e.g., SSH host key checking, timeouts).
+
+- Location: Looks in the current working directory or /etc/ansible.
+- Maintenance: Rarely changed; set up once and forget.
+
+Example (ansible.cfg) (INI):
+
+```ini
+[defaults]
+deprecation_warnings = False
+gather_facts = False
+host_key_checking = False
+```
+
+### Ansible Templates & Variables
+
+- Jinja2: Used to define config templates. Includes features like looping and conditionals.
+- YAML: Used to define input variables.
+- Workflow: Ansible loads variables per device -> feeds them into templates -> sends config to device.
+- Idempotency: If configuration is already present, Ansible checks running-config first and does not send it again.
+
+### Jinja2 Templating in Ansible
+Jinja2 is a popular templating language for Python. Ansible uses Jinja2 to handle any variable substitution, logic, and dynamic content generation within its files, most notably in configuration files (.j2 templates) and playbooks.
+- Variables: Jinja2 is what allows you to use double curly braces (`\{\{ variable_name \}\}`) to insert dynamic data (like IP addresses, hostnames, or credentials) into templates or playbook tasks.
+- Logic: It also allows for control structures like loops (`\{% for item in list %\}`) and conditionals (`\{% if condition %\}`) directly within your templates to generate configurations that vary based on host facts or defined variables.
+
+#### jinja2_extensions
+The jinja2_extensions setting allows you to enable optional features that are not part of the standard Jinja2 language set.
+- jinja2_extensions = jinja2.ext.do,jinja2.ext.i18n
+- jinja2.ext.do: This is the most common extension used in Ansible. It allows you to use the `{% do ... %}` tag in templates. This tag lets you execute statements (like adding an item to a list or calling a function) that do not return any output. This is useful for manipulating variables within a template.
+- jinja2.ext.i18n: This extension adds support for Internationalization (i18n), typically used for translating content in web application templates, though less common in network automation.
+
+#### Related Jinja2 Configuration Options
+These settings also control how Ansible interacts with the Jinja2 engine and variable rendering:
+
+| Setting | Purpose |
+| --- | --- |
+| ansible_managed | Defines the text placed at the top of configuration files generated from templates. It's a comment indicating the file was created and is managed by Ansible. By default, it's a static string to aid in idempotence (ensuring the task doesn't re-run unnecessarily). |
+| error_on_undefined_vars | By default (True), Ansible raises an error and stops the playbook if it encounters a Jinja2 variable (e.g., {{ undefined_var }}) that hasn't been defined. If you set this to False, Ansible will quietly substitute the undefined variable with an empty string, which can hide errors. |
+| private_key_file | While not a Jinja2 setting, this is a crucial configuration for authentication. It specifies the file path for the default SSH private key Ansible should use when connecting to managed hosts. |
+| vault_password_file | Another authentication setting. It points to a file containing the password used to decrypt Ansible Vault files, which store sensitive data like credentials. |
+
+Template Example (interface-template.j2):
+
+```text
+{% for iname, idata in interfaces.items() %}
+interface {{ iname }}
+ description {{ idata.description }}
+ ip address {{ idata.ipv4addr }} {{ idata.subnet }}
+{% endfor %}
+```
+
+Variables Example (ansible-vars.json):
+
+```yaml
+interfaces:
+  Loopback100:
+    description: "This is a loopback configured by ansible"
+    ipv4addr: "10.123.123.100"
+    subnet: "255.255.255.255"
+```
+
+### Ansible Facts
+When Ansible connects, it gathers and parses useful facts (OS Version, Hostname, Interface status, etc.).
+- Usage: Stored to disk for reference or used as runtime variables for conditional logic (e.g., only configure devices with "SJC" in the hostname).
+
+Example Output:
+
+```yaml
+ansible_net_hostname: CSR-1000V
+ansible_net_version: 16.09.03
+ansible_net_serialnum: 926V75BDNRJ
+```
+
+
+## Key Takeaways
+
+- Completed Advanced Lab Scenarios
+- Applied concepts from Complex multi-device scenarios and troubleshooting exercises.
+- Ready to proceed to the next chapter

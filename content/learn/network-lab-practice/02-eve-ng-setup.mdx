@@ -1,0 +1,611 @@
+---
+title: "EVE-NG Configuration"
+description: "Installing and configuring EVE-NG for network labs."
+---
+
+
+2. Create the Right Folder Structure
+Each image goes into a separate directory inside EVE’s QEMU structure:
+
+```bash
+mkdir -p /opt/unetlab/addons/qemu/asav
+mkdir -p /opt/unetlab/addons/qemu/iol-xe
+mkdir -p /opt/unetlab/addons/qemu/iolv2-xe
+```
+
+3. Move and Rename the Image
+Move your .qcow2 files into the appropriate directory and rename accordingly:
+
+```bash
+mv ~/Downloads/asav-9.12.qcow2 /opt/unetlab/addons/qemu/asav/asav.qcow2
+mv ~/Downloads/iol-xe-17.3.1.qcow2 /opt/unetlab/addons/qemu/iol-xe/virtioa.qcow2
+mv ~/Downloads/iolv2-xe-17.3.1.qcow2 /opt/unetlab/addons/qemu/iolv2-xe/virtioa.qcow2
+```
+
+Make sure only one image per folder, and the filenames match EVE’s expectations (asav.qcow2 or virtioa.qcow2).
+
+4. Fix Permissions
+
+```bash
+/opt/unetlab/wrappers/unl_wrapper -a fixpermissions
+```
+
+### How to Verify the Images in EVE-NG UI
+
+1. Open the EVE-NG Web UI
+2. Go to your lab topology
+3. Click Add New Node
+4. Select Cisco or use the search bar:
+   - Search IOL-XE, IOLV2-XE, or ASAv
+5. Drag them into your topology and start your lab!
+
+These will run without CML’s 5-node restriction, giving you greater flexibility for larger simulations and practice labs.
+
+### Bonus: Where to Find refplat.iso
+This ISO is bundled with CML releases. Once downloaded, you can mount it and extract:
+
+```bash
+hdiutil mount refplat.iso  # On macOS
+cp /Volumes/REFPLAT/images/*.qcow2 ~/Downloads/
+```
+
+### Summary Table of CML to EVE-NG Integration
+
+| Source File (CML ISO) | Target Folder in EVE-NG | New Filename | Device Type |
+|---|---|---|---|
+| asav-9.12.qcow2 | /asav/ | asav.qcow2 | Firewall |
+| iol-xe-17.3.1.qcow2 | /iol-xe/ | virtioa.qcow2 | Router |
+| iolv2-xe-17.3.1.qcow2 | /iolv2-xe/ | virtioa.qcow2 | L2 Switch |
+By combining these high-quality .qcow2 images from CML and correctly adapting them into your EVE-NG environment, you unlock a premium-grade lab experience — without licensing or node limits.
+
+How are EVE-NG and PNetLab manage and share labs, both platforms are very similar (PNetLab is essentially a fork of EVE-NG, so there's a lot of shared structure under the hood).
+
+## How EVE-NG and PNetLab Manage and Share Labs
+
+### 1. What are .CFG files in EVE-NG?
+These are the saved configurations of individual nodes (routers, switches, etc.) in your lab.
+
+**Details:**
+
+- When you export or save a node's config from EVE-NG, it creates a .CFG file. These are essentially device startup-configs (like show running-config).
+- They’re stored in:
+  - /opt/unetlab/tmp/0/`<lab-ID>`/`<node-ID>`/configs/
+  - or in saved states: /opt/unetlab/labs/`<your-lab-folder>`/`<your-node>`.cfg
+
+**Example:**
+If your lab is called ccna-lab.unl, configs may be saved as:
+`/opt/unetlab/labs/ccna-lab/node1.cfg`
+
+**Use:**
+
+- When you reboot or reopen the lab, EVE-NG uses the .cfg files to restore node states.
+- You can manually edit or replace these configs to preload labs with desired router configs.
+
+### 2. What is a .UNL file?
+A .unl file is a lab topology file, written in JSON/XML-like structure but with a .unl extension. 🧠 Think of it as: “Blueprint” of the lab topology — but not the actual configs.
+
+**Contains:**
+
+- Node definitions (device types, image used, console port, etc.)
+- Network links (how nodes are connected)
+- Position info (where the icons are on the map)
+- Node startup configs can be linked, but not stored directly in .unl
+
+**Location:**
+
+`/opt/unetlab/labs/<lab-folder>/<lab-name>.unl`
+
+### 3. How do .UNL files relate to .CFG files?
+
+| .UNL file | .CFG files |
+|---|---|
+| Describes what the lab is | Contains saved config per node |
+| Includes nodes, links, images | Stores each node’s CLI state |
+| Can be shared/reused easily | Must be copied to match node IDs |
+
+If you import a .unl file, and don’t have the matching .cfg files, your nodes will start with a default (blank) config unless the .unl also specifies saved states (like snapshots or configs in the same folder).
+
+### 4. Can you use PNetLab .UNL files in EVE-NG?
+Yes, with minor tweaks. Both use the same core engine (UNetLab), and .unl file structure is nearly identical.
+
+### Step-by-Step: Importing a PNetLab Lab into EVE-NG
+
+Here's a simple, clean step-by-step guide to import a full PNetLab lab into EVE-NG — including .unl topology and config files — so it works correctly.
+
+#### 1. Get the PNetLab Lab Files
+Make sure you have:
+- A .unl topology file (e.g. ccna-lab.unl)
+- Optional configs/ folder or .cfg files (node configurations)
+- A list of required image names
+Example PNetLab lab folder:
+
+```text
+ccna-lab/
+├── ccna-lab.unl
+├── configs/          ← optional
+│   ├── node1.cfg
+│   └── node2.cfg
+```
+
+#### 2. Transfer the Lab to EVE-NG
+
+1. Use SCP or WinSCP or CyberDuck(MACOS) to copy the lab folder to your EVE-NG server: /opt/unetlab/labs/
+2. Navigate to /opt/unetlab/labs/
+3. Drag and drop the ccna-lab/ folder
+
+#### 3. Fix Permissions
+Run the EVE-NG permission fixer:
+
+```bash
+/opt/unetlab/wrappers/unl_wrapper -a fixpermissions
+```
+
+#### 4. Match Image Names (If Needed)
+
+Open the .unl file:
+
+```bash
+nano /opt/unetlab/labs/ccna-lab/ccna-lab.unl
+```
+
+Find lines like:
+
+```text
+`<type>`iou`</type>`
+`<image>`i86bi-linux-l2-adventerprisek9-15.1g.bin`</image>`
+```
+
+Make sure the image name matches what you actually have in:
+`/opt/unetlab/addons/<type>/`
+
+You can either:
+
+- Rename your image to match the .unl
+- OR update the .unl to use your image name
+
+#### 5. Open the Lab in EVE-NG
+
+1. Log in to EVE-NG web UI
+2. Navigate to: /Labs/ccna-lab/ccna-lab.unl
+3. Open it — you should see the nodes and connections.
+4. Start the nodes and check if they load configurations (from .cfg files if available)
+
+### Optional: Verify Node Configs
+If the lab included saved configs:
+- Right-click a node > Start
+- Open the console
+- Verify the router/switch has config loaded
+- If it boots to blank config, the .cfg files may be missing or mismatched
+
+
+### Troubleshooting Tips
+
+| Issue | Fix |
+|---|---|
+| Node shows "missing image" | Fix the image name in .unl or rename your image |
+| No configs loaded | Make sure .cfg or configs/ folder exists and matches nodes |
+| File not showing in GUI | Run fixpermissions and check folder structure |
+
+### Summary
+
+| Task | Command/Action |
+|---|---|
+| Upload lab | scp or WinSCP to /opt/unetlab/labs/ |
+| Fix permissions | /opt/unetlab/wrappers/unl_wrapper -a fixpermissions |
+| Match image names | Edit .unl or rename image files |
+| Open in EVE-NG UI | Browse to the .unl in the Labs menu |
+| Confirm saved configs | Ensure .cfg or configs/ matches node names/IDs |
+
+ishare2-cli, is a powerful CLI tool designed specifically for managing EVE-NG image deployments using a shared cloud-based image repo. It's an open-source initiative from the iShare2 community, which maintains a massive repo of prepackaged, ready-to-use EVE-NG images.
+
+### What ishare2-cli Does
+
+| Feature | Description |
+|---|---|
+| 🚀 Pull images easily | Download EVE-NG images (Cisco, Palo, Fortinet, etc.) via a CLI. |
+| 📦 Handles import/convert | Automatically places them in /opt/unetlab/addons/, fixes permissions, and converts images. |
+| ☁️ Works great on cloud | Ideal for cloud-based EVE-NG setups (e.g., GCP, Azure, Oracle, Hetzner). |
+| 📁 Search & list images | Find what’s available, filter by vendor/type, and pull only what you need. |
+
+### Ideal Use Case for You
+Since you're building labs using .unl files from PNetLab and want full control on a cloud-hosted EVE-NG server, ishare2-cli helps with:
+- Instantly downloading the correct image a .unl topology needs (e.g. vios-adventerprisek9-15.9-3)
+- Auto-patching EVE-NG image folders with correct naming
+- Speeding up the whole import process (no more hunting for compatible .qcow2 files manually)
+
+
+### Basic Setup & Usage (Simplified)
+
+1. Install ishare2-cli:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ishare2-org/ishare2-cli/main/install.sh | bash
+```
+
+2. Use it:
+
+```bash
+ishare2 list             # List all available images
+ishare2 search cisco     # Search for Cisco images
+ishare2 pull vios-l3     # Download and install the vIOS L3 image
+```
+
+Example to fix permissions (done automatically, but just in case):
+
+```bash
+/opt/unetlab/wrappers/unl_wrapper -a fixpermissions
+```
+
+### Combine with Your .UNL Labs
+	0.	Import .unl lab as discussed earlier.
+	0.	See what images are required.
+	0.	Use ishare2-cli pull `<image-name>` to grab them quickly.
+	0.	Start lab in EVE-NG — all nodes should be recognized.
+
+
+### Is it safe to use?
+- ✅ Open-source, community-maintained
+- ✅ No login required
+- ✅ Pulls directly from a hosted repo (like GitHub Releases/CDN)
+- ✅ Used widely by the EVE-NG & PNetLab community
+- 🧪 You can inspect the source if concerned about security
+
+
+### Resources
+- GitHub: ishare2-org/ishare2-cli
+- List of supported images: ishare2 list or browse iShare2 CDN
+
+Part 1: VPS Providers with Nested Virtualization (KVM Support)
+Here is a table of cloud providers that support KVM with nested virtualization, critical for running EVE-NG and virtual router images:
+
+| Provider | Nested Virtualization | KVM Support | Notes |
+|---|---|---|---|
+| Hetzner | ✅ Yes | ✅ Yes | Best value VPS in EU. Ideal for labs. |
+| Vultr | ✅ Yes | ✅ Yes | Enable nested virtualization in dashboard. |
+| Linode | ✅ Yes (by request) | ✅ Yes | Easy to use; support may need to enable nested VT. |
+| UpCloud | ✅ Yes | ✅ Yes | High performance with custom kernel support. |
+| OVHcloud | ✅ Yes | ✅ Yes | Supports nested VT via control panel. |
+| Netcup | ✅ Yes | ✅ Yes | Excellent for budget labs in Europe. |
+| Contabo | ✅ Yes | ✅ Yes | Massive specs for low cost; slower disks. |
+| Oracle Cloud | ✅ Yes | ✅ Yes | Free tier supports nested VT (Ampere or AMD). |
+| Scaleway | ✅ Yes | ✅ Yes | France-based, developer-friendly. |
+
+| Cloud Provider | Hypervisor Used | Notes |
+|---|---|---|
+| Amazon AWS | Nitro Hypervisor (custom KVM) | AWS moved from Xen to Nitro, a lightweight KVM-based hypervisor with near bare-metal performance. |
+| Microsoft Azure | Hyper-V + custom extensions | Azure’s base hypervisor is Hyper-V, used across VMs and AKS nodes. |
+| Google Cloud | KVM (QEMU-based) | GCP uses KVM, supports nested virtualization in some VM types. |
+| Oracle Cloud | Xen + KVM (for some offerings) | Xen for traditional compute; some newer offerings support KVM and bare metal. |
+| IBM Cloud | KVM, PowerVM (for Power-based VMs) | IBM supports both Intel and Power architectures. |
+| Alibaba Cloud | KVM | Same as GCP. Efficient for Linux-heavy workloads. |
+| DigitalOcean | KVM | Lightweight and developer-friendly cloud. |
+
+| Platform | Type | Details |
+| --- | --- | --- |
+| VMware Fusion | Type 2 | macOS desktop virtualization. |
+| VMware Workstation | Type 2 | Windows/Linux desktop virtualization. |
+| VirtualBox | Type 2 | Popular open-source hypervisor. |
+| KVM/QEMU on Linux | Type 1 | Linux-native, used for EVE-NG, GNS3, lab setups. |
+| Proxmox VE | Type 1 | KVM-based, runs directly on hardware. |
+| ESXi | Type 1 | Direct hardware control, VMware's enterprise hypervisor. |
+
+Direct hardware control, VMware’s enterprise hypervisor.
+	Part 2: Step-by-Step Guide to Deploy EVE-NG on a Cloud VPS
+Requirements:
+- A VPS with: 4 vCPU, 8GB+ RAM, 40GB+ SSD, KVM + nested VT
+- EVE-NG ISO: Download from eve-ng.net
+
+### Step 1: Deploy Your VPS
+
+- Choose a KVM VPS from any provider above.
+- Enable nested virtualization if not enabled by default.
+
+### Step 2: Upload and Mount EVE-NG ISO
+
+- Access VPS via noVNC/console or SSH.
+
+```bash
+# Set hostname (optional)
+sudo hostnamectl set-hostname eve-ng
+
+# Install EVE-NG prerequisites
+apt-get install -y wget nano
+
+# Download and run EVE-NG installer script
+wget https://www.eve-ng.net/repo/install-eve.sh
+chmod +x install-eve.sh
+./install-eve.sh
+```
+
+OR Upload ISO using SCP or cloud provider dashboard.
+
+```bash
+scp eve-ng.iso root@your-vps-ip:/root/
+```
+
+### Step 3: Install EVE-NG
+
+- Boot from ISO.
+- Follow installation prompts (use full disk).
+- After installation, reboot and log in as root (default password: eve).
+
+### Step 4: Basic Post-Install Config
+
+```bash
+apt update && apt upgrade -y
+```
+
+- Set static IP if needed.
+- Ensure qemu-kvm, bridge-utils, virt-manager are installed.
+
+## Part 3: Automate Image Downloads Using iShare2-CLI
+iShare2-CLI GitHub
+
+Step 1: Install Dependencies
+
+```bash
+apt install python3 python3-pip git -y
+pip3 install rich requests
+```
+
+Step 2: Clone and Run
+
+```bash
+git clone https://github.com/ishare2-org/ishare2-cli.git
+cd ishare2-cli
+python3 ishare.py
+```
+
+Step 3: Download Images
+- Run the tool and follow the terminal UI.
+- It fetches router/firewall images (e.g., Cisco vIOS, FortiGate) from their open repository.
+- Images are automatically placed in the correct EVE-NG folder.Part 4: Using iShare + EVE-NG Together
+	0.	Create a lab in EVE-NG Web UI.
+	0.	Use nodes from imported images.
+	0.	Upload .unl lab files (from PNetLab if needed).
+	0.	Boot and test.Optional: Upload PNetLab Topologies to EVE-NG
+	0.	Copy .unl and configs/ folder into /opt/unetlab/labs/
+	0.	Run fix permissions: /opt/unetlab/wrappers/unl_wrapper -a fixpermissions
+	0.	Refresh EVE-NG GUI. Lab will show in the list.
+
+Deploying EVE-NG on the cloud unlocks professional-grade labbing anywhere. Combined with tools like iShare2-CLI, you can instantly populate your lab with ready-to-use images — no need to hunt for them manually.
+Whether you're migrating from Packet Tracer or scaling up from GNS3, this approach gives you a real-world simulation environment ready for CCNA/CCNP, security, and cloud hybrid labs.
+
+
+## Why Automate Image Downloads?
+
+- No more wasting hours looking for Cisco, Juniper, Fortinet, or Palo Alto images.
+- Easy to integrate with your local or cloud-deployed EVE-NG instance.
+- One-click download and install with proper permissions set.
+- Saves time when working with prebuilt topologies (like .unl files) from PNETLab or the community.
+
+## Prerequisites
+- EVE-NG is already installed (locally via VMware or on a cloud VPS).
+- SSH or terminal access to your EVE-NG shell.
+- Internet access from within the EVE-NG VM.
+
+✅ Yes, you can absolutely use ishare2-cli on your local EVE-NG VM running in VMware Fusion. In fact, this is a great way to:
+- Test the setup and understand how ishare2 works.
+- Download and organize images before deploying on a cloud server.
+- Avoid wasting cloud resources (and cost) during your learning phase.
+
+## Image Automation for EVE-NG with ishare2-cli
+As part of my journey from Packet Tracer to EVE-NG and beyond, I quickly realized that one of the most frustrating bottlenecks was hunting for reliable and compatible device images online. Forums were inconsistent, links expired, and half the time I was unsure if the image would even work.
+That all changed when I discovered ishare2-cli — an open-source CLI tool built to integrate with the iShare2 image repo. It acts like a package manager for EVE-NG device images.
+
+### Here's How to Use ishare2-cli on Your Local VMware EVE-NG
+
+**Prerequisites:**
+- Your EVE-NG VM is running on VMware Fusion, fully installed and updated.
+- You have SSH access or console access into the EVE-NG shell.
+- Your EVE-NG VM has internet access (NAT or bridged network works fine).
+
+
+### Step-by-Step: Installing ishare2-cli Inside Your EVE-NG VM
+
+```bash
+# Step 1: SSH into your EVE-NG VM or open terminal in console
+ssh root@`<eve-ip-address>`
+
+# Step 2: Download and install ishare2-cli (official repo)
+apt update
+apt install -y python3-pip git
+git clone https://github.com/ishare2-org/ishare2-cli.git
+cd ishare2-cli
+chmod +x ./install.sh
+./install.sh
+pip3 install -r requirements.txt
+Ishare2 [action]
+```
+
+📁 This tool will now be ready to download .image files directly into your /opt/unetlab/addons directory.
+
+### Search & Pull Workflow
+
+```bash
+# Search for available images (e.g., iosv, iol, asav)
+ishare2.py search iosv
+
+# Pull a specific image from the results
+ishare2.py pull dynamips | iol | qemu `<ReferenceNumber>`
+```
+
+### What Happens During Image Pull?
+When you run pull, ishare2-cli does the following:
+
+1. Searches for the requested image by name.
+2. Downloads the .image file to the appropriate folder:
+   - qemu images → /opt/unetlab/addons/qemu/
+   - iol images → /opt/unetlab/addons/iol/
+   - dynamips → /opt/unetlab/addons/dynamips/
+3. The image is not automatically renamed or moved into a subfolder.
+4. Manual step: Rename .image to virtioa.qcow2 (or required filename).
+5. Create a directory for the image and move it inside:
+
+```bash
+mkdir /opt/unetlab/addons/qemu/iosv-15.6-2T
+mv iosv-15.6-2T.image /opt/unetlab/addons/qemu/iosv-15.6-2T/virtioa.qcow2
+```
+
+### Final Step: Fix Permissions
+
+```bash
+/opt/unetlab/wrappers/unl_wrapper -a fixpermissions
+```
+
+This ensures the web UI can detect and launch the image.
+
+Pro Tip — Beware of vios_l2-adventerprisek9-M
+This image often hangs during boot, responds slowly, and has known limitations with EtherChannel/LACP. If you need a reliable switch lab, consider IOL L2, or newer vIOS-L2 builds instead.
+⚠️ Some images like Arista vEOS use the same base image for both router and switch roles. In such cases, the folder name determines how the node appears in EVE-NG. You may need to manually rename the folder to veos or veos-router depending on your use case.
+The difference between the vEOS Router and the vEOS Switch in EVE-NG lies in:
+
+| Type | Directory Name | Role in Lab |
+|---|---|---|
+| Router | /opt/unetlab/addons/qemu/veos-router | L3 functionalities |
+| Switch | /opt/unetlab/addons/qemu/veos | L2 switching |
+🔎 Common Causes of IOL L2 Crashes - a known issue with some IOL L2 images, particularly ones like i86bi_Linux-L2-Adventerprisek9-ms.SSA.high_iron_20190423. These are often buggy or unstable in EVE-NG
+
+| Cause | Explanation | Fix/Workaround |
+|---|---|---|
+| ❌ Corrupt image | Image might be partially broken during transfer or download | Try redownloading from a known stable source |
+| ⚠️ Wrong platform/emulation | EVE-NG expects IOL images with specific naming & behavior | Rename correctly and ensure .bin not .qcow2 |
+| ⚙️ Missing license (iourc) | IOL requires a valid iourc license file | Make sure /opt/unetlab/addons/iol/bin/iourc is present and valid |
+| 🐞 Faulty build | Some images like high_iron are known to crash | Try using a more stable version like i86bi-linux-l2-adventerprisek9-15.1g.bin |
+| 🚫 Wrong permissions | EVE can’t access or boot properly | Run unl_wrapper -a fixpermissions after any image work |
+
+⚙️ Why Test Locally?
+- You avoid cloud billing while learning.
+- You can verify images are working (console boots up, etc).
+- Once happy, you can migrate this .qcow2 library to a cloud server later.
+🔢 Estimate: Number of Nodes You Can Run
+Here’s a quick estimate of the types of images you can run and how many, assuming 12GB RAM assigned to EVE-NG and efficient CPU usage.
+
+| Image Type | RAM per Node | vCPU per Node | Est. Max Nodes | Use Case |
+|---|---|---|---|---|
+| Cisco IOL (Layer 2/3) | 128MB-256MB | ~5-10% | 15-25 nodes | CCNA/CCNP switching/routing |
+| Cisco vIOS-L2/L3 | 512MB-768MB | ~10-20% | 6-10 nodes | More realistic IOS XR labs |
+| MikroTik CHR | 256MB | Low | 10-15 nodes | Routing/Firewall labs |
+| FortiGate (low mem) | ~1024MB+ | Moderate | 4-6 nodes | Security labs |
+| Windows 7/10 | 1.5GB-2GB | Moderate/High | 2-3 max | Heavy, only for AD/domain labs |
+| Ubuntu CLI only | 512MB | Low | 6-10 nodes | Kali, OpenVPN, Auth, etc. |
+
+No—you shouldn’t need to resort to guestfish or manually mount the QCOW2 to tweak it, as long as you’re using ishare2-cli to pull your images.
+ishare2-cli already:
+	0.	Downloads the image in a ready-to-use format
+	0.	Places it in the correct /opt/unetlab/addons/`<type>`/`<imagename>`/ folder
+	0.	Renames it to virtioa.qcow2 (or the appropriate default filename)
+	0.	Leaves it fully configured for EVE-NG’s defaults
+The only time you’d need to mount and edit with guestfish (or qemu-nbd, etc.) is if you want to:
+- Inject custom files (license files, scripts, certificates) into the image before first boot
+- Change default credentials or other OS-level settings baked into the image
+- Strip out unwanted services to slim it further
+But for standard lab use—especially following the EVE-NG “HowTo” docs—you can skip all that. After your ishare2 pull `<image>` and /opt/unetlab/wrappers/unl_wrapper -a fixpermissions, just add the node in the GUI and boot it.
+If you do need to make small OS-level tweaks (e.g. adding SSH keys, custom banners), I’d recommend:
+
+```bash
+# 1. Load the image locally for editing
+apt install libguestfs-tools
+guestfish --ro -a virtioa.qcow2
+```
+
+```text
+# 2. At the guestfish prompt:
+> run
+> mount /dev/sda1 /
+> edit /etc/ssh/sshd_config   # or copy-in files
+> exit
+```
+But again—not required for any ishare2-managed image that’s otherwise unmodified.
+
+You can do all of this inside your EVE-NG VM—no need to jump back to your desktop. Here’s how:
+
+1. Install the GuestFS Tools
+
+```bash
+# SSH into your EVE-NG VM (or open its console)
+ssh root@`<eve-ip>`
+
+# Install the guestfish package (it provides guestfish, virt-cat, etc.)
+apt update && apt install -y libguestfs-tools
+```
+
+2. Locate Your Image File
+By default, an image you pulled with ishare2-cli lives under:
+/opt/unetlab/addons/`<type>`/`<image-folder>`/virtioa.qcow2
+For example:
+/opt/unetlab/addons/qemu/iosv-15.6-2T/virtioa.qcow2
+
+3. Mount (Read-Write) with Guestfish
+Warning: Always work on a copy of the QCOW2 if you care about the original!
+
+```bash
+# Make a copy to play safe
+cd /opt/unetlab/addons/qemu/iosv-15.6-2T/
+cp virtioa.qcow2 virtioa-edit.qcow2
+
+# Launch guestfish in read-write mode
+guestfish --rw -a virtioa-edit.qcow2
+```
+
+```text
+# At the guestfish> prompt, run:
+run                      # discover the partitions
+list-filesystems         # see which device has / (e.g. /dev/sda1)
+```
+	0.	mount /dev/sda1 /        # mount root partition
+	0.	Edit or copy files. You can use guestfish’s built-in editor or copy files in/out:
+
+```text
+edit /etc/hostname       # built-in editor
+copy-in /root/mykey /root/.ssh/authorized_keys  # inject your SSH key
+```
+
+	0.	Unmount and quit:
+
+```text
+umount /
+exit
+```
+
+4. Replace the Original (Optional)
+Once you’ve validated your changes:
+
+```bash
+mv virtioa-edit.qcow2 virtioa.qcow2
+/opt/unetlab/wrappers/unl_wrapper -a fixpermissions
+```
+
+Then boot the node in EVE-NG; it will use your edited image.
+
+Alternative: QEMU-NBD
+If you prefer, you can also use QEMU’s network block device:
+
+```bash
+modprobe nbd max_part=8
+qemu-nbd --connect=/dev/nbd0 virtioa.qcow2
+mount /dev/nbd0p1 /mnt
+# make edits under /mnt
+umount /mnt
+qemu-nbd --disconnect /dev/nbd0
+```
+
+Both methods achieve the same result—pick whichever you find more comfortable.
+
+```bash
+-machine type=pc,accel=kvm \
+-cpu host \
+-smp cores=2,threads=1,sockets=1 \
+-device virtio-scsi-pci,id=scsi0 \
+-drive file=disk1.qcow2,if=none,id=hd0,cache=none,format=qcow2 \
+-device scsi-hd,drive=hd0 \
+-netdev type=tap,id=net0,script=/etc/qemu-ifup \
+-device virtio-net-pci,netdev=net0 \
+-nographic \
+-serial mon:stdio \
+
+## Key Takeaways
+
+- Completed EVE-NG Configuration
+- Applied concepts from Installing and configuring EVE-NG for network labs.
+- Ready to proceed to the next chapter

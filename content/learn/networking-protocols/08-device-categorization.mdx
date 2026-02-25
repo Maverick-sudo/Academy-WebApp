@@ -1,0 +1,53 @@
+---
+title: "Device Categorization"
+description: Categorize network devices by OSI layer, function, and role in network design.
+---
+
+* **Characteristics:** Full-duplex communication. Can be managed (VLANs, QoS) or unmanaged.
+    * **Common Types:**
+        * **Unmanaged Switches:** Plug-and-play, no configuration.
+        * **Managed Switches:** Allow configuration of VLANs, QoS, port security, Spanning Tree Protocol (STP), etc.
+
+#### Layer 3 (Network Layer) Devices
+
+These devices operate at the Network Layer, dealing with IP (Internet Protocol) addresses and packets. They are responsible for routing packets between different networks (IP subnets).
+
+* **Routers:**
+    * **Function:** Connects different IP networks (e.g., LAN to WAN, home network to internet). Forwards data packets between networks.
+    * **Operation:** Uses IP addresses to determine the best path for packet delivery, maintaining routing tables.
+    * **Characteristics:** Creates separate broadcast domains. Key for inter-network communication.
+* **Layer 3 Switches:**
+    * **Function:** A switch that incorporates routing capabilities. Can perform both Layer 2 switching and Layer 3 routing.
+    * **Operation:** Routes traffic between VLANs (Inter-VLAN Routing) at high speed using specialized hardware.
+    * **Use Cases:** High-performance campus networks where routing between multiple VLANs is needed.
+
+#### Layer 4-7 (Transport to Application Layers) Devices
+
+These devices operate at higher OSI layers, often performing complex functions that go beyond simple packet forwarding, examining data content, and managing application-level traffic.
+
+* **Firewalls:** (As detailed in Chapter 5's concluding section)
+    * **Function:** Enforces security policies, controlling incoming and outgoing network traffic.
+    * **Operation:** Can inspect traffic at various layers, from packet headers (packet-filtering) to application content (application firewalls).
+* **Load Balancers:**
+    * **Function:** Distributes incoming network traffic across multiple servers to ensure optimal resource utilization and prevent overload.
+    * **Operation:** Improves application availability and responsiveness. Can operate at Layer 4 (TCP/UDP) or Layer 7 (HTTP/HTTPS).
+* **Proxy Servers:**
+    * **Function:** Acts as an intermediary for requests from clients seeking resources from other servers.
+    * **Operation:** Can provide security (hiding client IP), caching (improving performance), and content filtering.
+* **Intrusion Detection/Prevention Systems (IDS/IPS):**
+    * **Function:** Monitors network traffic for suspicious activity and known threats.
+    * **Operation:** IDS detects and alerts; IPS detects and actively blocks/prevents threats.
+
+### Categorization by Function/Role (Network Design)
+
+Network devices can also be categorized based on their logical placement and role within a network's design, especially in hierarchical models (e.g., Cisco's three-tier model).
+
+| Role/Function           | Typical Devices                                         | Key Features                                                              |
+| :---------------------- | :------------------------------------------------------ | :------------------------------------------------------------------------ |
+| **Access Layer Devices** | Layer 2 Switches (unmanaged or basic managed)           | Port security, VLAN assignments, PoE (Power over Ethernet).               |
+| **Distribution Layer Devices** | Layer 3 Switches, Routers                               | Inter-VLAN routing, ACLs (Access Control Lists), QoS (Quality of Service), redundancy (e.g., HSRP, VRRP). |
+| **Core Layer Devices** | High-end Layer 3 Switches, Routers                      | Extreme forwarding capacity, redundancy, low latency. Focus solely on fast packet forwarding. |
+| **Wireless Devices** | Wireless Access Points (APs), Wireless LAN Controllers (WLCs) | SSID management, security (WPA3), roaming, client management.             |
+| **Security Devices** | Dedicated Firewalls, Intrusion Prevention Systems (IPS), VPN gateways, Web Application Firewalls (WAFs) | Packet filtering, stateful inspection, deep packet inspection, threat intelligence. |
+
+---

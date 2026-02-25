@@ -1,0 +1,463 @@
+---
+title: SQL and SQL Injection
+description: SQL (Structured Query Language) is the most common solution for storing and interacting with data in a relational database.
+---
+
+
+SQL (Structured Query Language) is the most common solution for storing and interacting with data in a relational database. A relational database management system (RDBMS) organizes information into one or more tables, which are collections of data organized into rows and columns.
+
+-   **Table**: A collection of data organized into rows and columns, also referred to as a relation.
+-   **Column/Field**: A set of data values of a particular type.
+-   **Row**: A single record in a table.
+
+## Data Definition Language (DDL)
+
+### CREATE DATABASE
+The `CREATE DATABASE` statement is used to create a new SQL database.
+
+```sql
+CREATE DATABASE databasename;
+```
+
+### DROP DATABASE
+The `DROP DATABASE` statement is used to drop an existing SQL database.
+
+```sql
+DROP DATABASE databasename;
+```
+> **Note**: Be careful before dropping a database. Deleting a database will result in the loss of all information stored in it.
+
+### BACKUP DATABASE
+The `BACKUP DATABASE` statement is used in SQL Server to create a full backup of an existing SQL database.
+
+```sql
+BACKUP DATABASE databasename
+TO DISK = 'filepath';
+```
+
+A differential backup only backs up the parts of the database that have changed since the last full database backup.
+
+```sql
+BACKUP DATABASE databasename
+TO DISK = 'filepath'
+WITH DIFFERENTIAL;
+```
+
+### CREATE TABLE
+The `CREATE TABLE` statement is used to create a new table in a database.
+
+```sql
+CREATE TABLE table_name (
+    column1 datatype,
+    column2 datatype,
+    column3 datatype,
+   ....
+);
+```
+
+You can also create a copy of an existing table. The new table will be filled with the existing values from the old table.
+
+```sql
+CREATE TABLE new_table_name AS
+    SELECT column1, column2,...
+    FROM existing_table_name
+    WHERE ....;
+```
+
+### ALTER TABLE
+The `ALTER TABLE` clause lets you make changes, such as adding a new column to a table.
+
+### DROP TABLE
+The `DROP TABLE` statement is used to drop an existing table in a database.
+
+```sql
+DROP TABLE table_name;
+```
+
+### TRUNCATE TABLE
+The `TRUNCATE TABLE` statement is used to delete the data inside a table, but not the table itself.
+
+```sql
+TRUNCATE TABLE table_name;
+```
+
+### Constraints
+SQL constraints are used to specify rules for the data in a table, ensuring accuracy and reliability.
+
+-   **`NOT NULL`**: Ensures that a column cannot have a `NULL` value.
+    ```sql
+    CREATE TABLE Persons (
+        ID int NOT NULL,
+        LastName varchar(255) NOT NULL,
+        FirstName varchar(255) NOT NULL,
+        Age int
+    );
+    ```
+-   **`UNIQUE`**: Ensures that all values in a column are different.
+-   **`PRIMARY KEY`**: A combination of `NOT NULL` and `UNIQUE`. It uniquely identifies each row in a table. A table can have many `UNIQUE` constraints, but only one `PRIMARY KEY`.
+    ```sql
+    CREATE TABLE Persons (
+        ID int NOT NULL PRIMARY KEY,
+        LastName varchar(255) NOT NULL,
+        FirstName varchar(255),
+        Age int
+    );
+    ```
+-   **`FOREIGN KEY`**: Prevents actions that would destroy links between tables. It is a field in one table that refers to the `PRIMARY KEY` in another table.
+-   **`CHECK`**: Ensures that the values in a column satisfy a specific condition.
+    ```sql
+    CREATE TABLE Persons (
+        ID int NOT NULL,
+        LastName varchar(255) NOT NULL,
+        FirstName varchar(255),
+        Age int,
+        CHECK (Age>=18)
+    );
+    ```
+-   **`DEFAULT`**: Sets a default value for a column if no value is specified.
+    ```sql
+    CREATE TABLE Orders (
+        ID int NOT NULL,
+        OrderNumber int NOT NULL,
+        OrderDate date DEFAULT GETDATE()
+    );
+    ```
+-   **`CREATE INDEX`**: Used to create and retrieve data from the database very quickly. Indexes are not visible to users but are used to speed up searches.
+    ```sql
+    -- Allows duplicate values
+    CREATE INDEX index_name
+    ON table_name (column1, column2, ...);
+
+    -- Does not allow duplicate values
+    CREATE UNIQUE INDEX index_name
+    ON table_name (column1, column2, ...);
+    ```
+
+### AUTO_INCREMENT / IDENTITY
+The `AUTO_INCREMENT` or `IDENTITY(X,Y)` field allows a unique number to be generated automatically when a new record is inserted into a table.
+
+## Data Manipulation Language (DML)
+
+### SELECT
+The `SELECT` clause is used to query data and retrieve information stored in a database.
+
+### INSERT INTO
+The `INSERT INTO` clause adds specified data as a new row or record.
+
+-   Specify both column names and values:
+    ```sql
+    INSERT INTO table_name (column1, column2, column3, ...)
+    VALUES (value1, value2, value3, ...);
+    ```
+-   Add values for all columns (in order):
+    ```sql
+    INSERT INTO table_name
+    VALUES (value1, value2, value3, ...);
+    ```
+
+### INSERT INTO SELECT
+The `INSERT INTO SELECT` statement copies data from one table and inserts it into another. Data types in the source and target tables must match.
+
+-   Copy all columns:
+    ```sql
+    INSERT INTO table2
+    SELECT * FROM table1
+    WHERE condition;
+    ```
+-   Copy specific columns:
+    ```sql
+    INSERT INTO table2 (column1, column2, column3, ...)
+    SELECT column1, column2, column3, ... FROM table1
+    WHERE condition;
+    ```
+
+### UPDATE
+The `UPDATE` clause edits existing rows in a table.
+```sql
+UPDATE table_name
+SET column1 = value1, column2 = value2, ...
+WHERE condition;
+```
+> **Note**: Be careful when updating records. If you omit the `WHERE` clause, all records in the table will be updated.
+
+### DELETE
+The `DELETE FROM` statement deletes existing rows from a table.
+```sql
+DELETE FROM table_name WHERE condition;
+```
+> **Note**: If you omit the `WHERE` clause, all records in the table will be deleted, but the table structure, attributes, and indexes will remain intact.
+
+### SELECT INTO
+The `SELECT INTO` statement copies data from one table into a new table.
+```sql
+-- Copy all columns into a new table
+SELECT * INTO newtable FROM oldtable WHERE condition;
+
+-- Copy specific columns into a new table
+SELECT column1, column2, ... INTO newtable FROM oldtable WHERE condition;
+
+-- Create an empty table based on another table's schema
+SELECT * INTO newtable FROM oldtable WHERE 1 = 0;
+```
+
+## Query Clauses and Operators
+
+### ALIASES (AS)
+SQL aliases give a table or column a temporary name, which can make queries more readable. An alias only exists for the duration of the query.
+
+-   **Column Alias**:
+    ```sql
+    SELECT column_name AS alias_name FROM table_name;
+    ```
+-   **Table Alias**:
+    ```sql
+    SELECT column_name(s) FROM table_name AS alias_name;
+    ```
+
+### UNION & UNION ALL
+The `UNION` operator combines the result-set of two or more `SELECT` statements.
+
+-   `UNION`: Selects only distinct values.
+-   `UNION ALL`: Allows duplicate values.
+
+```sql
+SELECT column_name(s) FROM table1
+UNION
+SELECT column_name(s) FROM table2;
+```
+> **Note**: Both `SELECT` statements must have the same number of columns with similar data types and in the same order.
+
+### JOIN
+The `JOIN` clause combines rows from two or more tables based on a related column.
+
+-   **`INNER JOIN`**: Returns records that have matching values in both tables.
+    ```sql
+    SELECT column_name(s)
+    FROM table1 INNER JOIN table2
+    ON table1.column_name = table2.column_name;
+    ```
+-   **`LEFT JOIN`** (or `LEFT OUTER JOIN`): Returns all records from the left table and the matched records from the right table.
+    ```sql
+    SELECT column_name(s)
+    FROM table1 LEFT JOIN table2
+    ON table1.column_name = table2.column_name;
+    ```
+-   **`RIGHT JOIN`** (or `RIGHT OUTER JOIN`): Returns all records from the right table and the matched records from the left table.
+    ```sql
+    SELECT column_name(s)
+    FROM table1 RIGHT JOIN table2
+    ON table1.column_name = table2.column_name;
+    ```
+-   **`FULL OUTER JOIN`**: Returns all records when there is a match in either the left or right table.
+    ```sql
+    SELECT column_name(s)
+    FROM table1 FULL OUTER JOIN table2
+    ON table1.column_name = table2.column_name
+    WHERE condition;
+    ```
+-   **`SELF JOIN`**: A regular join where a table is joined with itself.
+    ```sql
+    SELECT column_name(s)
+    FROM table1 T1, table1 T2
+    WHERE condition;
+    ```
+
+### DISTINCT
+The `DISTINCT` keyword returns only unique values in the output.
+
+### LIMIT / TOP / ROWNUM
+These clauses specify the maximum number of rows to return.
+
+-   **SQL Server / MS Access**:
+    ```sql
+    SELECT TOP number|percent column_name(s)
+    FROM table_name
+    WHERE condition;
+    ```
+-   **MySQL**:
+    ```sql
+    SELECT column_name(s)
+    FROM table_name
+    WHERE condition
+    LIMIT number;
+    ```
+-   **Oracle**:
+    ```sql
+    SELECT column_name(s)
+    FROM table_name
+    ORDER BY column_name(s)
+    FETCH FIRST number ROWS ONLY;
+    ```
+
+### WHERE
+The `WHERE` clause is used to filter records based on a specified condition.
+
+| Operator  | Description        |
+| :-------- | :----------------- |
+| `=`       | Equal              |
+| `>`       | Greater than       |
+| `<`       | Less than          |
+| `>=`      | Greater than or equal |
+| `<=`      | Less than or equal |
+| `<>` or `!=`| Not equal          |
+| `BETWEEN` | Between a certain range |
+| `LIKE`    | Search for a pattern  |
+| `IN`      | Specify multiple possible values |
+
+### Wildcards
+Wildcard characters are used with the `LIKE` operator to search for a pattern in a string.
+
+**SQL Server Wildcards**
+
+| Symbol | Description                               | Example                                 |
+| :----- | :---------------------------------------- | :-------------------------------------- |
+| `%`    | Represents zero or more characters        | `bl%` finds `bl`, `black`, `blue`       |
+| `_`    | Represents a single character             | `h_t` finds `hot`, `hat`, and `hit`     |
+| `[]`   | Represents any single character within brackets | `h[oa]t` finds `hot` and `hat`      |
+| `^`    | Represents any character not in the brackets | `h[^oa]t` finds `hit`                   |
+| `-`    | Represents a character within a range     | `c[a-b]t` finds `cat` and `cbt`         |
+
+**MS Access Wildcards**
+
+| Symbol | Description                               | Example                                 |
+| :----- | :---------------------------------------- | :-------------------------------------- |
+| `*`    | Represents zero or more characters        | `bl*` finds `bl`, `black`, `blue`       |
+| `?`    | Represents a single character             | `h?t` finds `hot`, `hat`, and `hit`     |
+| `[]`   | Represents any single character within brackets | `h[oa]t` finds `hot` and `hat`      |
+| `!`    | Represents any character not in the brackets | `h[!oa]t` finds `hit`                   |
+| `-`    | Represents any single character within a range | `c[a-b]t` finds `cat` and `cbt`         |
+| `#`    | Represents any single numeric character   | `2#5` finds `205`, `215`, etc.          |
+
+### Aggregate Functions
+Calculations performed on multiple rows of a table are called aggregates.
+
+-   `MIN()`: Returns the smallest value in a column.
+-   `MAX()`: Returns the largest value in a column.
+-   `COUNT()`: Returns the number of rows matching a criterion.
+-   `AVG()`: Returns the average value of a numeric column.
+-   `SUM()`: Returns the total sum of a numeric column.
+
+### CASE
+The `CASE` statement creates different outputs based on conditions, similar to an `if-then-else` statement.
+
+```sql
+CASE
+    WHEN condition1 THEN result1
+    WHEN condition2 THEN result2
+    ELSE result
+END;
+```
+
+### GROUP BY
+The `GROUP BY` statement, often used with aggregate functions, groups rows that have the same values into summary rows. It comes after `WHERE` but before `ORDER BY` or `LIMIT`.
+
+```sql
+SELECT column_name(s)
+FROM table_name
+WHERE condition
+GROUP BY column_name(s)
+ORDER BY column_name(s);
+```
+
+### ORDER BY
+The `ORDER BY` clause sorts the result set in ascending (`ASC`) or descending (`DESC`) order.
+
+### HAVING
+The `HAVING` clause filters the results of a query based on an aggregate property. It is used because the `WHERE` keyword cannot be used with aggregate functions.
+
+## Stored Procedures
+A stored procedure is prepared SQL code that you can save and reuse. You can pass parameters to a stored procedure to make it more flexible.
+
+-   **Create Procedure**:
+    ```sql
+    CREATE PROCEDURE procedure_name
+    AS
+    sql_statement
+    GO;
+    ```
+-   **Execute Procedure**:
+    ```sql
+    EXEC procedure_name;
+    ```
+
+## Date and Time
+The most difficult part of working with dates is ensuring that the format of the date you are inserting matches the date format of the column in the database.
+
+-   **MySQL Date Types**: `DATE` (YYYY-MM-DD), `DATETIME` (YYYY-MM-DD HH:MI:SS), `TIMESTAMP`, `YEAR`.
+-   **SQL Server Date Types**: `DATE` (YYYY-MM-DD), `DATETIME` (YYYY-MM-DD HH:MI:SS), `SMALLDATETIME`, `TIMESTAMP`.
+
+## Views
+A view is a virtual table based on the result-set of an SQL statement. It contains rows and columns like a real table and always shows up-to-date data.
+
+```sql
+CREATE VIEW view_name AS
+SELECT column1, column2, ...
+FROM table_name
+WHERE condition;
+```
+
+## SQL Injection
+A SQL Injection is a common web security vulnerability that allows an attacker to interfere with the queries that an application makes to its database. By constructing text inputs that modify the backend SQL query, an attacker can force the application to output private data or behave unexpectedly.
+
+Protection techniques include input validation, parameterized queries, stored procedures, and using a Web Application Firewall (WAF).
+
+### SQLmap
+SQLmap is an open-source tool that automates the process of detecting and exploiting SQL injection flaws.
+
+```bash
+sqlmap -u 'http://{target_IP}/dashboard.php?search=any+query' --cookie="PHPSESSID={Your_cookie}"
+```
+
+If the tool confirms a vulnerability, you can use the `--os-shell` flag to attempt command injection.
+
+### Example: Authentication Bypass
+Consider the following vulnerable PHP code:
+```php
+<?php
+mysql_connect("localhost", "db_username", "db_password"); // Connection to the SQL Database.
+mysql_select_db("users"); // Database table where user information is stored.
+$username=$_POST['username']; // User-specified username.
+$password=$_POST['password']; //User-specified password.
+$sql="SELECT * FROM users WHERE username='$username' AND password='$password'"; // Query for user/pass retrieval from the DB.
+$result=mysql_query($sql); // Performs query stored in $sql and stores it in $result.
+$count=mysql_num_rows($result); // Sets the $count variable to the number of rows stored in $result.
+if ($count==1){ // Checks if there's at least 1 result, and if yes:
+    $_SESSION['username'] = $username; // Creates a session with the specified $username.
+    $_SESSION['password'] = $password; // Creates a session with the specified $password.
+    header("location:home.php"); // Redirect to homepage.
+}
+else { // If there's no singular result of a user/pass combination:
+    header("location:login.php");
+}
+?>
+```
+This code is vulnerable because it directly embeds user input into the SQL query without validation. An attacker could input `admin'#` as the username. The `#` symbol starts a comment in SQL, so the query becomes:
+```sql
+SELECT * FROM users WHERE username='admin'# AND password='...'
+```
+The server executes only the part before the comment, searching for a user named `admin` and ignoring the password check. If a user named `admin` exists, the query returns a result, and the login succeeds.
+
+### Types of SQL Injection
+-   **Union-Based Injection**
+-   **Error-Based Injection**
+-   **Time-Based Injection**
+-   **Out-of-Band Injection**
+-   **Boolean Injection**
+-   **Blind SQL Injection**: Occurs when the application is vulnerable but does not return query results or database errors in its HTTP responses.
+-   **Second-order (Stored) SQL Injection**: The application stores malicious user input and later uses it in an unsafe SQL query.
+
+## Connecting to a Database
+To communicate with a database, you need a client like `mysql` or `mariadb`.
+```bash
+sudo apt update && sudo apt install mysql*
+```
+It is essential to test for passwordless authentication, especially during development stages.
+```bash
+# Attempt to log in as root without a password
+mysql -h {target_IP} -u root
+```
+Common commands after connecting:
+-   `SHOW databases;`: Lists accessible databases.
+-   `USE {database_name};`: Selects a database to use.
+-   `SHOW tables;`: Lists tables in the current database.
+-   `SELECT * FROM {table_name};`: Retrieves all data from a table.

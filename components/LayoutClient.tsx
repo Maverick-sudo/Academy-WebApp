@@ -10,6 +10,10 @@ const Sidebar = dynamic(() => import('@/components/Sidebar'), {
   ssr: false,
 })
 
+const MobileNavDrawer = dynamic(() => import('@/components/MobileNavDrawer'), {
+  ssr: false,
+})
+
 const CompactMobileTree = dynamic(() => import('@/components/CompactMobileTree'), {
   ssr: false,
 })
@@ -96,9 +100,9 @@ export default function LayoutClient({ children, sidebarData }: LayoutClientProp
   }, [sidebarData])
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <TopNav />
-      <div className="flex">
+      <div className="flex flex-1">
         {isDocsRoute && (
           <Sidebar 
             data={sidebarData} 
@@ -108,14 +112,15 @@ export default function LayoutClient({ children, sidebarData }: LayoutClientProp
             onToggleCollapse={toggleCollapse}
           />
         )}
-        {/* Mobile navigation menu inline above content (hidden on desktop). */}
         <main className={`flex-1 min-w-0 px-4 xl:px-6 ${isDesktop && isDocsRoute ? (isCollapsed ? 'xl:ml-16' : 'xl:ml-72') : ''}`}> 
-          {isDocsRoute && isMobileOpen && (
-            <CompactMobileTree open={isMobileOpen} onClose={() => setIsMobileOpen(false)} data={sidebarData} />
-          )}
           {children}
         </main>
       </div>
+      {isDocsRoute && (
+        <MobileNavDrawer isOpen={isMobileOpen} onClose={() => setIsMobileOpen(false)}>
+          <CompactMobileTree open={isMobileOpen} onClose={() => setIsMobileOpen(false)} data={sidebarData} />
+        </MobileNavDrawer>
+      )}
       {isDocsRoute && <ScrollControls threshold={200} />}
       {sidebarDebug && (
         <script

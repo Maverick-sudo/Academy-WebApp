@@ -1,0 +1,882 @@
+---
+title: "Application Layer"
+description: Explore HTTP, DNS, SMTP, FTP, and other protocols that power applications.
+---
+
+* **Function:** A hierarchical and decentralized naming system for computers, services, or any resource connected to the Internet or a private network. It translates human-readable domain names (e.g., `google.com`) into machine-readable IP addresses (e.g., `172.217.160.142`).
+* **Core Purpose:** To make the Internet easier to use by eliminating the need to remember numerical IP addresses.
+* **Protocol:** Primarily uses **UDP port 53** for standard queries, and **TCP port 53** for zone transfers.
+
+Hosts on The Internet maintains two principal namespaces, the domain name hierarchy and the Internet Protocol (IP) address spaces., which is used for routing and network interface identification. An often-used analogy to explain the Domain Name System is that it serves as the phone book for the Internet by translating human-friendly computer hostnames into IP addresses. For example, the domain name www.example.com translates to the addresses 93.184.216.34 (IPv4) and 2606:2800:220:1:248:1893:25c8:1946 (IPv6). The translation between addresses and domain names is performed by the Domain Name System (DNS), a hierarchical, decentralized, distributed naming system that allows for the subdelegation of namespaces to Internet resources by designating authoritative name servers for each domain, Most prominently, it translates more readily memorized domain names to the numerical IP addresses needed for locating and identifying computer services and devices with the underlying network protocols.  
+
+### DNS Hierarchy and Components
+* **DNS Hierarchy:** A tree-like structure that organizes domain names.
+    * **Root Servers:** The top of the DNS hierarchy. They know the addresses of the TLD name servers. Represented by a ".".
+    * **Top-Level Domain (TLD) Servers:** Handle domains like `.com`, `.org`, `.net`, `.edu`, `.gov`, and country codes like `.uk`, `.de`. They know the addresses of authoritative name servers for second-level domains.
+    * **Second-Level Domain (SLD):** The part of the domain name that comes before the TLD (e.g., `google` in `google.com`). These are registered by individuals or organizations.
+    * **Authoritative Name Servers:** Hold the actual DNS records (A, AAAA, MX, CNAME, etc.) for a specific domain. They are the ultimate source of truth for a domain.
+    * **Host (Subdomain):** Specific hosts or services within a domain (e.g., `www`, `mail`, `ftp` in `www.example.com`).
+* **DNS Resolvers (Caching/Recursive Name Servers):**
+    * **Function:** Act as intermediaries between clients and authoritative name servers. They receive DNS queries from clients and perform the recursive lookups on their behalf.
+    * **Characteristics:** Cache query results to speed up future lookups.
+
+(Image Placeholder - DNS Hierarchy)
+
+The domain name space consists of a tree data structure. Each node or leaf in the tree has a label and zero or more resource records (RR), which hold information associated with the domain name. The domain name itself consists of the label, concatenated with the name of its parent node on the right, separated by a dot.
+The tree sub-divides into zones beginning at the root name server zone. A DNS zone may consist of only one domain, or may consist of many domains and sub-domains, depending on the administrative choices of the zone manager. A domain name consists of one or more parts, technically called labels, that are conventionally concatenated, and delimited by dots, such as example.com.
+The right-most label conveys Top-Level Domain (TLD) servers; for example, the domain name www.example.com belongs to the top-level domain COM (parent node).
+The hierarchy of domains descends from right to left; each label to the left specifies a subdivision, or subdomain of the domain to the right. As with root name servers, TLD servers keep track of the next level down: Authoritative name servers. When a TLD server receives your request for information, the server passes it down to an appropriate Authoritative name server.
+Authoritative name servers are used to store DNS records for domains directly. In other words, every domain in the world will have its DNS records stored on an Authoritative name server somewhere or another; they are the source of the information. When your request reaches the authoritative name server for the domain you're querying, it will send the relevant information back to you, allowing your computer to connect to the IP address behind the domain you requested.
+
+### DNS Query Types
+* **Recursive Query:**
+    * **Initiator:** Typically a client (stub resolver) to a recursive DNS server.
+    * **Process:** The client asks the recursive server to provide the full answer. The recursive server is responsible for resolving the query completely, contacting other servers if necessary, and returning either the IP address or an error message.
+* **Iterative Query:**
+    * **Initiator:** Typically a recursive DNS server to a root, TLD, or authoritative name server.
+    * **Process:** The querying server asks the queried server for the best answer it can provide. If the queried server doesn't have the answer, it responds with a referral (the address of another server higher up or closer to the authoritative server) that might know. The querying server then "iterates" by contacting the referred server.
+
+(Image Placeholder - DNS Query Process)
+
+DNS Resolvers➡️The client side of the DNS is called a DNS resolver. A resolver is responsible for initiating and sequencing the queries that ultimately lead to a full resolution (translation) of the resource sought. DNS resolvers are classified by a variety of query methods, such as recursive, non-recursive, and iterative. A resolution process may use a combination of these methods. DNS protocol transport primarily uses the UDP port 53 to serve requests.  TCP is also used for tasks such as zone transfers. Some resolver implementations use TCP for all queries. 
+Record Caching➡️A standard practice in implementing name resolution in applications is to reduce the load on the Domain Name System servers by caching results locally, or in intermediate resolver hosts. Results obtained from a DNS request are always associated with the time to live (TTL), an expiration time after which the results must be discarded or refreshed.
+Reverse Lookup➡️A reverse DNS lookup is a query of the DNS for domain names when the IP address is known. Multiple domain names may be associated with an IP address. The DNS stores IP addresses in the form of domain names as specially formatted names in pointer (PTR) records within the infrastructure top-level domain arpa. For IPv4, the domain is in-addr.arpa. For IPv6, the reverse lookup domain is ip6.arpa. The IP address is represented as a name in reverse-ordered octet representation for IPv4, and reverse-ordered nibble representation for IPv6. 
+DNS message format➡️The DNS protocol uses two types of DNS messages, Queries and Replies; both have the same format. Each message consists of a Header + 4 sections: Question, Answer, Authority, & an additional space. A header field controls the content of these 4 sections.
+The Header section consists of the following field: Identification, Flags, Number of questions, Number of answers, Number of authority resource records (RRs), and Number of additional RRs. Each field is 16 bits long, and appears in the order given. The identification field is used to match responses with queries.
+DNS over HTTPS (DoH) is a protocol for performing remote Domain Name System (DNS) resolution via the HTTPS protocol. A goal of the method is to increase user privacy and security by preventing eavesdropping and manipulation of DNS data by man-in-the-middle attacks[1] by using the HTTPS protocol to encrypt the data between the DoH client and the DoH-based DNS resolver.
+DNS over TLS (DoT) is a network security protocol for encrypting and wrapping Domain Name System (DNS) queries and answers via the Transport Layer Security (TLS) protocol. The goal of the method is to increase user privacy and security by preventing eavesdropping and manipulation of DNS data via man-in-the-middle attacks. 
+While DNS-over-TLS is applicable to any DNS transaction, it was first standardized for use between stub or forwarding resolvers and recursive resolvers, in RFC 7858
+
+### Host Names and Fully Qualified Domain Names (FQDN)
+
+A **Host-Name** is assigned to a computer by an administrator, usually at the time of OS installation. The host name needs to be unique on the local network.
+
+A **Fully Qualified Domain Name (FQDN)** is used to provide a unique identity for a host belonging to a particular Internetwork, to avoid the possibility of duplicate host names on the Internet.
+
+**FQDN Structure:**
+`MY.HOST.Domain.TLD` (e.g., `www.example.com`)
+* `MY.HOST`: Host Name (unique within its domain)
+* `Domain`: Second-Level Domain Name (unique within a TLD)
+* `TLD`: Top-Level Domain (e.g., `.com`, `.org`, `.net`, `.gov`)
+
+Numerous hosts may exist within the same Domain and TLD. The "root" (represented by a dot `.`) is at the end of the FQDN but is usually omitted in most cases.
+
+A Domain Name is unique within a TLD. Once registered, it cannot be used by another organization. However, the same Domain Name may be registered within different TLDs (e.g., `example.com` and `example.org`).
+
+**FQDN Rules:**
+FQDNs must follow certain rules:
+1.  **Unique Host Name:** The host name must be unique within its domain.
+2.  **Case-Insensitivity:** DNS labels are not case-sensitive.
+3.  **Length:** The total length of an FQDN cannot exceed 253 characters. Each label (part of the name divided by a period) can be no more than 63 characters (excluding periods).
+4.  **Characters:** A DNS label should use letters, digits, and hyphen characters only.
+5.  **Start Character:** A label should not start with a hyphen, punctuation, or forward slash character.
+
+#### Domain Name System: Hierarchy and Management
+
+The **Domain Name System (DNS)** is a global hierarchy of distributed name server databases that contain information on domains and hosts within those domains.
+
+At the top of the DNS Hierarchy is the **Root**, which is represented by the null label (just a period `.`). There are 13 root name servers (A-M).
+
+Below the root are the **Top-Level Domains (TLDs)**. These include:
+* **Generic TLDs (gTLDs):** Most prevalent gTLDs include `.com`, `.org`, `.net`, `.biz`, `.gov`. ICANN (Internet Corporation for Assigned Names and Numbers) manages these generic TLDs.
+* **Country Code TLDs (ccTLDs):** Such as `.uk`, `.ca`, `.au`. These are generally managed by an organization appointed by the relevant government.
+
+The Root DNS Servers have complete information about the TLD Servers. In turn, the TLD Servers have information relating to servers for the second-level domains. No single name server has complete information about all domains. Records within the DNS tell them where an **Authoritative Name Server** for missing information can be found.
+
+An FQDN reflects this hierarchy, from most specific on the left (the host's resource record with its Name:IP address mapping) to the least specific on the right (the TLD and root).
+
+#### Name Resolution Using Domain Name System Servers
+
+The process of translating an FQDN into an IP address is known as **Name Resolution**.
+
+#### Iterative vs. Recursive Lookup Queries
+
+1.  **Client Request:** A client requests a web address. It uses a **Stub Resolver** (a simple DNS client) which first checks its local cache for the name:IP mapping.
+2.  **Local DNS Server (Recursive Query):** If the local client's cache doesn't have the record, it forwards the query to its configured **Local DNS Server** (also known as a **Recursive Resolver**). This local server performs a recursive query.
+3.  **Root Name Server:** The local DNS server contacts one of the Root Name Servers (using a pre-configured list of IP addresses).
+4.  **Iterative Responses (from Root/TLD):**
+    * If the Root Server is not authoritative for the requested record, it returns the IP address of the Server for the TLD (`.com`, `.org`, etc.).
+    * If the TLD name server is also not authoritative, it returns the IP address of the Authoritative Name Server for the specific domain (e.g., `example.com`).
+    * **Iterative lookup** means that a name server responds to a query with either the requested record OR the address of a name server at a lower level in the hierarchy that is authoritative for the namespace. It makes no effort to try to make additional queries to locate the information it does not have.
+5.  **Authoritative Name Server:** The local DNS server then directly queries the **Authoritative Name Server** for the domain.
+6.  **Record Return & Caching:** This authoritative server returns the requested host record for the domain. The local DNS server caches the record and responds to the client.
+7.  **Client Caching:** The client now has an IP address for the domain, which it then caches.
+
+**Recursive lookup** means that if the required server is not authoritative, it takes on the task of querying other name servers until it finds the requested record or times out.
+
+* A query from a client to its local DNS server is typically a **recursive lookup**.
+* A query from a local DNS server to the Root, TLD, or Authoritative servers is an **iterative lookup**.
+
+Most Internet-accessible DNS Servers disable recursive queries for external clients. **Recursive Resolvers** are typically only accessible by authorized clients (e.g., subscribers within an ISP's network or clients on a private LAN).
+
+**DNS Resolution Process - Recursive and Iterative Queries:**
+
+```mermaid
+sequenceDiagram
+    participant Client as "Client PC\n(Stub Resolver)"
+    participant Local as "Local DNS Server\n(Recursive Resolver)\n10.0.0.1"
+    participant Root as "Root DNS Server\n(.)\n198.41.0.4"
+    participant TLD as "TLD DNS Server\n(.com)\n192.5.6.30"
+    participant Auth as "Authoritative DNS\n(example.com)\n93.184.216.34"
+    
+    Note over Client,Auth: DNS Resolution for www.example.com
+    
+    rect rgb(255, 250, 240)
+        Note over Client: 1. Check Local Cache
+        Client->>Client: Check local DNS cache\nMISS: www.example.com not found
+    end
+    
+    rect rgb(240, 248, 255)
+        Note over Client,Local: 2. Recursive Query to Local DNS
+        Client->>Local: Recursive Query\nQuery: www.example.com A?\nUDP Port 53
+        Note left of Client: "Find the IP for\nwww.example.com\nI'll wait for answer"
+        Note right of Local: Checks own cache\nMISS: Not cached\nWill query hierarchy
+    end
+    
+    rect rgb(255, 245, 245)
+        Note over Local,Root: 3. Iterative Query: Root Server
+        Local->>Root: Iterative Query\nWhere is www.example.com?
+        Root->>Local: Referral Response\n"I don't know, but ask\n.com TLD servers at:\n192.5.6.30"
+        Note right of Root: Root provides referral\nto .com TLD servers\n(Iterative: gives next step)
+    end
+    
+    rect rgb(245, 255, 245)
+        Note over Local,TLD: 4. Iterative Query: TLD Server
+        Local->>TLD: Iterative Query\nWhere is www.example.com?
+        TLD->>Local: Referral Response\n"I don't know, but ask\nexample.com nameserver:\nns1.example.com\n93.184.216.34"
+        Note right of TLD: TLD provides referral\nto authoritative NS\nfor example.com
+    end
+    
+    rect rgb(245, 245, 255)
+        Note over Local,Auth: 5. Iterative Query: Authoritative Server
+        Local->>Auth: Iterative Query\nWhat is the A record for\nwww.example.com?
+        Auth->>Local: Authoritative Answer\nwww.example.com\nA 93.184.216.34\nTTL: 3600 seconds
+        Note right of Auth: Authoritative server\nprovides definitive answer\nwith IP address
+    end
+    
+    rect rgb(255, 250, 240)
+        Note over Local: 6. Cache & Return
+        Local->>Local: Cache record for TTL\nwww.example.com → 93.184.216.34\nExpires in 3600s
+        Local->>Client: Recursive Response\nwww.example.com\nA 93.184.216.34
+        Note right of Local: Response sent back\nto client\nRecord cached locally
+    end
+    
+    rect rgb(240, 255, 240)
+        Note over Client: 7. Client Caches Result
+        Client->>Client: Cache in local DNS cache\nwww.example.com → 93.184.216.34\nCan now connect to server
+    end
+    
+    QueryTypes["Query Types:\n✓ Recursive: Client → Local DNS (full answer required)\n✓ Iterative: Local DNS → Root/TLD/Auth (referrals OK)\n✓ Authoritative: Final answer from domain's NS\n✓ Non-Authoritative: Answer from cache\n✓ Caching reduces load & latency (TTL control)"]
+    
+    style QueryTypes fill:#FFF9C4,stroke:#F39C12
+```
+
+*Figure: DNS resolution showing the complete query process. Client makes recursive query to local DNS server, which performs iterative queries to Root → TLD → Authoritative servers. Each server either provides the answer or refers to the next level in the hierarchy. Final answer is cached at multiple levels with TTL.*
+
+#### DNS Resource Records (RRs)
+
+A DNS **Zone** contains numerous resource records. These records allow a DNS name server to resolve queries for names and services hosted in the domain into IP addresses. The most common types of records stored in the DNS database are for Start of Authority (SOA), IP addresses (A and AAAA), SMTP mail exchangers (MX), name servers (NS), pointers for reverse DNS lookups (PTR), and domain name aliases (CNAME)
+
+* **Start of Authority (SOA) Record:** Identifies the primary Authoritative name server that maintains complete resource records for the zone. It includes contact info and a **Serial Number** for version control (critical for zone transfers).
+* **Name Server (NS) Record:** Identifies authoritative DNS name servers for the zone. Most zones are configured with secondary name servers for redundancy and load balancing. Secondary NS hold read-only copies of resource records but are still authoritative for the zone.
+* **Address (A) Record:** Used to resolve a host name to an **IPv4 address**.
+* **Address (AAAA) Record:** Used to resolve a host name to an **IPv6 address**.
+    * *Note:* AAAA records can exceed the typical UDP protocol transmission size (512 bytes) on port 53. This can result in UDP packets being fragmented into several IP packets, which may be blocked by firewalls if not configured to expect them. DNS servers are also configured to allow connections over TCP port 53, as this allows longer record transfers exceeding 512 Bytes.
+    * An admin can configure multiple A or AAAA records to point different host names to the same IP address.
+    * It is also possible to configure multiple A or AAAA records with the same host name but different IP addresses. This is a basic load balancing technique referred to as **Round Robin DNS**.
+* **Canonical Name (CNAME) Record:** Used to configure an **ALIAS** for an existing address record (A or AAAA). CNAME records are often used to make DNS administration easier. An alias can be redirected to a completely different host temporarily during system maintenance. Multiple different named records can refer to the same IP address (and vice versa in the case of load balancing).
+    * *Best Practice:* While it's possible to use multiple A/AAAA records for a single FQDN, using CNAME records is often considered best practice for aliases.
+* **Mail Exchange (MX) Record:** Used to identify an email server for the domain.
+    * The host identified in an MX record must have an associated A or AAAA record.
+    * **An MX record MUST NOT point to a CNAME record.** It must point directly to an A or AAAA record.
+* **Service (SRV) Record:** Contains the service name and port on which a particular application is hosted. They are an essential part of the infrastructure of Active Directory, used to locate domain controllers. As with MX, SRV records can be configured with a priority value.
+* **Text (TXT) Record:** Used to store any free-form text that may be needed to support other network services. A single domain may have many TXT records. Most commonly, they are used as part of **Sender Policy Framework (SPF)** and **DomainKeys Identified Mail (DKIM)**.
+    * **SPF (Sender Policy Framework):** Used to list the IP addresses or names of servers that are permitted to send email from a particular domain. Combats sending of spoofed email. Mail servers check that incoming mail really did come from an authorized host.
+    * **DKIM (DomainKeys Identified Mail):** Used to decide whether you should allow received email from a given source. DKIM uses encrypted signatures to prove that a message really originated from the domain it claims, preventing spam and mail spoofing. You put your public key in the DKIM TXT record.
+
+#### Pointer (PTR) Records / Reverse Lookup
+
+DNS Servers have **Forward Lookup Zones** and **Reverse Lookup Zones**.
+* All previously listed records (A, AAAA, CNAME, MX, SRV, TXT) are **forward lookup** records, as they all return an IP address when given a host name.
+* A **reverse lookup / DNS Query** returns the Host name associated with a given IP address. This information is stored in a **Reverse Lookup Zone** as a **PTR Record**.
+* Reverse DNS querying uses a special domain named by the first three octets of IPv4 addresses in the zone in reverse order, appended with `in-addr.arpa`. For IPv6, each character is expressed in reverse order up to the network prefix as a subdomain and appended with `ip6.arpa`.
+    * Example IPv4: `198.51.100.1` becomes `1.100.51.198.in-addr.arpa`
+    * Example IPv6: `2001:0db8::abcd:ef12:1234` becomes `4.3.2.1.2.1.f.e.d.c.b.a.d.c.b.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.0.2.ip6.arpa`
+* Reverse lookup zones are not mandatory and are often omitted from DNS servers.
+
+#### DNS Server Configuration
+
+* The function of a **Resolver** is to perform Recursive queries in response to requests from client systems (and stub resolvers). An alternative to recursion is **Forwarding** queries.
+* A Recursive Resolver must be configured with a **Root Hints File** so that it can query the whole DNS hierarchy from the Root Server down.
+* DNS Servers should allow Recursive queries **only from Authorized Internal Clients** for security.
+
+#### DNS Zones
+
+DNS Name Servers maintain DNS namespace in **Zones**. A single Zone namespace might host records for multiple Domains. A single name server might be configured to manage multiple Zones.
+
+* **Primary (Master) Zone:** Zone records held on this server are **editable (writable)**. A zone can be hosted by multiple primary servers for redundancy, but changes must be carefully replicated and synchronized. It is critical to update the **Serial Number** for each change.
+* **Secondary (Slave) Zone:** This server holds a **Read-Only Copy** of the zone. This copy is maintained through a process of replication known as **Zone Transfer** from a primary name server. Typically, secondary servers are provided on two or more separate servers to provide fault tolerance and load balancing. The Serial Number is a critical part of Zone Transfer.
+
+A name server that holds complete records for a domain can be defined as **Authoritative**. This means that a record in the zone identifies the server as a name server for that namespace. Both Primary & Secondary name servers are authoritative.
+
+Servers that don't maintain a zone are referred to as **Cache-Only Servers** during the name resolution process. A non-authoritative answer from a server is one that derives from a cached record rather than directly from the zone records.
+
+#### Time to Live (TTL)
+
+Each Resource Record can be configured with a default **TTL (Time to Live)** value, measured in seconds. This value instructs resolvers how long a query result can be kept in cache.
+* Setting a **low TTL** allows records to be updated more quickly but increases load on the server and can cause higher latency (delay) on client connections to services (due to more frequent queries).
+* Common TTL values: 300 seconds (5 mins), 3600 seconds (1 hour), 86400 seconds (1 day), 604800 seconds (1 week).
+* A very long TTL can cause issues if changes are made to the record, as the old cached information will persist for longer.
+
+#### Forwarders and Conditional Forwarders
+
+* A **Forwarder** transmits a client query to another DNS server and routes its reply back to the client.
+* A **Conditional Forwarder** performs this task for certain domains only. For example, an admin might configure a DNS server that is authoritative for the local private network (Internal DNS), but that forwards any requests for Internet domains to an external DNS resolver run by your ISP, or to a trusted public service like Google DNS (8.8.8.8) or Cloudflare (1.1.1.1).
+
+### Troubleshooting DNS
+
+The use of caching and the distributed nature of DNS means that configuration errors can occur in several different places. To investigate name resolution issues:
+
+1.  **Verify Host Configuration:**
+    * Windows: `ipconfig /all`
+    * Linux: `hostname -I` or `ip a`
+2.  **DNS Lookup Tools:**
+    * **`nslookup` (Windows):** Troubleshoots DNS name resolution.
+        * Running `nslookup` without arguments starts it in interactive mode.
+        * Full syntax: `nslookup [options] [Host] [DNS Server]`
+        * `options`: Specifies lookup subcommand (e.g., `-type=ns` to query name servers, `-type=MX` for mail records).
+        * `Host`: Can be a Host Name, Domain Name/FQDN, or an IP address.
+        * `DNS Server`: The IP address of a specific server to use for the query (e.g., `8.8.8.8` for Google DNS).
+    * **`Resolve-DnsName` (PowerShell - Windows):** Provides a more sophisticated, scripted approach using cmdlets. It allows for more flexible testing of name resolution (e.g., checking HOSTS file, DNS Cache, specific DNS servers).
+    * **`dig` (Domain Information Groper - Linux/Unix/macOS):** A powerful command-line tool for querying DNS servers.
+        * Can be run pointing at a specific DNS server; otherwise, it uses the default resolver.
+        * Without any specific settings, it queries the DNS Root Zone.
+        * A simple query like `dig host` will search for the A record for the Host, Domain, or FQDN; `dig -x [IP Address]` will perform a PTR (reverse) lookup.
+3.  **Interpreting Results:**
+    * "The Authority" / Authoritative: The DNS server queried is the authority for the zone; it contains the zone source file.
+    * "Non-Authoritative": The answer is derived from cached information, not directly from the zone source file. This information is valid only for its TTL. A very long TTL can cause issues if changes are made.
+
+### DNS Caching
+
+DNS caching is performed by both DNS servers and client computers. Each application on a client computer might also be configured to manage its own DNS cache rather than relying on a shared Operating System cache.
+
+Changes to Resource Records (and subsequent updates) can be relatively slow to propagate around the Internet due to caching.
+
+**Planning for a Record Change:**
+1.  **Reduce the TTL** in the period before the change (e.g., to 5 minutes).
+2.  **Wait for the old TTL to expire** for existing cached records to clear.
+3.  **Update the record** on the authoritative DNS server.
+4.  **Wait for the change to propagate** (at least the reduced TTL duration) before expecting all clients to see the new record.
+5.  **Revert to the original TTL value** when the update has safely propagated and is stable.
+
+### Internal vs. External DNS Zones
+
+A company will use primary & secondary NS to maintain authoritative zone records for the domains it manages.
+
+* **Internal DNS Zones:** Refer to the domains used on the private network only. These are available only to internal clients. For instance, the zone records for `subdomain.bigsupport.com` would be served from internal name servers, allowing a client PC (`pc1.bigsupport.com`) to contact a local application server (`crm.bigsupport.com`). The name servers hosting these internal subdomain records **must not be accessible from the Internet** for security.
+* **External DNS Zones:** Refer to records that Internet clients must be able to access. For a company running web and email services on `bigsupport.com`, in order for Internet hosts to use a web server at `www.bigsupport.com` or send email to an `@bigsupport.com` address, the zone records for `bigsupport.com` must be hosted on a name server that is accessible over the Internet.
+
+It is generally a good idea to separate the DNS servers used to host zone records (authoritative servers) from the ones used to service client requests for non-authoritative domains (recursive resolvers/forwarders).
+
+### Key Configuration Best Practices for DNS
+
+* Configure primary & secondary name servers to host records for your LAN. These name servers should only be accessible by authorized internal clients.
+* Configure the appropriate Host (A/AAAA), MX, Service (SRV), and TXT records for the forward lookup zone.
+* Configure a reverse lookup zone to allow clients to resolve IP addresses to host names (PTR records).
+* Configure secondary NS to obtain up-to-date records periodically through a Zone Transfer with the primary NS.
+* To resolve client Internet queries, set up a forwarder to pass queries to trusted resolvers on the Internet (e.g., your ISP's DNS server, or trusted public services like Google DNS or Cloudflare DNS).
+* For external DNS, consider using a third-party provider, ideally a Cloud Service, to ensure high availability. Without public DNS, your customers cannot browse your websites or send you email.
+* Implement SPF and DKIM TXT records to prevent mail spoofing by proving sender validity and digitally signing your outgoing mail.
+* Be aware that even with DNS server and client caching, changes to resource records can be relatively slow to propagate. Plan for record changes by reducing TTLs beforehand.
+
+### DNS Configuration
+
+Devices will save the DNS Server’s responses to a local DNS cache, this means they don’t have to query the server every single time they want to access a particular destination, this may lead to DNS cache poisoning. For hosts in a network to use dns, you don’t need to configure DNS on the routers , the routers simply forward the DNS messages like any other packets. Cisco router can be configured as a DNS server , although rare. A Cisco Router can also be configured as a DNS client Most devices have a Hosts file which existed before dns to save the Hostname of IP addresses local to a device, which is C:\windows\system32\drivers\etc\hosts or /etc/hosts
+Normal DNS requests and responses are sent by UDP port 53, DNS can use TCP or generates TCP sessions for only Zone Transfers and query responses that exceed 512bytes—Recursive DNS Search [which allow DNS servers to provide authoritative name resolution to hosts]. 
+
+A Recursive DNS server is that, when asked for information it does not have, performs a repetitive (recursive) process to ask other DNS servers in sequence, sending repeated DNS messages in an effort to identify the authoritative DNS server or DNS server that knows the information. 
+
+Router> enable 
+Router# configure terminal 
+Router(config)# ip dns server -> Configure a Router to act as a DNS server
+Router(config)# ip host hostname host-IP -> Add an entry to the ip hostname table, Building the router’s own host table with a list of hostname/IP address mappings. 
+Router(config)# ip name-server 8.8.8.8 -> Specify address of name server to use, this Configures an external DNS Server that router will query, if the requested record is not in its own host table. 
+Router(config)# ip domain lookup -> Enable Router to perform DNS queries. Becoming a DNS client.
+Router(config)# ip domain name FQDN -> Configure the default domain name locally, once done all connected devices to the router, will have a FQDN of hostname.FQDN
+Router(config)# do show hosts -> To view the routers DNS cache and host table.
+
+---
+
+## DYNAMIC HOST CONFIGURATION PROTOCOL (DHCP)
+
+### Dynamic Host Configuration Protocol (DHCP)
+* **Function:** A network management protocol used on Internet Protocol (IP) networks for dynamically assigning IP addresses and other communication parameters (like subnet mask, default gateway, DNS server addresses) to devices connected to the network.
+* **Core Purpose:** Automates the configuration of network devices, eliminating the need for manual configuration and reducing errors.
+* **Protocol:** Operates at the **Application Layer** of the OSI model but functions heavily with the **Transport Layer (UDP port 67 for server, UDP port 68 for client)**.
+* **Key Concept:** DHCP uses a client-server model. A DHCP server manages a pool of IP addresses and configuration information.
+* **Ports:** Client UDP 68, Server UDP 67.
+**DHCP** provides an automatic method for allocating an IP address, subnet mask, and optional parameters (like Default Gateway and DNS Server Addresses) when a host joins a network. The IP address is leased by the server for a limited period only.
+
+### DHCP DORA Process (IP Lease Process)
+* **Function:** The four-step process a DHCP client uses to obtain an IP address and other configuration information from a DHCP server.
+* **Steps:**
+    1.  **Discover:** The client broadcasts a **DHCP Discover** message on the local network to find available DHCP servers. (Source IP: 0.0.0.0, Destination IP: 255.255.255.255)
+    2.  **Offer:** Available DHCP servers receive the Discover message and respond with a **DHCP Offer** message. This message proposes an IP address and other configuration parameters to the client. (Source IP: Server's IP, Destination IP: 255.255.255.255 or Client's MAC)
+    3.  **Request:** The client receives one or more Offer messages and broadcasts a **DHCP Request** message to the network, formally requesting the offered IP address from a specific server (usually the first one that offered).
+    4.  **Acknowledge:** The chosen DHCP server sends a **DHCP Acknowledge (ACK)** message to the client, confirming the IP address assignment and providing all the necessary configuration parameters. The client then configures its network interface with the received information. Once the client receives the ACK, it performs an ARP message to check that the Address is unused. If so, it will start to use the Address and options.
+
+**DHCP DORA Process Sequence:**
+
+```mermaid
+sequenceDiagram
+    participant Client as "DHCP Client\n(0.0.0.0)"
+    participant Network as "Broadcast Domain\n(255.255.255.255)"
+    participant Server as "DHCP Server\n(192.168.1.1)"
+
+    Note over Client,Server: DHCP DORA Process\nDynamic IP Address Assignment
+    
+    rect rgb(255, 245, 230)
+        Note over Client,Server: 1. DISCOVER Phase
+        Client->>Network: DHCP DISCOVER (Broadcast)\nSrc: 0.0.0.0:68\nDst: 255.255.255.255:67\nMAC: Client's MAC\nRequesting IP configuration
+        Network->>Server: Forward broadcast to\nall DHCP servers
+        Note left of Client: Client has no IP yet\nBroadcasts to find servers\nUDP Port 68→67
+    end
+    
+    rect rgb(230, 245, 255)
+        Note over Client,Server: 2. OFFER Phase
+        Server->>Network: DHCP OFFER (Broadcast/Unicast)\nSrc: 192.168.1.1:67\nDst: 255.255.255.255:68\nOffered IP: 192.168.1.100\nSubnet: 255.255.255.0\nGateway: 192.168.1.1\nDNS: 8.8.8.8\nLease: 86400 sec (1 day)
+        Network->>Client: Deliver offer to client
+        Note right of Server: Server proposes:\n• IP address from pool\n• Subnet mask\n• Default gateway\n• DNS servers\n• Lease duration
+    end
+    
+    rect rgb(240, 255, 240)
+        Note over Client,Server: 3. REQUEST Phase
+        Client->>Network: DHCP REQUEST (Broadcast)\nSrc: 0.0.0.0:68\nDst: 255.255.255.255:67\nRequested IP: 192.168.1.100\nServer ID: 192.168.1.1\nAccepting offer
+        Network->>Server: Forward request
+        Note left of Client: Client accepts offer\nBroadcasts to inform all\nservers of selection\nIdentifies chosen server
+    end
+    
+    rect rgb(245, 255, 245)
+        Note over Client,Server: 4. ACKNOWLEDGE Phase
+        Server->>Network: DHCP ACK\nSrc: 192.168.1.1:67\nDst: 255.255.255.255:68\nConfirmed IP: 192.168.1.100\nLease starts now\nT1 (Renewal): 43200 sec\nT2 (Rebind): 75600 sec
+        Network->>Client: Deliver ACK
+        Note right of Server: Server confirms:\n• IP assignment final\n• Lease activated\n• Timers T1 & T2 set\n• Client can use IP
+    end
+
+    Note over Client: Client performs ARP check\nConfigures interface\nIP: 192.168.1.100/24\nGateway: 192.168.1.1\nDNS: 8.8.8.8
+    
+    rect rgb(255, 255, 240)
+        Note over Client,Server: Lease Management
+        Note over Client: T1 Timer (50% lease)\nUnicast renewal to original server
+        Note over Client: T2 Timer (87.5% lease)\nBroadcast rebind if no response
+        Note over Client: Lease expires\nRelease IP, restart DORA
+    end
+    
+    LeaseTimers["DHCP Lease Timers:\n✓ Lease Duration: Full period IP is valid\n✓ T1 (50%): Try renewing with original server\n✓ T2 (87.5%): Try rebinding with any server\n✓ Expired: Release IP, start DORA again"]
+    
+    style LeaseTimers fill:#FFF9C4,stroke:#F39C12
+```
+
+*Figure: DHCP DORA process showing the four-phase IP address acquisition: (D)iscover → (O)ffer → (R)equest → (A)cknowledge. Client starts with no IP (0.0.0.0), broadcasts to find servers, receives offers, selects one, and gets configuration confirmed. Includes lease management with T1 (renewal) and T2 (rebind) timers.*
+
+### DHCP Server Configuration & Scopes
+
+A DHCP Server must be allocated a static IP Address and configured with a range of IP Addresses and Subnet Masks, plus option values, to allocate as a **Scope**. To define a scope, you must provide a start & end IP Address along with a Subnet mask.
+
+The server maintains a one-to-one mapping of scopes to subnets (i.e., no scope can cover more than one subnet & no subnet can contain more than one scope). The DHCP Server must be placed in the same Subnet as its clients.
+
+More advanced DHCP servers might be configured to manage & support multiple scopes. Where a server provides IP Config for multiple subnets/scopes, it must choose the pool to service each request based on the subnet from which the request originated.
+
+For fault tolerance and redundancy, **Split Scopes** can be configured with non-overlapping address ranges. DHCP for multiple subnets is usually handled by configuring **Relay Agents** to forward requests to a central DHCP server.
+
+### DHCP Lease Management
+
+An IP Address is leased by the server for a limited period only. A client can attempt to renew or rebind the lease before it expires. If the lease cannot be renewed, the client must release the IP address and start the DHCP DORA process again.
+
+* **T1 Timer (Default: Half the lease period has elapsed):** Client attempts to renew the lease with the original DHCP server.
+* **T2 Timer (Default: 87.5% of the lease duration is up):** If no response from the original DHCP server, the client attempts to rebind the lease by broadcasting a DHCP request to any available DHCP server.
+
+A long lease time means the client doesn't have to renew the lease often. Where the DHCP server's Address pool is not replenished frequently or IP addresses are in short supply, a shorter lease period enables the DHCP Server to allocate addresses previously assigned to hosts that have become inactive on the Network.
+
+If both T1 & T2 timers elapse, the client releases the IP address and broadcasts to discover a new server.
+
+To force a release of a lease, a Windows Client can use `IPCONFIG /RELEASE` and `IPCONFIG /RENEW`. Linux clients can use `dhclient`, Network Manager, or Systemd-Networks.
+
+Failure to renew a lease: A Windows host reverts to **Automatic Private IP Addressing (APIPA)** (addresses in the range `169.254.0.0/16`). Linux might use link-local config, set the Address to unknown, or leave the interface unconfigured.
+
+### DHCP Options
+
+Each additional Option supplied by a DHCP Server is identified by a byte or decimal Value. Such Options include:
+
+* The **Default Gateway** (IP Address of the Router)
+* The **IP Address(es) of DNS Servers** (i.e., act as resolvers for name queries)
+* The **DNS Suffix** (domain name) to be used by the client
+* Other Useful Options such as Network Time Sync (NTP), File Transfer (TFTP), and VoIP proxy.
+
+A set of default/global options can be configured on a server-wise basis. Default Options can be overridden by setting scope-specific Options.
+
+### DHCP Reservations & Exclusions
+
+One disadvantage of the standard Dynamic Assignment method is that it doesn't guarantee that any given client will retain the same IP Address over time.
+
+1.  One solution is to configure **Static Assignments** using IP Addresses outside the DHCP Scope OR a specially configured Exclusion Range.
+2.  A **Reservation** is a mapping of a client's MAC Address or Interface ID to a specific IP Address within the DHCP Server's Address pool.
+3.  An **Automatically Allocated Reservation** refers to an Address that is leased permanently to a client. The Admin doesn't predetermine which specific IP Address will be leased; the server automatically makes a permanent lease for the first requested IP.
+
+### DHCP Relay Agent
+
+* **Function:** A network device (typically a router) that forwards DHCP messages between clients and servers that are on different IP subnets. DHCP messages are usually broadcast, so they don't cross router boundaries by default.
+* **Purpose:** Allows a single DHCP server to serve multiple subnets without needing a server on each subnet, saving administrative overhead and resources.
+* **Mechanism:** The relay agent converts broadcast DHCP messages into unicast messages directed to the DHCP server.
+A **DHCP Relay Agent** can be configured to provide forwarding of DHCP traffic between Subnets. Routers that can provide this type of forwarding are RFC 1542 Compliant.
+
+The DHCP Relay Agent (configured on RFC 1542 Compliant Routers) intercepts DHCP broadcast frames, then applies a Unicast Address for the appropriate DHCP server(s) and forwards them over the interface for the subnet containing the server. The DHCP Server can identify the original IP Subnet from the packet and offer a lease from the appropriate scope (subnet range). The DHCP relay also performs the reverse process of directing responses from the server to the appropriate client Subnet.
+
+**IP Helper** functionality can be configured on Routers to allow certain types of broadcast traffic (including DHCP) to be forwarded to an interface. The IP helper function supports the function of the DHCP relay agent. UDP forwarding is a more general application of the same principle.
+
+### DHCPv6 (Ports: Client UDP 546, Server UDP 547)
+
+IPv6's Stateless Address Auto-Configuration (SLAAC) process can locate routers and generate a host address with a suitable network prefix automatically. Therefore, the role of a DHCP Server in IPv6 is different. DHCPv6 is often just used to provide additional option settings, rather than leases for host addresses.
+As IPv6 does not support broadcasts, clients use the multicast Address for routers (`ff02::1:2`) to discover a DHCPv6 server, using Neighbor Discovery Protocol (NDP).
+* **Function:** Provides stateful address configuration and other network parameters (DNS servers, NTP servers) for IPv6 hosts.
+* **Types:**
+    * **Stateful DHCPv6:** Assigns unique IPv6 addresses and all configuration parameters to hosts, maintaining state (records of assigned addresses).
+    * **Stateless DHCPv6:** Used in conjunction with SLAAC. SLAAC assigns the IPv6 address and default gateway, while Stateless DHCPv6 provides additional information like DNS server addresses or SIP server addresses.
+* **Process:** Similar to DHCP for IPv4, involving messages like Solicit, Advertise, Request, Reply.
+* **Requirement:** Requires a DHCPv6 server.
+
+#### DHCPv6 Process Steps:
+
+1.  **Step 1: Client Router Solicitation (RS):** Client uses NDP Router Solicitation to request information from the Router.
+2.  **Step 2: Router Advertisement (RA):**
+    * **Stateless Mode:** Router Advertisement; Client obtains a Network prefix from a Router Advertisement and, using it with the appropriate Interface ID, obtains only extra options from the DHCPv6 Server.
+    * **Stateful Mode:** The Router Advertisement cannot help the client host obtain a routable IP address using usual NDP Router Advertisement. Hence, it directs the client to the DHCPv6 server to obtain it directly. (Therefore, the host obtains IP prefix AND extra options from DHCPv6 Server Directly!)
+3.  **Step 3: Client Solicit:** Client solicits a DHCPv6 Server using the multicast address `ff02::1:2`.
+4.  **Step 4: DHCPv6 Server Advertise:** DHCPv6 Server Advertises its availability.
+5.  **Step 5: Client Request (Information Request):** Client requests information message on IP Addressing & Extra Options.
+6.  **Step 6: DHCPv6 Server Reply:** DHCPv6 Server replies Message with IP Address from its scope and extra information (DNS, SIP, SNTP, Domain Options, etc.).
+
+**Note:** There is no mechanism in DHCPv6 for setting the Default Route; the host learns the default gateway from the Router Advertisement (NDP).
+
+### DHCP Scope Properties (General)
+
+* **IP Address Range (+ excluded addresses):** A contiguous pool of IP Addresses for a subnet. This is called a pool (or scope). DHCP Exceptions & Exclusions can be made inside of this scope.
+* **Lease Durations:** Addresses are reclaimed after a lease period. A longer lease time means the client doesn't have to renew often. If the Address pool is limited, use short lease times to prevent address exhaustion.
+    * T1 Timer (50% of lease time).
+    * T2 Timer (87.5% of lease time). If T1 & T2 are exceeded, the client restarts the DORA process.
+* **DNS Server, Default Gateway, VoIP Servers:** Allocation & Reallocation.
+
+### DHCP Assignment Methods
+
+* **Dynamic Assignment:**
+    * DHCP server has a pool of addresses to give out.
+    * Addresses are reclaimed after a lease period.
+* **Static Assignment / Static DHCP / IP Reservation / Address Reservation:**
+    * Administratively configured using a table of MAC addresses to matching IP addresses.
+    * Ensures a specific device always gets the same IP.
+* **Automatic Assignment:**
+    * Similar in principle to Dynamic.
+    * DHCP server keeps a list of past assignments, so a client will always get the same IP address if available.
+    * Additional overhead in storage for the server.
+
+Renew lease after T1; if not, check back at timer T2. The countdown is reset if the lease is renewed.
+
+### Best Practices
+
+* Configure Secure DHCP & DNS services and ensure that all network hosts can contact them, using DHCP Relay where appropriate.
+* Configure reservations or static assignments for hosts that need to be allocated a consistent IP address.
+
+**EVERY HOST INTERFACE NEEDS AN IP CONFIG TO COMMUNICATE ON A TCP/IP NETWORK.**
+
+### DHCP Configuration
+
+DHCP (BootP-Server UDP 67 / BootP-Client UDP 68) is used to allow hosts to automatically/dynamically learn various aspects of their network configuration, such as IP ADDRESS, SUBNET MASK, DEFAULT GATEWAY, DNS SERVER without manual/static configuration. DHCP allows both the permanent assignment of host addresses, but more commonly, DHCP assigns a temporary lease of IP addresses. With these leases, the DHCP server can reclaim IP addresses when a device is removed from the network, making better use of the available addresses. DHCP also enables mobility.
+
+DHCP server ‘lease’ IP address to clients. These leases are usually not permanent, and the client must give up the address at the end of the lease.
+
+* To release a DHCP leased address → `ipconfig /release`.
+* To obtain a DHCP address lease → `ipconfig /renew`.
+
+DHCP operations fall into four phases: client-server discovery, IP lease offer, IP lease request, & IP lease acknowledgement. These stages are often abbreviated as DORA for:
+
+* **DISCOVERY** → (Client → Server) Broadcast (always)
+    * **Reason:** The client does not yet have an IP address, so it sends to the broadcast IP 255.255.255.255 to reach any available DHCP server.
+* **OFFER** → (Server → Client) Usually Broadcast (can be unicast under specific conditions).
+    * **Reason:** The client may not yet have a usable IP, so the server broadcasts the offer so the client can receive it even without a configured IP stack. However, if the server knows the client’s MAC address and the network allows it, it can unicast the offer directly to the client.
+* **REQUEST** → (Client → Server) (broadcast msg ff:ff:ff:ff:ff:ff, 255.255.255.255 from client, however a field is filled in the DHCP packet - DHCP server identifier) The client still doesn’t have a valid IP and is notifying all DHCP servers of the chosen offer, so it uses broadcast again.
+* **ACKNOWLEDGEMENT** → (either Broadcast or Unicast)(Server → Client):
+    * **Broadcast or Unicast depending on the client state:**
+        * Broadcast if it’s a new lease and the client has no IP yet.
+        * Unicast if the client already has an IP and is renewing the lease (typically during the T1 or T2 timer stages). The client includes its current IP and can receive unicast packets now.
+* **NAK (Negative Acknowledgment):** Opposite of Acknowledgment, used to decline a client's request.
+* **RELEASE:** Used to tell the server that the client no longer requires its IP address.
+* **DECLINE:** Used to decline the IP address offered by the DHCP server.
+
+DHCP clients, however, have a somewhat unique problem: they do not have an IP address yet, but they need to send these DHCP messages inside IP packets. To make that work, DHCP messages make use of two special IPv4 addresses that allow a host that has no IP address to still be able to send and receive messages on the local subnet:
+
+* **0.0.0.0:** An address reserved for use as a source IPv4 address for hosts that do not yet have an IP address.
+* **255.255.255.255:** The local broadcast IP address. Packets sent to this destination address are broadcast on the local data link, but routers do not forward them.
+
+Some Network Engineers might choose to configure each router in a network topology as the DHCP sever for its connected LANs to keep the protocol flow local. However, for large enterprises it’s recommended to use a centralized DHCP server. A centralized DHCP server approach has advantages as well. In fact, some Cisco design documents suggest a centralized design as a best practice, in part because it allows for centralized control and configuration of all the IPv4 addresses assigned throughout the enterprise.
+
+If the server is centralized, it won’t receive the DHCP clients’ broadcast DHCP messages (as broadcast messages don’t leave the local subnet). To fix this, we configure a router to act as a DHCP RELAY AGENT. The router-RelayAgent will forward the clients' broadcast DHCP messages to the remote DHCP server as Unicast messages.
+
+In some enterprise networks, that router configuration can be a single command on many of the router’s LAN interfaces (`ip helper-address server-ip`), which identifies the DHCP server by its IP address. This feature, by which a router relays DHCP messages by changing the IP addresses in the packet header, is called DHCP relay.
+
+A DHCP pool is a subnet of addresses that can be given to DHCP clients, as such as other info such as default gateway and dns server. Ensure to create a separate DHCP pool for each network the router is acting as a DHCP server for.
+
+#### DHCP Server Configuration for Dynamic Allocation - DHCP acting in the capacity of a server
+
+```cli
+Router(config)# ip dhcp excluded-address 192.168.10.1 192.168.10.20
+```
+Specify a range of addresses that won’t be given to DHCP clients. The server needs to know which addresses in the subnet to not lease. This list allows the engineer to reserve addresses to be used as static IP addresses.
+
+```cli
+Router(config)# ip dhcp pool LAN_CLIENTs
+```
+Specify DHCP pool name.
+
+```cli
+Router(dhcp-config)# network 192.168.10.0/24
+```
+Specify the subnet of addresses to be assigned to clients (excluding the excluded addresses). The DHCP server can use this information to know all addresses in the subnet. (The DHCP server knows to not lease the subnet ID or subnet broadcast address.)
+
+```cli
+Router(dhcp-config)# default-router IP-ADDR
+```
+This is the IP address of the router on that subnet. Specify the default gateway that DHCP client should use. Host Default Router Setting Should Equal Router Interface Address.
+
+```cli
+Router(dhcp-config)# dns-server 8.8.8.8
+```
+Specify the DNS server that DHCP clients should use. This is a list of DNS server IP addresses.
+
+```cli
+Router(dhcp-config)# domain-name FQDN
+```
+Specify the Domain-Name of the Network.
+
+```cli
+Router(dhcp-config)# lease days hours minutes
+```
+The server leases an address for a time (usually a number of days), and then the client can ask to renew the lease. If the client does not renew, the server can reclaim the IP address and put it back in the pool of available IP addresses. The server configuration sets the maximum time for the lease.
+
+```cli
+Router(dhcp-config)# lease infinite
+```
+This configures AUTOMATIC ALLOCATION, which sets the DHCP lease time to infinite. As a result, once the server chooses an address from the pool and assigns the IP address to a client, the IP address remains with that same client indefinitely.
+
+#### DHCP Relay Agent Configuration - DHCP acting in the capacity of a Relay agent
+
+```cli
+Router(config)# interface Gx/y
+```
+Specify the interface connected to the subnet of the client devices.
+
+```cli
+Router(config-if)# ip helper-address dhcp-server-IP
+```
+Configure an interface to forward/“RELAY” DHCP broadcasts across a network to the IP address of the DHCP server.
+
+We first specified an interface on the router serving the subnet that requires a DHCP, and then we configured a relay agent for that interface using the IP address of a centralized DHCP server. Ensure the router has a static or dynamic route to the DHCP server. The DHCP relay feature must be configured for any router interface that connects to a subnet where:
+
+* DHCP clients exist in the subnet
+* DHCP servers do not exist in the subnet
+
+Once such interfaces have been identified, the configuration requires the `ip helper-address` interface subcommand on each of those interfaces. The `ip helper-address server-ip` subcommand tells the router to do the following for the messages coming in an interface, from a DHCP client:
+
+1.  Watch for incoming DHCP messages, with destination IP address 255.255.255.255.
+2.  Change that packet’s source IP address to the router’s incoming interface IP address.
+3.  Change that packet’s destination IP address to the address of the DHCP server (as configured in the `ip helper-address` command).
+4.  Route the packet to the DHCP server.
+
+This command gets around the “do not route packets sent to 255.255.255.255” rule by changing the destination IP address. Once the destination has been set to match the DHCP server’s IP address, the network can route the packet to the server.
+
+**NOTE:** THE `IP HELPER-ADDRESS` command configures an interface to forward broadcasts to the following UDP ports for the protocols DNS, TFTP, NetBios, TACACS.
+
+#### DHCP Client Configuration - DHCP acting in the capacity of a Client
+
+```cli
+Router(config)# interface Gx/y
+```
+Specify the interface connected to the DHCP server.
+
+```cli
+Router(config-if)# ip address dhcp
+```
+Use the command to tell the router to use DHCP to learn its own IP address. The router then adds a default route based on the default gateway (routers do not normally use a default gateway setting; only hosts use a default gateway setting. However, the router takes advantage of that information by turning that default gateway IP address into the basis for a default route) to its IP routing table. In most every case it makes more sense to statically configure router interface IP addresses with the address listed in the `ip address address mask` interface subcommand. However, configuring a router to lease an address using DHCP makes sense in some cases with a router connected to the Internet; in fact, most every home-based router does just that. A router with a link to the Internet can learn its IP address and mask with DHCP and also learn the neighboring ISP router’s address as the default gateway. Additionally, router can distribute that default route to the rest of the routers using an interior routing protocol like OSPF. To recognize this route as a DHCP-learned default route, look to the administrative distance value of 254. IOS uses a default administrative distance of 1 for static routes configured with the `ip route` configuration command but a default of 254 for default routes added because of DHCP. Like Windows, macOS adds a default route to its host routing table based on the default gateway, as well as a route to the local subnet calculated based on the IP address and mask learned with DHCP.
+
+```cli
+Router()# show ip dhcp binding
+```
+Displays all the DHCP clients that are currently assigned addresses, as well as information on Lease expiration, Device IP & MAC.
+
+To see more details specific to DHCP, instead use the `show dhcp lease` command to see the (temporarily) leased IP address and other parameters.
+
+```cli
+Router()# show dhcp lease
+```
+
+```cli
+Router()# show ip dhcp pool
+```
+Verify the configured IPv4 subnets in a DHCP pool, on a router configured as a DHCP server.
+
+---
+
+## Hypertext Transfer Protocol Secure (HTTPS)
+* **Definition:** The secure version of HTTP (Hypertext Transfer Protocol). It uses SSL/TLS (Transport Layer Security) to encrypt communication between a web browser and a website.
+* **Core Purpose:** To provide secure communication over a computer network, particularly the internet, ensuring data confidentiality, integrity, and authentication.
+* **Protocol Stack:** HTTPS is essentially HTTP layered on top of SSL/TLS.
+* **Port:** Primarily uses **TCP port 443**.
+* **Key Benefit:** Protects sensitive data (e.g., login credentials, financial transactions) from eavesdropping and tampering by unauthorized parties.
+
+### How HTTPS Works
+* **Encryption:** The data exchanged between the client (browser) and the server is encrypted using symmetric encryption after an initial key exchange. TLS uses asymmetric encryption during the handshake to securely exchange the symmetric keys.
+* **Digital Certificates:** Servers present a digital certificate (issued by a Certificate Authority - CA) to clients. This certificate contains the server's public key and verifies its identity.
+* **Authentication:**
+    * **Server Authentication:** The client verifies the server's identity using its digital certificate, ensuring it's communicating with the legitimate website.
+    * **Client Authentication (Optional):** In some cases, the server may also request a client certificate to authenticate the client.
+* **Data Integrity:** Hashing functions are used to detect any alteration of data during transmission.
+
+(Image Placeholder - HTTPS Process)
+
+The HTTP (The Hyper Text Transfer Protocol) handles our web requests to servers. HTTP functions as a request–response protocol in the client–server computing model. HTTP uses a set of verbs, like GET, POST, PUT, and HEAD, to retrieve and send data. Anytime a page is loaded, there are multiple web requests to retrieve content like images, text, and formatting code.  High-traffic websites often benefit from web “CACHE” servers that deliver content on behalf of upstream servers to improve response time. Web browsers “CACHE” previously accessed web resources and reuse them, when possible, to reduce network traffic. HTTP is a “STATELESS” protocol. A stateless protocol does not require the HTTP server to retain information or status about each user for the duration of multiple requests. However, some web applications implement “Statefulness” or server side sessions using for instance HTTP “COOKIES” or hidden variables within web forms. 
+
+* HTTP/1.1➡️ was one of the first versions of the HTTP protocol to be designed and implemented. It operates by sending messages in the form of text. HTTP/1.1 is commonly used over TCP and is the slowest of the HTTP versions regarding data transmission.
+* HTTP/2➡️ is a major revision of HTTP/1.1, developed with the intent to try and reduce web page load latency. However, the most significant departure from HTTP/1.1 is the encapsulation of all messages in binary format rather than plain text. This allows HTTP/2 to apply different techniques for data transmission, including sending smaller packets of data for greater flexibility of data transfer. This also allows a single connection to be made between two communicating entities rather than multiple as required by HTTP/1.1. Similar to HTTP/1.1, HTTP/2 also leverages TCP for transport.
+* HTTP/3➡️ is the third major version of HTTP. While there are quite a few complex technological differences between HTTP/3 and the previous versions, one of the most important is how the protocol deals with lost packets. HTTP/3 also differs through its use of transport protocol, leveraging a transport protocol called QUIC, as opposed to earlier versions of HTTPS which use a combination of TCP and TLS to ensure reliability and security respectively. This means that HTTP/3 uses a single handshake to set up a connection, rather than having two separate handshakes for TCP and TLS, meaning the overall time to establish a connection is reduced.
+* HTTP Strict Transport Security (HSTS) is a policy mechanism that helps to protect websites against man-in-the-middle attacks such as protocol downgrade attacks and cookie hijacking. It allows web servers to declare that web browsers (or other complying user agents) should automatically interact with it using only HTTPS connections, which provide Transport Layer Security (TLS/SSL), unlike the insecure HTTP used alone. The HSTS Policy is communicated by the server to the user agent via an HTTP response header field named "Strict-Transport-Security". HSTS Policy specifies a period of time during which the user agent should only access the server in a secure fashion. Websites using HSTS often do not accept clear text HTTP, either by rejecting connections over HTTP or systematically redirecting users to HTTPS (though this is not required by the specification). The consequence of this is that a user-agent not capable of doing TLS will not be able to connect to the site. The protection only applies after a user has visited the site at least once, relying on the principle of Trust on first use. The way this protection works is that a user entering or selecting a URL to the site that specifies HTTP, will automatically upgrade to HTTPS, without making an HTTP request, which prevents the HTTP man-in-the-middle attack from occurring.
+* WebSocket is a computer communications protocol, providing full-duplex communication channels over a single TCP connection. Although they are different, RFC 6455 states that WebSocket "is designed to work over TCP-HTTP ports 443 and 80 as well as to support HTTP proxies and intermediaries," thus making it compatible with HTTP. To achieve compatibility, the WebSocket handshake uses the HTTP Upgrade header to change from the HTTP protocol to the WebSocket protocol. 
+* WebRTC (Web Real-Time Communication) is a free and open-source project providing web browsers and mobile applications with real-time communication (RTC) via simple application programming interfaces (APIs). It allows audio and video communication to work inside web pages by allowing direct peer-to-peer communication, eliminating the need to install plugins or download native apps. It’s purpose of the project is to "enable rich, high-quality RTC applications to be developed for the browser, mobile platforms, and IoT devices, and allow them all to communicate via a common set of protocols"
+
+## SMTP (Simple Mail Transfer Protocol) How does email work? 
+To send email, the standard is SMTP is an internet standard connection-oriented, text-based, communication protocol for electronic mail transmission in which a mail sender communicates with a mail receiver by issuing command string & necessary data over a reliable ordered data stream channel(TCP). Mail servers and other Mail/Message Transfer agents use SMTP to send and receive mail messages, SMTP servers commonly use the TCP on port number 25 (for unencrypted plaintext) and 587 (for encrypted communications). The SMTP server performs three basic functions:
+ 1. It verifies who is sending emails through the SMTP server.
+ 2. It sends the outgoing mail
+ 3. If the outgoing mail can't be delivered it sends the message back to the sender
+
+Email is submitted by a mail client (mail user agent, MUA) to a mail server (mail submission agent, MSA) using SMTP on TCP port 587 involving a SMTP Handshake. Most mailbox providers still allow submission on traditional port 25. The MSA delivers the mail to its mail transfer agent (mail transfer agent, MTA). Often, these two agents are instances of the same software launched with different options on the same machine. The main difference between an MTA and an MSA is that connecting to an MSA requires SMTP Authentication. 
+The boundary MTA uses DNS to look up the MX (mail exchangers) DNS resource record for the recipient's domain (the part of the email address on the right of @). The MX record contains the name of the target-destination MTA. Based on the target host and other factors, the sending MTA selects a recipient server and connects to it to complete the mail exchange. An MDA (mail delivery agents) saves messages in the relevant mailbox format. As with sending, this reception can be done using one or multiple computers, Once delivered to the local mail server, the mail is stored for batch retrieval by authenticated mail clients (MUAs).
+Sender MUA >> MSA >> MTA 📤 >> DNS Lookup of MX records
+Recipient 📥 MTA >> MDA >> MUA >> Forwarded to IMAP/POP
+ 
+Mail is retrieved by end-user applications, called email clients, using Internet Message Access Protocol (IMAP), a protocol that both facilitates access to mail and manages stored mail, or the Post Office Protocol (POP) which typically uses the traditional inbox mail file format. “SMTP defines message transport, not the message content. Thus, it defines the mail envelope and its parameters, such as the envelope sender, but not the header (except trace information) nor the body of the message itself. STD 10 and RFC 5321 define SMTP (the envelope), while STD 11 and RFC 5322 define the message (header and body), formally referred to as the Internet Message Format.”
+
+## IMAP (Internet Message Access Protocol)
+IMAP is an Internet standard protocol used by email clients to retrieve email messages from a mail server over a TCP/IP connection. IMAP was designed with the goal of permitting complete management of an email box by multiple email clients, therefore clients generally leave messages on the server until the user explicitly deletes them, This and other characteristics of IMAP operation allow multiple clients to manage the same mailbox. IMAP offers access to the mail storage. Clients may store local copies of the messages, but these are considered to be a temporary cache. An IMAP server typically listens on port number 143. IMAP over SSL/TLS (IMAPS) is assigned the port number 993.
+Advantages over POP
+- Connected and disconnected nodes       --Server Side Searches
+- Multiple Simultaneous clients*              — Multiple Mailboxes on the server
+- Access to Mulitpurpose Internet Mail Extensions message parts and partial fetch
+- Message State Information (Use of Flags)   —Built-in Extension Mechanism
+
+## POP (Post Office Protocol) 
+POP is an application-layer Internet standard protocol used by e-mail clients to retrieve e-mail from a mail server. POP version 3 (POP3) is the version in common use. A POP3 server listens on well-known port number 110 for service requests. Encrypted communication for POP3 is either requested after protocol initiation, using the STLS command, if supported, or by POP3S, which connects to the server using Transport Layer Security (TLS) or Secure Sockets Layer (SSL) on well-known TCP port number 995.
+
+## SSH Secure Shell (SSH)
+
+### Secure Shell (SSH)
+
+SSH Secure Shell (SSH) is a cryptographic network protocol for operating network services securely over an unsecured network. SSH provides a secure channel over an unsecured network by using a client–server architecture, connecting an SSH client application with an SSH server. IT professionals and engineers use this to help configure and program a system remotely and securely. The standard TCP/UDP/SCTP port for SSH is 22. The encryption used by SSH is intended to provide Confidentiality and Integrity of data over an unsecured network, such as the Internet. SSH uses public-key cryptography to Authenticate the remote computer and allow it to authenticate the user, if necessary. SSH is typically used to log into a remote machine and execute commands, but it also supports tunneling, forwarding TCP ports and X11 connections; it can transfer files using the associated SSH file transfer (SFTP) or secure copy (SCP) protocols.[2]
+
+SSH is a secure alternative to the non-protected login protocols (such as telnet, rlogin) and insecure file transfer methods (such as FTP). Putty is for Windows Operating System. Just a regular GUI interface for SSH protocol.
+
+In SSH, a private key is used for authenticating computers and users. A host key authenticates servers, and an Authorized keys and identity key serves as an authentication credential for a user. Together they are called SSH keys.
+In SSH, public key cryptography is used for authenticating computers and users. Host keys authenticate hosts. Authorized keys and identity keys authenticate users.
+The most common type of SSH key is an authorized key, which is a public key.
+
+* `ssh-keygen` - creates a key pair for public key authentication
+* `ssh-copy-id` - configures a public key as authorized on a server
+* `ssh-agent` - Authentication Agent to hold private key for Public key authentication
+* `ssh-add` - Adds private Key identities/fingerprints to the OPENSSH Authentication Agent.
+
+SSH (Secure Shell) is a protocol primarily used for secure remote login and other secure network services over an insecure network. It uses the client-server model and supports various forms of tunneling, which can be utilized to securely forward traffic over the network.
+
+#### SSH Architecture
+
+Architecture—>The SSH-2 protocol has an internal architecture (defined in RFC 4251) with well-separated layers, namely:
+
+* **The transport layer**: which typically runs on top of TCP/IP. This layer handles initial key exchange as well as server authentication, and sets up encryption, compression and integrity verification.
+* **The user authentication layer**: This layer handles client authentication and provides a number of authentication methods. Authentication is client-driven: when one is prompted for a password, it may be the SSH client prompting, not the server. The server merely responds to the client's authentication requests. Widely used user-authentication methods include the following:
+    * **password**: a method for straightforward password authentication, including a facility allowing a password to be changed. Not all programs implement this method.
+    * **publickey**: a method for public-key-based authentication, usually supporting at least DSA, ECDSA or RSA keypairs, with other implementations also supporting X.509 certificates.
+    * **keyboard-interactive** (RFC 4256): a versatile method where the server sends one or more prompts to enter information and the client displays them and sends back responses keyed-in by the user. Used to provide one-time password authentication such as S/Key or SecurID.
+* **The connection layer**: This layer defines the concept of channels, channel requests and global requests using which SSH services are provided. A single SSH connection can host multiple channels simultaneously, each transferring data in both directions. Channel requests are used to relay out-of-band channel-specific data, such as the changed size of a terminal window or the exit code of a server-side process. Additionally, each channel performs its own flow control using the receive window size. The SSH client requests a server-side port to be forwarded using a global request. Standard channel types include:
+    * **shell** for terminal shells, SFTP and exec requests (including SCP transfers)
+    * **direct-tcpip** for client-to-server forwarded connections
+    * **forwarded-tcpip** for server-to-client forwarded connections
+
+The SSHFP DNS record provides the public host key fingerprints in order to aid in verifying the authenticity of the host.
+
+#### Tips for Securing `SSHD_config`
+
+* **TIPs to securing SSHD_config file**, default values for certain configuration options in OpenSSH are quite restrictive....note that keywords are case-insensitive and arguments are case-sensitive
+* Change Default port 22, remember to change the firewall to allow incoming connections on the server to this port #, as well as configuring the remote login to use same port# whilst starting connections\*\*\*\*\*\*\*
+    * `netstat -aep | grep ':\*'` — >LINUX
+    * `sudo lsof -i -P | grep -i "listen"` —>MacOS
+* Add SSH protocol version to 2. `[Protocol 2]`
+* Disable Remote root login `[PermitRootLogin no]`
+* `ChallengeResponseAuthentication no && HostBasedAuthentication no && PasswordAuthentication no && Pluggable Authentication Modules [UsePAM yes]`
+* `PermitEmptyPasswords no`
+* `AllowTcpForwarding no && AllowStreamLocalForwarding no && GatewayPorts no && PermitTunnel no`
+* `LoginGraceTime` should be set to lowest amount in secs
+* `LogLevel VERBOSE` —> This way, the key fingerprint for any SSH key used for login is logged. No longer needed therefore `SyslogFacility AUTH && LogLevel INFO`
+* `ListenAddress host|IPv4_addr|IPv6_addr` or `ListenAddress host|IPv4_addr:port` or `ListenAddress [host|IPv6_addr]:port`
+* Key exchange algorithms are selected by the `KexAlgorithms` option. We recommend `ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha256`
+* Message authentication code algorithms are configured using the `MACs` option. A good value is `hmac-sha2-256,hmac-sha2-512`
+* COMBO `[Ciphers aes128-ctr,aes192-ctr,aes256-ctr HostKeyAlgorithms ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-rsa,ssh-dss KexAlgorithms ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2- nistp521,diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha256 MACs hmac-sha2-256,hmac-sha2-512,hmac-sha1]`
+
+### SOCKS Protocol
+
+* SOCKS is an Internet protocol that exchanges network packets between a client and server through a proxy server. SOCKS5 optionally provides authentication so only authorized users may access a server. Practically, a SOCKS server proxies TCP connections to an arbitrary IP address, and provides a means for UDP packets to be forwarded.
+
+### File Transfer Protocol (FTP)
+
+* FTP- The File Transfer Protocol (FTP) is a standard communication protocol used for the transfer of computer files from a server to a client on a computer network. FTP is built on a client–server model architecture using separate command control and data connections between the client and the server Modern implementations of FTP can include encryption as well. FTP may run in active or passive mode, which determines how the data connection is established. In both cases, the client creates a TCP control connection from a random, usually an unprivileged, port N to the FTP server command port 21. FTP needs two ports (one for sending and one for receiving) because it was originally designed to operate on Network Control Program (NCP), which was a simplex protocol that utilized two port addresses, establishing two connections, for two-way communications. An odd and an even port were reserved for each application layer application or protocol. The FTP protocol was never altered to only use one port, and continued using two for backwards compatibility.
+    * **Syntax**: `FTP URL syntax ftp://[user[:password]@]host[:port]/url-path` (the bracketed parts are optional). Users could connect to the FTP server anonymously if the server is configured to allow it, meaning that we could use it even if we had no valid credentials. If we look back at our nmap scan result, the FTP server is indeed configured to allow anonymous login: If you need a refresher, the `ftp -h` command will help you figure out the available commands for the FTP service on your local host.
+    * `ftp-anon: Anonymous FTP login allowed (FTP code 230)` from NMAP SCAN
+    * To connect to the remote FTP server, you need to specify the target's IP address (or hostname) The prompt will then ask us for our login credentials, which is where we can fill in the anonymous username. In our case, the FTP server does not request a password, and inputting the anonymous username proves enough for us to receive the 230 code, `Login successful`.
+    * For example, the URL `ftp://public.ftp-servers.example.com/mydirectory/myfile.txt` represents the file `myfile.txt` from the directory `mydirectory` on the server `public.ftp-servers.example.com` as an FTP resource. The URL `ftp://user001:secretpassword@private.ftp-servers.example.com/mydirectory/myfile.txt` adds a specification of the username and password that must be used to access this resource.
+* FTP is often secured with + ✅SSL/TLS (`Explicit FTPS` is an extension to the FTP standard that allows clients to request FTP sessions to be encrypted. This is done by sending the `"AUTH TLS"` command. The server has the option of allowing or denying connections that do not request TLS.) or entirely replaced by ✅SSH/Secure File Transfer Protocol (`SFTP` is a network protocol that provides file access, file transfer, and file management over any reliable data stream has a similar command set for users, but uses the Secure Shell protocol (SSH) to transfer files. Unlike FTP, it encrypts both commands and data, preventing passwords and sensitive information from being transmitted openly over the network.) This protocol assumes that it is run over a secure channel, such as SSH, that the server has already authenticated the client, and that the identity of the client user is available to the protocol. It cannot interoperate with FTP software. `*SFTP is not FTP run over SSH*`
+* An SSH server is a software program which uses the secure shell protocol to accept connections from remote computers. SFTP/SCP file transfers and remote terminal connections are popular use cases for an SSH server
+* An SSH client is a software program which uses the secure shell protocol to connect to a remote computer.
+
+---
+
+### Remote Synchronization (RSYNC)
+
+Remote Synchronization is an open source utility that provides fast incremental file transfer, Fast and extraordinarily versatile file copying tool. It can copy locally, to/from another host over any remote shell, or to/from a remote rsync daemon. It offers a large number of options that control every aspect of its behavior and permit very flexible specification of the set of files to be copied. It is famous for its delta-transfer algorithm, which reduces the amount of data sent over the network by sending only the differences between the source files and the existing files in the destination. Rsync is widely used for backups and mirroring and as an improved copy command for everyday use. The main concern with FTP is that it is a very old and slow protocol. FTP is a protocol used for copying entire files over the network from a remote server. In many cases there is a need to transfer only some changes made to a few files and not to transfer every file every single time. For these scenarios, the rsync protocol is generally preferred. The changes that need to get transfered are called deltas. Using deltas to update files is an extremely efficient way to reduce the required bandwidth for the transfer as well as the required time for the transfer to complete. It follows directly from the definition of rsync that it's a great tool for creating/maintaining backups and keeping remote machines in sync with each other. Both of these functionalities are commonly implemented in corporate environment. In these environments time is of of the most importance, so rsync is preferred due to the speedup it offers for these tasks.
+
+The main stages of an rsync transfer are the following:
+1. rsync establishes a connection to the remote host and spawns another rsync receiver process.
+2. The sender and receiver processes compare what files have changed.
+3. What has changed gets updated on the remote host.
+
+`rsync OPTION … USER@{TargetHOSTIP}::SRC DEST`
+`rsync {target_IP}::public/flag.txt flag.txt`
+
+where SRC is the file or directory (or a list of multiple files and directories) to copy from, DEST is the file or directory to copy to, and square brackets indicate optional parameters.
+The `[OPTION]` portion of the syntax, refers to the available options in rsync . The list with all valid options is available over at the official manual page of rsync under the section Options Summary .
+The `[USER@]` optional parameter is used when we want to access the the remote machine in an authenticated way. If we don't have any valid credentials at our disposal so we will omit this portion and try an anonymous authentication.
+As our first attempt we will try to simply list all the available directories to an anonymous user. Reading through the manual page we can spot the option `--list-only` , which according to the definition is used to "list the files instead of copying them" ->> `rsync --list-only {target_IP}::`
+
+### Other Relevant Protocols & Concepts
+
+* **✔️Port 135: RPC**
+    * The Remote Procedure Call (RPC) service supports communication between Windows applications.
+    * Specifically, the service implements the RPC protocol — a low-level form of inter-process communication where a client process can make requests of a server process.
+    * Microsoft’s foundational COM and DCOM technologies are built on top of RPC.
+    * The service’s name is RpcSs and it runs inside the shared services host process, `svchost.exe`. This is one of the main processes in any Windows operating system & it should not be terminated.
+
+* **✔️Port 139: NETBIOS**
+    * This port is used for NetBIOS. NetBIOS is an acronym for Network Basic Input/Output System.
+    * It provides services related to the session layer of the OSI model allowing applications on separate computers to communicate over a local area network.
+    * As strictly an API, NetBIOS is not a networking protocol.
+    * Older operating systems ran NetBIOS over IEEE 802.2 and IPX/SPX using the NetBIOS Frames (NBF) and NetBIOS over IPX/SPX (NBX) protocols, respectively.
+    * In modern networks, NetBIOS normally runs over TCP/IP via the NetBIOS over TCP/IP (NBT) protocol. This results in each computer in the network having both an IP address and a NetBIOS name corresponding to a (possibly different) host name.
+    * NetBIOS is also used for identifying system names in TCP/IP(Windows).
+    * Simply saying, it is a protocol that allows communication of files and printers through the Session Layer of the OSI Model in a LAN.
+
+* **✔️SMB - Server Message Block Protocol**
+    * SMB - Server Message Block Protocol - is a client-server communication protocol used for sharing access to files, printers, serial ports and other resources on a network.
+    * Servers make file systems and other resources (printers, Serial Ports between Endpoints, named pipes, APIs) available to clients on the network. Client computers may have their own hard disks, but they also want access to the shared file systems and printers on the servers.
+    * The SMB protocol is known as a response-request protocol, meaning that it transmits multiple messages between the client and server to establish a connection.
+    * During scanning, we will typically see port 445 TCP open on the target, reserved for the SMB protocol.
+    * Usually, SMB runs at the Application or Presentation layers of the OSI model, pictured below. Due to this, it relies on lower-level protocols for transport. The Transport layer protocol that Microsoft SMB Protocol is most often used with is NetBIOS over TCP/IP (NBT). Clients connect to servers using TCP/IP (actually NetBIOS over TCP/IP {NBT} as specified in RFC1001 and RFC1002). Microsoft Windows operating systems since Windows 95 have included client and server SMB protocol support.
+    * Samba, an open source server that supports the SMB protocol, was released for Unix systems. To access an SMB share, we need a client to access resources on servers (i.e SMBClient). We will be using SMBClient because it's part of the default samba suite.
+    * Smbclient will attempt to connect to the remote host and check if there is any authentication required. If there is, it will ask you for a password for your local username. We should take note of this. If we do not specify a specific username to smbclient when attempting to connect to the remote host, it will just use your local machine's username. That is the one you are currently logged into your Virtual Machine with. This is because SMB authentication always requires a username, so by not giving it one explicitly to try to login with, it will just have to pass your current local username to avoid throwing an error with the protocol.
+    * In this case, we do not have such credentials, so what we will be trying to perform is any of the following:
+        * Guest authentication
+        * Anonymous authentication
+    * **ADMIN$ Share**: This is a special share that exists on Windows machines used primarily for system administration - allowing system admins to have remote access to every disk volume on the Remote system, typically allowing access to the `C:\Windows` directory on the remote machine. These shares may not be permanently deleted but may be disabled.
+    * **IPC$ Share**: This share is used for inter-process communication (IPC), allowing programs running on networked computers to communicate with each other via named pipes and is not part of the file system.
+    * **C$**: Administrative share for the `C:\` disk volume. This is where the operating system is hosted - File system of the Windows Machine the SMB server is hosted
+    * **WorkShares**: Custom share
+    * In the context of Impacket's `psexec.py`, here's what happens:
+        * Impacket creates a remote service by uploading a randomly-named executable on the ADMIN$ share on the remote system & then register it as a Windows service.This will result in having an interactive shell available on the remote Windows system via TCP port 445
+        * **Connection to IPC$**: The script uses `connectTree('IPC$')` to establish a session for IPC. This connection is crucial for sending commands & managing comms btw the local & remote systems.
+        * **Uploading Executable**: While the script connects to the IPC$ for communication purposes, the actual uploading of executables typically involves the ADMIN$ share. This is because ADMIN$ provides access to the system directories where executables can be placed and executed.
+        * **Execution as a Service**: Creating and Starting the Service: After uploading the executable to a suitable location (usually via ADMIN$), the next step is to create a service on the remote machine that points to the uploaded executable. This is typically done through Windows Service Control Manager remotely.
+        * These functions interact with the SCM (Service Control Manager) to create and start a new service that executes the uploaded file. In summary, while IPC$ is used for initiating the session and sending some types of commands, ADMIN$ is crucial for the actual file upload process because it allows access to system directories.
+
+    * **✔️Telnet**
+    * Telnet is an application protocol which allows you, with the use of a telnet client, to connect to and execute commands on a remote machine that's hosting a telnet server.
+    * The telnet client will establish a connection with the server. The client will then become a virtual terminal- allowing you to interact with the remote host.
+    * The user connects to the server by using the Telnet protocol, which means entering "telnet" into a command prompt. The user then executes commands on the server by using specific Telnet commands in the Telnet prompt.
+    * You can connect to a telnet server with the following syntax: `"telnet [ip] [port]"`
+
+    * **✔️NFS**
+    * NFS stands for "Network File System" and allows a system to share directories and files with others over a network.
+    * By using NFS, users and programs can access files on remote systems almost as if they were local files. It does this by mounting all, or a portion of a file system on a server. The portion of the file system that is mounted can be accessed by clients with whatever privileges are assigned to each file.
+    * First, the client will request to mount a directory from a remote host on a local directory just the same way it can mount a physical device. The mount service will then act to connect to the relevant mount daemon using RPC (Remote Procedure Call).
+    * The server checks if the user has permission to mount whatever directory has been requested. It will then return a file handle which uniquely identifies each file and directory that is on the server.
+    * If someone wants to access a file using NFS, an RPC call is placed to NFSD (the NFS daemon) on the server. This call takes parameters such as:
+        * The file handle
+        * The name of the file to be accessed
+        * The user's, user ID
+        * The user's group ID
+    * These are used in determining access rights to the specified file. This is what controls user permissions, I.E read and write of files.
+    * Open Network Computing Remote Procedure Call (ONC RPC) / Secure RPC is fundamental to the Secure NFS system. The goal of Secure RPC is to build a system that is at minimum as secure as a time-sharing system (one in which all users share a single computer). A time-sharing system authenticates a user through a login password. With data encryption standard (DES) authentication, the same authentication process is completed. Users can log in on any remote computer just as they can on a local terminal, and their login passwords are their passports to network security.
+
+    * The first of which is key to interacting with any NFS share from your local machine: `nfs-common`. It is important to have this package installed on any machine that uses NFS, either as client or server. It includes programs such as: `lockd`, `statd`, `showmount`, `nfsstat`, `gssd`, `idmapd` and `mount.nfs`.
+
+    ### End-to-End Principle Governing TCP/Internet Protocol Suite
+
+* The fundamental notion behind the end-to-end principle is that for two processes communicating with each other via some communication means, the reliability obtained from that means(protocol) cannot be expected to be perfectly aligned with the reliability requirements of the protocol processes.
+
+### PDU Terminology
+
+* The term TCP `*packet*` appears in both informal and formal usage, whereas in more precise terminology
+* `*segment*` refers to the TCP layer protocol data unit (PDU)
+* `*datagram*` refers to the UDP layer protocol data unit (PDU)
+* `*datagram*` to the IP protocol data unit (PDU)
+* `*frame*` to the data link layer protocol data unit (PDU)
+
+### Network Node and Host Definitions
+
+* The word end-user directly relates & interacts with a computer(end-system/end-station) connected to a computer network providing information or services.
+* End-systems include devices that the end-user doesn’t interact directly with, I.e mail servers, web servers, database servers, internet of things(IOT) devices-digital cameras, TV sets, etc.
+* Nodes that send and receive information are referred to as End systems or as Host nodes. This type of node includes computers, laptops, servers, Voice over IP (VoIP) phones, smartphones, and printers.
+* A Node that provides only a "forwarding function" is referred to as an intermediate system or infrastructure node.
+* A NODE is either a redistribution point or a communication endpoint. The definition of a node depends on the network and protocol layer referred to. A physical network node is an electronic device that is attached to a network, and is capable of creating, receiving, or transmitting information over a communication channel hence referred to as a HOST.
+* A network HOST is a computer or other device connected to a computer network. A host may work as a server offering information resources, services, and applications to users or other hosts on the network. Hosts are assigned at least one network address.
+* `“Every network host is a node, but not every network node is a host”`
+* A `“HOST is a NODE”` that participates in user applications, either as a server, client, or both. A server is a type of host that offers resources to the other hosts. Typically a server accepts connections from clients who request a service function.
+
+### What is a Firewall?
+
+A firewall is a tool designed to intercept and assess incoming and outgoing packets. Depending on the types of devices we are protecting, and what we are protecting them from, we may choose to use different types of firewalls. They work mostly on the Network & Internet-Protocol Layer. Firewalls implement Network Address Translation.
+
+#### Firewall Types
+
+* **✔️Packet-Filtering Firewalls**
+    * do not check content, but they can inspect and filter on information like:
+    * Source IP, Destination IP, Destination port numbers on a packet as well as the protocols used.
+    * They are best suited Within your network to control traffic from internal network to internal network
+    * For example, within an organization, we can use a packet-filtering firewall to prevent the flow of packets between different parts of the network.
+
+* **✔️Circuit-Level Firewalls**
+    * reviews content related to individual sessions.
+    * Ensure that sessions are properly configured & Identify illegitimate connections
+    * While these may help to prevent malformed sessions from connecting, they might still allow certain threats to pass through. For example, a valid session transferring malware could be allowed as long as the session is established properly.
+    * They can be used to implement virtual private networks VPN.
+
+* **✔️Stateful Inspection Firewalls**
+    * maintains a table of active sessions, similar to circuit-level firewalls.
+    * They Are able to limit activity based on source and destination data, like packet-filtering firewalls
+    * Attempt to review the contents of active sessions, dropping packets that don’t comply with the logged session. It’s goal is to identify hosts that represent a threat by accumulating evidence against them, if the negative evidence against a host exceeds a threshold established by the network firewall’s security policy the host can be blocked
+    * Firewall uses stateful rules that drop unexpected packets. This feature was initially found mostly on high-end firewalls, though it has become much more common over the years. The Linux Netfilter/iptables system supports this through the `--state` option, which categorizes packets based on connection state as described in the following man page excerpt:
+        * Possible states are `INVALID` meaning that the packet is associated with no known connection, `ESTABLISHED` meaning that the packet is associated with a connection which has seen packets in both directions, `NEW` meaning that the packet has started a new connection, or otherwise associated with a connection which has not seen packets in both directions, and `RELATED` meaning that the packet is starting a new connection, but is associated with an existing connection, such as an FTP data transfer, or an ICMP error.
+
+* **✔️Application Firewalls**
+    * with the use of pattern-matching, application firewalls can detect and block much more sophisticated attacks.
+    * Utilize application-specific rules to identify malicious traffic
+    * The firewall is represented through a wall that lets in good certain devices or requests while blocking the bad ones. In another example, an HTTP request may be passing data to a web server. While the request’s IP and session information may appear safe, content sent in individual HTTP requests could pose a danger to the receiving web servers. An application firewall could identify malicious content in HTTP requests and block the content.
+
+* **✔️Next-Generation Level Firewalls (NGLF)**
+    * are considered the most advanced firewalls, they will also identify additional malicious content in real-time.
+    * Through the use artificial intelligence, or even global networks, to identify new and emerging threats in real-time
+
+---

@@ -1,0 +1,64 @@
+---
+title: "Infrastructure as Code (IaC): Automation & Orchestration"
+description: Automate network provisioning with Ansible, Terraform, and IaC principles.
+---
+
+
+Network automation provides many key benefits by using tools and methods to automate tasks.
+
+### Key Benefits of Network Automation
+
+* **Scalability:** Networks become much more scalable as configurations can be deployed rapidly and consistently across many devices.
+* **Network-Wide Policy Compliance:** Automated systems ensure that policies are consistently applied across the entire network, reducing configuration drift.
+* **Improved Efficiency:** Automating network operations leads to reduced operating expenses (OpEx) by minimizing manual effort and human error.
+* **Consistency:** Reduces "Snowflake Systems" and configuration drift, leading to greater stability and security.
+
+### Tools and Methods for Network Automation
+
+* **Ansible, Puppet, Python scripts, Chef:** Common tools used for network automation.
+* **REST API:** A common interface used on controllers and network devices for programmatic interaction.
+* **SDN Solutions:** Software-Defined Networking greatly facilitates the automation of various tasks via the SDN Controller.
+* **Traditional Network Architectures:** Networking tasks can also be automated in traditional network architectures, but SDN tools can provide greater benefits by centralizing control.
+
+---
+
+## Cisco Sd-Access
+
+Cisco SD-Access is Cisco's enterprise-level SDN solution for campus and branch networks.
+
+### Underlay and Overlay in SD-Access
+
+* **Underlay Network:** The underlying physical network of devices and connections (including wired and wireless) providing Layer 3 IP connectivity. Its purpose is to support the VXLAN tunnels of the Overlay.
+* **Overlay Network:** The virtual network built on top of the physical underlay. SD-Access uses **VXLAN (Virtual eXtensible LAN)** to build tunnels over the underlay, providing Layer 2 connectivity over a Layer 3 underlay.
+* **Fabric:** The combination of the Underlay and Overlay forms the network fabric.
+
+### Three Different Roles for Switches in SD-Access
+
+1.  **Edge Nodes:**
+    * Connect to end-hosts (clients).
+    * Access Switches act as the default gateway for end-hosts (implementing a **Routed Access Layer**).
+2.  **Border Nodes:**
+    * Connect to devices outside of the SD-Access domain (e.g., WAN routers, external data centers, the Internet).
+3.  **Control Nodes:**
+    * Use **LISP (Locator/ID Separation Protocol)** to perform various control plane functions.
+    * Maintain a list of mappings of **EID (Endpoint Identifiers)** to **RLOCs (Routing Locators)**, effectively separating identity from location.
+
+### SD-Access Deployment Models
+
+* **Brownfield Deployment:** SD-Access can be added to an existing network if your hardware and software support it.
+* **Greenfield Deployment:** A new deployment will be configured by **Cisco DNA Center** to ensure an optimal SD-Access underlay.
+    * In a Greenfield deployment, all links between switches are **routed ports**.
+    * **No Spanning Tree Protocol (STP)** is needed in the underlay due to the routed links.
+    * Access Switches act as the default gateway for end-hosts.
+    * Cisco's **TrustSec (CTS)** provides policy control (QoS, security policy, etc.) within SD-Access.
+
+## Cisco DNA Center
+
+Cisco DNA Center is the SDN Controller for SD-Access and has two main roles:
+
+1.  **Network Manager:** For traditional (non-SD-Access) networks, it provides centralized management, monitoring, and automation capabilities.
+2.  **SDN Controller:** For SD-Access deployments.
+
+* **REST API:** DNA Center exposes a REST API that can be used to interact with it programmatically. The Southbound Interface (SBI) supports Netconf and Restconf.
+* **Intent-Based Networking:** DNA Center enables "Intent-Based Networking." This allows engineers to communicate their *intent* for network behavior (e.g., "Guest users should not access corporate resources"). DNA Center then translates this intent into the actual configurations and policies on the network devices, centrally managing and monitoring them.
+* **Configuration Drift:** DNA Center helps to prevent **configuration drift**, which occurs when individual changes made over time cause a device's configuration to deviate from the standardized or correct configurations defined by the company. It facilitates **Configuration Provisioning**, referring to how configuration changes are applied to devices.

@@ -1,11 +1,7 @@
 import { notFound, redirect } from 'next/navigation'
 import { getDocBySlug, getDocsInDirectory, getAdjacentDocs, getGitHubUrl, getAllStaticPaths } from '@/lib/content'
 import { Suspense } from 'react'
-import dynamic from 'next/dynamic'
-import rehypeHighlight from 'rehype-highlight'
-import rehypeSlug from 'rehype-slug'
-import rehypeAutolinkHeadings from 'rehype-autolink-headings'
-import remarkGfm from 'remark-gfm'
+import { remarkPlugins, rehypePlugins } from '@/lib/markdown-plugins'
 import TocContainer from '@/components/Toc/TocContainer'
 import { extractHeadings } from '@/lib/toc/extractHeadings'
 import Breadcrumb from '@/components/Breadcrumb'
@@ -14,12 +10,10 @@ import EditOnGitHub from '@/components/EditOnGitHub'
 import Link from 'next/link'
 import { formatDisplayTitle } from '@/lib/title'
 import Mermaid from '@/components/Mermaid'
-
-// Lazy load heavy components
-const ReactMarkdown = dynamic(() => import('react-markdown'), {
-  loading: () => <div className="animate-pulse bg-slate-100 dark:bg-slate-800 rounded h-96" />,
-  ssr: true,
-})
+import { Link2 } from 'lucide-react'
+import { MarkdownErrorBoundary } from '@/components/MarkdownErrorBoundary'
+import ReactMarkdown from 'react-markdown'
+import CodeBlock from '@/components/CodeBlock'
 
 interface DocPageProps {
   params: Promise<{
@@ -67,14 +61,22 @@ export default async function DocPage({ params }: DocPageProps) {
             
             <div className="grid gap-4">
               {docsInDir.map(doc => (
-                <Link
+                <div
                   key={doc.slug.join('/')}
-                  href={`/docs/${doc.slug.join('/')}`}
                   className="block p-6 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-blue-500 dark:hover:border-blue-500 transition-colors"
                 >
-                  <h2 className="text-xl font-semibold mb-2">
-                    {formatDisplayTitle(doc.meta.title || doc.slug[doc.slug.length - 1])}
-                  </h2>
+                  <div className="flex items-start justify-between gap-4">
+                    <h2 className="text-xl font-semibold mb-2 text-slate-900 dark:text-slate-100">
+                      {formatDisplayTitle(doc.meta.title || doc.slug[doc.slug.length - 1])}
+                    </h2>
+                    <Link
+                      href={`/docs/${doc.slug.join('/')}`}
+                      aria-label={`Open ${formatDisplayTitle(doc.meta.title || doc.slug[doc.slug.length - 1])}`}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-blue-600 hover:border-blue-500 dark:text-slate-400 dark:hover:text-blue-400"
+                    >
+                      <Link2 className="h-4 w-4" />
+                    </Link>
+                  </div>
                   {doc.meta.description && (
                     <p className="text-slate-600 dark:text-slate-400">
                       {doc.meta.description}
@@ -89,7 +91,7 @@ export default async function DocPage({ params }: DocPageProps) {
                       {doc.meta.status}
                     </span>
                   )}
-                </Link>
+                </div>
               ))}
             </div>
             {isAutomation && (
@@ -162,7 +164,7 @@ export default async function DocPage({ params }: DocPageProps) {
           <div className="flex-1 min-w-0 max-w-none lg:max-w-4xl">
             <Breadcrumb slug={normalizedSlug} />
             
-            <article className="prose prose-sm sm:prose lg:prose-lg prose-slate dark:prose-invert max-w-none prose-headings:scroll-mt-24 prose-img:rounded-lg leading-relaxed">
+            <article className="prose prose-sm sm:prose lg:prose-lg prose-slate dark:prose-invert max-w-[75ch] mx-auto prose-headings:scroll-mt-24 prose-img:rounded-lg prose-p:leading-relaxed prose-li:my-1 prose-code:before:content-none prose-code:after:content-none leading-relaxed">
               <Suspense fallback={
                 <div className="not-prose mb-8 animate-pulse">
                   <div className="h-12 bg-slate-200 dark:bg-slate-800 rounded w-3/4 mb-4" />
@@ -200,50 +202,71 @@ export default async function DocPage({ params }: DocPageProps) {
               <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-10/12" />
             </div>
           }>
+          <MarkdownErrorBoundary>
           <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            rehypePlugins={[
-              rehypeSlug,
-              [rehypeAutolinkHeadings, { behavior: 'wrap' }],
-              rehypeHighlight,
-            ]}
+            remarkPlugins={remarkPlugins}
+            rehypePlugins={rehypePlugins}
             components={{
               h1: () => null,
               img: () => null,
+              pre({ children }) {
+                return <CodeBlock>{children}</CodeBlock>
+              },
               a({ href, children, ...props }) {
-                if (!href) return <a {...props}>{children}</a>
-                
+                const label = extractText(children) || 'Open link'
+                const textNode = (
+                  <span className="text-slate-800 dark:text-slate-200">{children}</span>
+                )
+
+                if (!href) {
+                  return textNode
+                }
+
+                const iconClassName = "ml-1 inline-flex h-6 w-6 items-center justify-center rounded-md border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-blue-600 hover:border-blue-500 dark:text-slate-400 dark:hover:text-blue-400"
+
                 // Handle anchor links (same page navigation)
                 if (href.startsWith('#')) {
-                  return <a href={href} {...props}>{children}</a>
+                  return (
+                    <span className="inline-flex items-center">
+                      {textNode}
+                      <a href={href} aria-label={label} className={iconClassName} {...props}>
+                        <Link2 className="h-3.5 w-3.5" />
+                      </a>
+                    </span>
+                  )
                 }
-                
+
                 // Handle external links
                 if (href.startsWith('http://') || href.startsWith('https://')) {
                   return (
-                    <a href={href} target="_blank" rel="noopener noreferrer" {...props}>
-                      {children}
-                    </a>
+                    <span className="inline-flex items-center">
+                      {textNode}
+                      <a href={href} target="_blank" rel="noopener noreferrer" aria-label={label} className={iconClassName} {...props}>
+                        <Link2 className="h-3.5 w-3.5" />
+                      </a>
+                    </span>
                   )
                 }
-                
+
                 // Handle internal markdown links - strip .md extension and convert to proper path
                 let cleanHref = href.replace(/\.md$/i, '')
-                
+
                 // If it's a relative path, prepend current doc path
                 if (!cleanHref.startsWith('/')) {
-                  // Get current base path (e.g., /docs/study-notes)
                   const basePath = `/docs/${normalizedSlug.join('/')}`
                   cleanHref = `${basePath}/${cleanHref}`
                 }
-                
+
                 // Normalize multiple slashes
                 cleanHref = cleanHref.replace(/\/+/g, '/')
-                
+
                 return (
-                  <Link href={cleanHref} {...props}>
-                    {children}
-                  </Link>
+                  <span className="inline-flex items-center">
+                    {textNode}
+                    <Link href={cleanHref} aria-label={label} className={iconClassName} {...props}>
+                      <Link2 className="h-3.5 w-3.5" />
+                    </Link>
+                  </span>
                 )
               },
               code({ className, children, ...props }) {
@@ -270,6 +293,7 @@ export default async function DocPage({ params }: DocPageProps) {
           >
               {contentToRender}
           </ReactMarkdown>
+          </MarkdownErrorBoundary>
           </Suspense>
         </article>
         
@@ -295,8 +319,8 @@ export default async function DocPage({ params }: DocPageProps) {
           <div className="sticky top-4 animate-pulse">
             <div className="h-5 bg-slate-200 dark:bg-slate-800 rounded w-32 mb-4" />
             <div className="space-y-2">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-4 bg-slate-200 dark:bg-slate-800 rounded" style={{ width: `${60 + (i % 3) * 10}%` }} />
+              {['w-3/5', 'w-2/3', 'w-4/5', 'w-3/5', 'w-2/3', 'w-4/5'].map((widthClass, i) => (
+                <div key={i} className={`h-4 ${widthClass} bg-slate-200 dark:bg-slate-800 rounded`} />
               ))}
             </div>
           </div>

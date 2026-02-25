@@ -29,26 +29,26 @@ export default function Breadcrumb({ slug }: BreadcrumbProps) {
   ]
 
   return (
-    <div className="mb-6">
-      <div className="flex items-center justify-between gap-3 mb-2">
-        <nav className={`flex flex-wrap items-center gap-2 text-sm text-slate-600 dark:text-slate-400 transition-all ${
+    <div className="mb-8">
+      <div className="flex items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-900/30 rounded-lg px-4 py-3 border border-slate-200/60 dark:border-slate-800/60 backdrop-blur-sm">
+        <nav className={`flex flex-wrap items-center gap-2 text-sm transition-all duration-300 ${
           isCollapsed ? 'opacity-50' : 'opacity-100'
         }`}>
           {isCollapsed ? (
             // Show only last item when collapsed
-            <div className="flex items-center">
-              <span className="text-slate-400 dark:text-slate-600 mr-2">...</span>
-              <span className="font-medium text-slate-900 dark:text-slate-100 truncate max-w-[200px] md:max-w-none">
+            <div className="flex items-center animate-in fade-in duration-200">
+              <span className="text-slate-400 dark:text-slate-600 mr-2 font-semibold">...</span>
+              <span className="font-semibold text-slate-900 dark:text-slate-100 truncate max-w-[200px] md:max-w-none">
                 {breadcrumbs[breadcrumbs.length - 1].label}
               </span>
             </div>
           ) : (
             // Show full breadcrumb when expanded
             breadcrumbs.map((crumb, index) => (
-              <div key={crumb.href} className="flex items-center">
+              <div key={crumb.href} className="flex items-center animate-in fade-in slide-in-from-left-2 duration-200" style={{ animationDelay: `${index * 50}ms` }}>
                 {index > 0 && (
                   <svg
-                    className="w-3 h-3 md:w-4 md:h-4 mx-1 md:mx-2 flex-shrink-0"
+                    className="w-3 h-3 md:w-4 md:h-4 mx-1.5 md:mx-2.5 flex-shrink-0 text-slate-400 dark:text-slate-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -57,14 +57,14 @@ export default function Breadcrumb({ slug }: BreadcrumbProps) {
                   </svg>
                 )}
                 {index === breadcrumbs.length - 1 ? (
-                  <span className="font-medium text-slate-900 dark:text-slate-100 truncate max-w-[150px] md:max-w-none">
+                  <span className="font-semibold text-slate-900 dark:text-slate-100 truncate max-w-[150px] md:max-w-none">
                     {crumb.label}
                   </span>
                 ) : (
                   <Link
                     href={crumb.href}
                     prefetch={true}
-                    className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors truncate max-w-[100px] md:max-w-none"
+                    className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 truncate max-w-[100px] md:max-w-none hover:underline decoration-2 underline-offset-2"
                   >
                     {crumb.label}
                   </Link>
@@ -77,7 +77,7 @@ export default function Breadcrumb({ slug }: BreadcrumbProps) {
         {/* Breadcrumb Toggle Button */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="flex-shrink-0 p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
+          className="flex-shrink-0 p-2 rounded-md bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow"
           aria-label={isCollapsed ? 'Expand breadcrumb' : 'Collapse breadcrumb'}
           title={isCollapsed ? 'Expand breadcrumb' : 'Collapse breadcrumb'}
         >

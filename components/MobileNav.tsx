@@ -189,7 +189,6 @@ export default function MobileNav({ open, onClose, data }: MobileNavProps) {
               <div key={section.id} className="bg-transparent">
                 <button
                   type="button"
-                  aria-expanded={isOpen}
                   aria-controls={`menu-${section.id}`}
                   onClick={() => toggleSection(section.id)}
                   className="w-full flex items-center justify-between px-2 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-[var(--sidebar-accent)]"

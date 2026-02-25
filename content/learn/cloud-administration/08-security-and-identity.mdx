@@ -1,0 +1,61 @@
+---
+title: "Security and Identity"
+description: Secure cloud resources with IAM, RBAC, and zero-trust principles.
+---
+
+
+AWS SHIELD is a service that protects applications against DDoS attacks. AWS Shield provides two levels of protection: Standard and Advanced. AWS Shield Advanced is a paid service that provides detailed attack diagnostics and the ability to detect and mitigate sophisticated DDoS attacks. It also integrates with other services such as Amazon CloudFront, Amazon Route 53, and Elastic Load Balancing. Additionally, you can integrate AWS Shield with AWS WAF by writing custom rules to mitigate complex DDoS attacks.
+
+AWS Key Management Service (AWS KMS) enables you to perform encryption operations through the use of cryptographic keys. A cryptographic key is a random string of digits used for locking (encrypting) and unlocking (decrypting) data. You can use AWS KMS to create, manage, and use cryptographic keys. You can also control the use of keys across a wide range of services and in your applications.
+With AWS KMS, you can choose the specific levels of access control that you need for your keys. For example, you can specify which IAM users and roles are able to manage keys.
+
+AWS Web Application Firewall is a web application firewall that lets you monitor network requests that come into your web applications.
+AWS WAF works together with Amazon CloudFront and an Application Load Balancer. Recall the network access control lists that you learned about in an earlier module. AWS WAF works in a similar way to block or allow traffic.
+
+AWS INSPECTOR helps to improve the security and compliance of applications by running automated security assessments. It checks applications for security vulnerabilities and deviations from security best practices, such as open access to Amazon EC2 instances and installations of vulnerable software versions.
+After Amazon Inspector has performed an assessment, it provides you with a list of security findings. The list prioritizes by severity level, including a detailed description of each security issue and a recommendation for how to fix it.
+
+AWS GUARDDUTY is a service that provides intelligent threat detection for your AWS infrastructure and resources. It identifies threats by continuously monitoring the network activity and account behavior within your AWS environment. GuardDuty then continuously analyzes data from multiple AWS sources, including VPC Flow Logs and DNS logs. If GuardDuty detects any threats, you can review detailed findings about them from the AWS Management Console. Findings include recommended steps for remediation. You can also configure AWS Lambda functions to take remediation steps automatically in response to GuardDuty’s security findings.
+
+AWS SHIELD uses a variety of analysis techniques to detect potential DDoS attacks in real time and automatically mitigates them.
+
+The other response options are incorrect because:
+*   Amazon GuardDuty is a service that provides intelligent threat detection for your AWS infrastructure and resources. It identifies threats by continuously monitoring the network activity and account behavior within your AWS environment.
+*   Amazon Inspector checks applications for security vulnerabilities and deviations from security best practices, such as open access to Amazon EC2 instances and installations of vulnerable software versions.
+*   AWS Artifact is a service that provides on-demand access to AWS security and compliance reports and select online agreements.
+
+## Identity and Access Management (IAM)
+
+IAM policies is A document that grants or denies permissions to AWS services and resources. Such Policies provide you with the flexibility to customize users’ levels of access to resources. For instance, you can allow users to access all the Amazon S3 buckets in your AWS account or only a specific bucket.
+
+The other response options are incorrect because:
+*   Multi-factor authentication (MFA) is an authentication process that provides an extra layer of protection for your AWS account.
+*   An IAM role is an identity that you can assume to gain temporary access to permissions.
+*   The root user identity is the identity that is established when you first create an AWS account.
+
+An IAM ROLE is an identity that you can assume to gain temporary access to permissions. When someone assumes an IAM role, they abandon all permissions that they had under a previous role and assume the permissions of the new role. IAM roles are ideal for situations in which access to services or resources needs to be granted temporarily instead of long-term.
+
+The other response options are incorrect because:
+*   The AWS account root user is established when you first create an AWS account. As a best practice, do not use the root user for everyday tasks.
+*   Although you can attach IAM policies to an IAM group, this would not be the best choice for this scenario because the employee only needs to be granted temporary permissions.
+*   Service control policies (SCPs) enable you to centrally control permissions for the accounts in your organization. An SCP is not the best choice for granting temporary permissions to an individual employee.
+
+| Security Category | AWS Service | Azure Service | What it Secures |
+| --- | --- | --- | --- |
+| Identity & Access Management (IAM) | AWS Identity and Access Management (IAM) | Microsoft Entra ID (formerly Azure AD) | Users, groups, roles, permissions, access to cloud resources |
+| Network Firewall | AWS Network Firewall, Security Groups, NACLs | Azure Firewall, Network Security Groups (NSGs) | Virtual networks, subnets, traffic flow, application access |
+| Web Application Firewall (WAF) | AWS WAF | Azure Web Application Firewall (WAF) | Web applications and APIs against common web exploits |
+| DDoS Protection | AWS Shield | Azure DDoS Protection | Applications and resources against Distributed Denial of Service (DDoS) attacks |
+| Threat Detection & Monitoring | Amazon GuardDuty, AWS Security Hub, Amazon Detective, CloudTrail, CloudWatch | Microsoft Defender for Cloud, Microsoft Sentinel, Azure Monitor | Accounts, workloads, data, network activity, security posture, logs, events |
+| Vulnerability Management | Amazon Inspector | Microsoft Defender for Cloud (vulnerability assessment) | EC2 instances, container images, SQL databases |
+| Data Encryption & Key Management | AWS Key Management Service (KMS), AWS Secrets Manager, Amazon Macie | Azure Key Vault, Azure Storage Service Encryption, Azure Disk Encryption, Microsoft Purview | Encryption keys, secrets, sensitive data at rest and in transit, data classification |
+| Security Policy & Compliance | AWS Config, AWS Security Hub, AWS Audit Manager | Azure Policy, Microsoft Defender for Cloud (regulatory compliance), Azure Compliance Manager | Resource configurations, compliance against standards and regulations |
+| Endpoint Security (for Servers) | AWS Systems Manager (Session Manager, Patch Manager), Third-party EDR solutions | Microsoft Defender for Cloud (integrated EDR), Azure Security Center (legacy EDR), Third-party EDR solutions | EC2 instances, on-premises servers connected via Arc |
+| Secrets Management | AWS Secrets Manager | Azure Key Vault | API keys, passwords, connection strings, certificates |
+| Data Loss Prevention (DLP) | Amazon Macie (for S3) | Microsoft Purview | Sensitive data discovery, classification, and protection |
+## Key Takeaways
+
+- Apply least privilege with IAM roles and policies
+- Enable MFA for privileged accounts
+- Use Security Groups and Network ACLs for defense in depth
+- Audit permissions regularly and remove unused access

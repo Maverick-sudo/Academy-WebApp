@@ -1,0 +1,975 @@
+---
+title: "Routers (Layer 3)"
+description: Learn routing protocols, tables, static/dynamic routing, and inter-network connectivity.
+---
+
+
+A **Router** is a multi-homed Intermediate System with Network Links and Topology Information to facilitate forwarding packets between subnets, to or around an internetwork.
+
+Information about the location of other IP networks and hosts is stored in the **Routing Table**. Each entry represents an available path to its destination network or hosts. The key components that define an entry in the routing table are:
+
+| Component             | Description                                                                 |
+| :-------------------- | :-------------------------------------------------------------------------- |
+| **Protocol** | The protocol implemented by the Router (e.g., OSPF, RIP, EIGRP, BGP, Static, Connected). |
+| **Destination** | Routes can be defined to specific hosts but are more generally directed to Network IDs (Network ID / Host Address / Network Broadcast Address). |
+| **Interface** | The local interface to use to forward a packet along the chosen route.      |
+| **Gateway / Next Hop**| The IP address of the next router along the path to the destination.        |
+| **Metric** | A value used to determine the best path among multiple routes to the same destination. |
+| **Administrative Distance (AD)** | A value used to express the relative trustworthiness of the protocol supplying the route. |
+
+### Routing Table Entry Categories
+
+Routing Table Entries fall into four general categories:
+
+| Category                     | Description                                                                                             |
+| :--------------------------- | :------------------------------------------------------------------------------------------------------ |
+| **Direct Network Routes** | For subnets to which the Router is directly attached. The IP Network or Subnet for each active Router Interface is automatically added. Also known as **Directly Connected Routes**. |
+| **Remote Network Routes** | For subnets and IP Networks that are not directly attached. Learned through a routing protocol or static configuration. Typically have a mask length less than `/32`. |
+| **Host Routes** | For routes to a specific Host IP Address. A host route has a `/32` prefix for IPv4 or `/128` prefix for IPv6. |
+| **Default Routes** | Used when an exact match for a network or host route is not found. Also known as the **Gateway of Last Resort** (`0.0.0.0/0` for IPv4 or `::/0` for IPv6). |
+
+### Configured Routes (Static & Default)
+
+#### Static vs. Default Routes
+
+| Feature         | Static Routes                                           | Default Routes                                  |
+| :-------------- | :------------------------------------------------------ | :---------------------------------------------- |
+| **Configuration** | Manually added by administrator.                        | A special type of static route.                 |
+| **Purpose** | Directs traffic to a specific network or host.          | Catches all traffic not matched by other routes. |
+| **Destination** | Specific Network ID/Prefix or Host IP.                  | `0.0.0.0/0` (IPv4) or `::/0` (IPv6).             |
+| **Persistence** | Can be persistent (survives reboot) or non-persistent.  | Typically persistent.                           |
+| **Reachability**| Disabled if not reachable.                              | Operates as "Gateway of Last Resort".           |
+
+#### Floating Static Routes
+
+A floating static route is a static route with an administrative distance higher than that of a dynamic route to the same destination. It remains inactive in the routing table until the dynamic route is removed or becomes unavailable. This setup provides a backup path, ensuring continuity if the primary route fails. Floating static routes are used as backup routes to dynamic routes learned via protocols like OSPF or EIGRP. They are configured with a higher Administrative Distance (AD) than the primary route to ensure they are only used when the primary route fails.
+
+### Packet Forwarding (IP Layer 3)
+
+When a Router Receives a packet, it reads the destination address in the packet and looks up a matching destination network IP address and prefix in its Routing table (Topology Database). If there is a match, the Router will forward the packet out of one of its interfaces by Encapsulating the packet in a new frame.
+
+**Frame Encapsulation based on Destination:**
+
+1.  **For directly connected networks via an Ethernet Interface:** The Router uses ARP (IPv4) or Neighbor Discovery (IPv6) to determine the interface address (MAC) of the destination host.
+2.  **For packets that can be forwarded via a gateway over an Ethernet interface:** It inserts the next hop router's MAC address into the new frame.
+3.  **For packets where the destination address cannot be matched to a Route table entry:** The packet is either forwarded via the default route (Gateway of Last Resort) or dropped.
+
+* **NOTE:** Switches do NOT count as hops.
+* **NOTE:** Routers do NOT forward broadcast traffic.
+
+#### Hop Count & Time To Live (TTL) Comparison
+
+| Feature      | IPv4 (Time To Live - TTL)                                       | IPv6 (Hop Limit)                                              |
+| :----------- | :-------------------------------------------------------------- | :------------------------------------------------------------ |
+| **Behavior** | Decremented by at least 1 at each router.                       | Decremented by 1 at each router.                              |
+| **Purpose** | Prevents packets from endlessly circulating; nominally time unit, practically hop count. | Prevents packets from endlessly circulating; strictly hop count. |
+| **Discard** | Packet discarded when TTL reaches 0.                            | Packet discarded when Hop Limit reaches 0.                    |
+
+---
+
+### Fragmentation
+
+| Feature      | IPv4                                                          | IPv6                                                          |
+| :----------- | :------------------------------------------------------------ | :------------------------------------------------------------ |
+| **Fragmentation**| IP can fragment packets to fit within the MTU.           | Does not allow/perform fragmentation at the router level.       |
+| **Fields Used**| ID, Flags, Fragment Offset IP header fields for reassembly. | N/A                                                           |
+| **MTU Handling**| Router handles fragmentation.                                 | Host performs **Path MTU Discovery** to determine smallest MTU along path and crafts packets accordingly. |
+
+---
+### Brief Introduction to ICMP and ARP
+
+#### ICMP Overview
+- ICMP (Internet Control Message Protocol) is used in networks to diagnose network communication issues and operate management queries. It facilitates messages related to network operations, errors, and diagnostics.
+
+#### Initial ICMP R&Q Timeout
+- The Initial ICMP Request and Query (R&Q) timeout can occur if ARP (Address Resolution Protocol) has not yet resolved the destination MAC address. Since ICMP relies on IP addresses, ARP must first map the IP address to a MAC address for network-layer communication.
+
+#### ARP Details
+- ARP (Address Resolution Protocol) is utilized to discover the Layer 2 address (MAC address) of a known Layer 3 address (IP address).
+
+| ARP Message | Direction             | Purpose                                                |
+| :---------- | :-------------------- | :----------------------------------------------------- |
+| **ARP Request** | Broadcast to local segment | Asks which host has a specific IP address.             |
+| **ARP Reply** | Unicast response      | From the host with the requested IP, providing its MAC. |
+
+*Command to view ARP table:* `show arp` or `show ip arp`
+
+#### ICMP Echo Request and Reply
+| ICMP Type       | Purpose                                                    |
+| :-------------- | :--------------------------------------------------------- |
+| **Echo Request (Ping)** | Measures round-trip time to a destination host.          |
+| **Echo Reply** | Confirms reachability and provides round-trip time.        |
+
+#### Network Addressing Basics
+| IP Address Type          | Host Portion Bits | Description                                           |
+| :----------------------- | :---------------- | :---------------------------------------------------- |
+| **Network Address** | All 0s            | Identifies the network itself; cannot be assigned to a host. |
+| **Broadcast Address** | All 1s            | Used to communicate with all hosts within that subnet. |
+| **First Usable Address** | After network address | First valid assignable IP for a host.                 |
+| **Last Usable Address** | Before broadcast address | Last valid assignable IP for a host.                  |
+
+#### Example Router Configuration Commands
+Here's a breakdown of common router interface configuration commands:
+
+| Command                                      | Description                                                                                                    |
+| :------------------------------------------- | :------------------------------------------------------------------------------------------------------------- |
+| `RT(config)# interface g0/0`                 | Enters interface configuration mode for GigabitEthernet 0/0.                                                 |
+| `RT(config-if)# description "Link to ISP"`   | Sets a descriptive text for the interface.                                                                     |
+| `Router(config-if)# ip address 43.109.23.12 255.0.0.0` | Configures the IPv4 address and subnet mask on the interface.                                            |
+| `Router(config-if)# no shutdown`             | Activates the interface.                                                                                       |
+| `Router(config)# ipv6 unicast-routing`       | **Global Command:** Enables IPv6 routing on the router (required for forwarding IPv6 packets).                 |
+| `Router(config-if)# ipv6 enable`             | Enables IPv6 on an interface and automatically assigns a Link-Local Unicast IPv6 Address.                      |
+| `Router(config-if)# ipv6 address 2001:db8:0:0::1/64` | Configures a Global Unicast IPv6 address with a specified prefix.                                            |
+| `Router(config-if)# ipv6 address autoconfig` | Lets the router interface obtain an IPv6 address using stateless autoconfiguration (SLAAC); uses NDP to learn prefix. |
+| `Router(config-if)# ipv6 address 2001:db8:0:1::/64 EUI-64` | Configures a Global Unicast IPv6 address where the 64-bit host portion is generated using EUI-64 from the MAC address. |
+| `do show ip interface brief`                 | Shows a summary of IPv4 interfaces and their status (executed from any mode with `do`).                      |
+| `do show ipv6 interface brief`               | Shows a summary of IPv6 interfaces and their status (executed from any mode with `do`).                      |
+
+### Understanding Connected and Local Routes
+
+When you configure an IP address on a router interface and bring it up, two types of routes are automatically created in the routing table:
+
+| Route Type       | Description                                                               | Example for `192.168.1.1 255.255.255.0` on `GigabitEthernet0/2` |
+| :--------------- | :------------------------------------------------------------------------ | :--------------------------------------------------------------- |
+| **Connected Route** | Represents the network or subnet to which the interface is directly attached. | `192.168.1.0/24` directly connected, GigabitEthernet0/2          |
+| **Local Route** | Represents the specific IP address assigned to the interface itself. It's a host route to the interface's own IP. | `192.168.1.1/32` is directly connected, GigabitEthernet0/2        |
+
+### Setting Up Static and Default Routes and Floating Routes:
+
+| Route Type                  | IPv4 Command Syntax                                    | IPv6 Command Syntax                                                         | Notes                                                              |
+| :-------------------------- | :----------------------------------------------------- | :-------------------------------------------------------------------------- | :----------------------------------------------------------------- |
+| **Static Route** | `ip route [destination] [subnet mask] [next-hop-addr | exit-interface]` | `ipv6 route [destination/prefix] {next-hop-addr | exit-interface [next-hop]}` | Manually configured, specific to a destination.                    |
+| **Floating Static Route** | `ip route [destination] [Netmask] [next-hop | exit-interface] [ad]` | `ipv6 route [destination/prefix] {next-hop-addr | exit-interface} [ad]` | `ad` (administrative distance) is higher than primary route.       |
+| **Default Route** | `ip route 0.0.0.0 0.0.0.0 [next-hop-addr | exit-interface]` | `ipv6 route ::/0 {next-hop-addr | exit-interface}`                            | "Gateway of Last Resort" for unmatched traffic.                    |
+| **Directly Attached Static (IPv6)** | N/A                                                    | `ipv6 route [destination/prefix] [exit-interface]`                            | Cannot be used with Ethernet interfaces in IPv6.                   |
+| **Recursive Static (IPv6)** | N/A                                                    | `ipv6 route [destination/prefix] [next-hop-addr]`                             | `next-hop-addr` must be routable (not link-local).                 |
+| **Fully Specified Static (IPv6)** | N/A                                                    | `ipv6 route [destination/prefix] [exit-interface] [next-hop-addr]`            | Most explicit; good for multi-access segments.                     |
+
+---
+
+### Supernetting & Subnetting Overview
+
+#### CIDR (Classless Inter-Domain Routing)
+- Allows for flexible division of networks by eliminating the strict boundaries of classful addressing.
+- Uses notation `/x` to denote the number of bits used for the network portion.
+
+#### Classful Addressing
+Based on the first octet, IP addresses were divided into classes with default subnet masks:
+
+| Class | First Octet Range | Default Subnet Mask (Decimal) | Default Subnet Mask (CIDR) |
+| :---- | :---------------- | :---------------------------- | :------------------------- |
+| **A** | 0-127             | `255.0.0.0`                   | `/8`                       |
+| **B** | 128-191           | `255.255.0.0`                 | `/16`                      |
+| **C** | 192-223           | `255.255.255.0`               | `/24`                      |
+
+### Router Placement & Types
+
+Routers serve both to link physically Remote networks and subdivide IP networks into multiple subnets. Router placement is generally driven by:
+
+1.  Hosts with Addresses in the same subnet (IP network) mustn't be separated by a Router.
+2.  Hosts with Addresses in different subnets (IP network) must be separated by a Router.
+
+#### Edge Routers
+
+**Edge Routers** are placed at the network perimeter (WAN side) to distinguish External (Internet) and Internal Interfaces. They perform framing to repackage data from the private LAN Frame format to the WAN/Internet access frame format.
+
+* The Customer's Router is referred to as **Customer Edge (CE)**.
+* The Service Provider Router is referred to as **Provider Edge (PE)**.
+
+Edge Routers designed to work with DSL or cable broadband are often called **SOHO Routers**. Edge Routers with similar integrated functionality are also deployed by Enterprises for Branch Office Connectivity, which are designed to service medium to large networks with specialized processors to handle Routing & path forwarding processes, and memory to buffer data. They also support plug-in cards for WAN Interfaces and Site-to-Site VPN.
+
+#### Internal Routers
+
+An **Internal Router** has no public-facing interface to the Internetwork. They serve to implement whatever network topology is required, meaning that traffic between the local subnets (LAN) is controlled by a separate Internal Router.
+
+Many networks are segmented using the **Virtual LANs (VLANs)** feature of managed Switches. Traffic between VLANs is Routed in two scenarios:
+
+1.  **Using a Router with a single Interface Connected to a Trunk Port on the switch:** The Router's physical Interface is Configured with multiple "**SUBINTERFACES**". Each subinterface is configured with a specific VLAN ID. The Sub Interface routes traffic for a given VLAN and receives traffic from a given VLAN via the TRUNK PORT. The Sub Interface serving the destination VLAN receives traffic from the router. (This scenario does not scale well for tens of VLANs).
+
+2.  **A Layer 3 Capable Switch:** This is one that is optimized for Routing between VLANs. They can use static or dynamic Routing to identify which VLAN an IP Address should be forwarded to, and maintain a mapping table of IP and MAC addresses, thereby using low-latency Hardware-based forwarding. However, they do not typically have WAN interfaces and are not usually used for Routing at the network edge.
+    * A subinterface for each VLAN is created over the trunk. Each subinterface must be configured with an IP address and mask for the subnet mapped to the VLAN.
+
+### Router Configuration
+
+Routers are configured either via a Serial Connection (Console port) OR remotely over the network using SSH or Telnet with the Router via the IP Address of any configured Interface. Due to unforeseen Hardware Faults, best practice is to create a **Virtual Interface (Loopback Interface)** and assign it an IP address for use in remotely managing the Router. This is a way of giving the Router an internal IP Address not connected to any physical network, and therefore not reliant on a specific network link being available.
+
+Principal Configuration tasks:
+
+1.  Apply an IP configuration to each of its interfaces.
+2.  Configure one or more Routing protocols or static routes to serve the Router's function.
+
+### Viewing & Modifying Routing Tables on End Systems
+
+* The `show route`, `show ip route`, `show ipv6 route` commands output the active Routing Table on Cisco Routers.
+* The **`route` command** is used to view or modify the Routing table of End System (Linux and Windows) hosts. The routing table for an end system generally conforms to a single entry for the default route. Traffic that isn't addressed to the local subnet is sent over this default route.
+
+#### Command Syntax Examples (Windows & Linux)
+
+* **Windows:**
+    * `Route [–p] add [Dest IP] mask [Netmask] [Gateway IP] metric [Metric Value] IF [Interface]`
+* **Linux (using `ip route` which replaced deprecated legacy command-line tools):**
+    * `ip route add [Dest IP] via [Gateway IP] dev [Interface]`
+    * `ip route add [Dest IP]/[Netmask Value] via [Gateway IP] dev [Interface]`
+
+#### Variables in the Syntax:
+
+* **Destination IP:** A network or host address.
+* **Netmask:** The subnet mask for Destination IP.
+* **Gateway IP:** The Router to use to contact the network or host address.
+* **Metric Value:** The cost of the Route.
+* **Interface:** The adapter (NIC) the host should use (used if the host is multi-homed).
+
+Routes added in this manner are non-persistent by default. Using the `-p` switch in Windows, routes can be permanently configured. In Linux, the command above cannot be used directly to add persistent (permanent) routes without additional configuration.
+
+## Subnetting
+
+Subnetting is the process of dividing a single large network into smaller, logical subnetworks. This improves network performance, security, and IP address management.
+
+#### Subnet Masking Approaches
+
+| Approach | Description                                          | Key Characteristic                             |
+| :------- | :--------------------------------------------------- | :--------------------------------------------- |
+| **FLSM (Fixed Length Subnet Mask)** | All subnets created use the same subnet mask. | Simpler to manage, but can waste IP addresses. |
+| **VLSM (Variable Length Subnet Mask)** | Subnets can have different sizes, allowing for more efficient use of IP space. | More complex to manage, but optimizes IP usage. |
+
+#### Practical Subnet Examples
+
+| Subnet Mask | Common Use Case           | Number of Usable IPs | Total Addresses | Network Address | Broadcast Address |
+| :---------- | :------------------------ | :------------------- | :-------------- | :-------------- | :---------------- |
+| **/31** | Point-to-point links (2 routers) | 2                    | 2               | No (implied)    | No (implied)      |
+| **/30** | Point-to-point links      | 2                    | 4               | Yes             | Yes               |
+
+### Network Design Using VLSM Example:
+
+Given a parent network of `192.168.1.0/24`, dividing this into multiple subnets could look like this:
+
+| Subnet ID           | CIDR | Usable Hosts | Total Addresses | Network Address    | Broadcast Address    |
+| :------------------ | :--- | :----------- | :-------------- | :----------------- | :------------------- |
+| **First Subnet** | `/25`| 126          | 128             | `192.168.1.0`      | `192.168.1.127`    |
+| **Second Subnet** | `/26`| 62           | 64              | `192.168.1.128`    | `192.168.1.191`    |
+| **Third Subnet** | `/27`| 30           | 32              | `192.168.1.192`    | `192.168.1.223`    |
+| **Fourth Subnet** | `/28`| 14           | 16              | `192.168.1.224`    | `192.168.1.239`    |
+| **Point-to-Point** | `/30`| 2            | 4               | `192.168.1.240`    | `192.168.1.243`    |
+
+### Key Considerations:
+
+* **Number of Hosts vs. Number of Subnets**:
+    * Increasing the number of network bits (`prefix length`) decreases the number of available hosts but increases the number of possible subnets within the given address space.
+* **Supernetting**:
+    * Used to summarize multiple contiguous subnets into a single network advertisement.
+    * Reduces the complexity in routing tables by aggregating several smaller networks into a larger one using a shorter subnet mask.
+
+This structured approach to subnetting and supernetting helps organizations efficiently utilize their assigned IP address spaces, tailoring network divisions to actual usage needs, ensuring both flexibility and scalability.
+
+---
+
+### Interface Configuration
+
+Interface configuration is crucial for setting up how a router or multilayer switch interacts with different network segments.
+
+#### Common Interface Configuration Commands
+
+| Command                                        | Context                                      | Description                                                                                                                                              |
+| :--------------------------------------------- | :------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `interface G0/1.10`                            | Sub-interface (Router/L3 Switch)             | Enters sub-interface configuration mode for interface G0/1, associated with VLAN 10. Used for Router-on-a-Stick or inter-VLAN routing.                     |
+| `interface G0/1`                               | Physical Interface (Router/Switch)           | Selects a particular physical interface (e.g., GigabitEthernet 0/1) for configuration.                                                                   |
+| `no switchport`                                | L3 Switch Interface (Global Config)          | Configures or upgrades the selected interface as a "Routed Port" (Layer 3 functionality), removing its Layer 2 switching capabilities.                 |
+| `ip address IPAddress Netmask`                 | Interface (Router/L3 Switch)                 | Sets the IPv4 address and subnet mask for the interface. `IPAddress` must be a usable host address within the subnet range.                             |
+| `no shutdown`                                  | Interface (Router/L3 Switch)                 | Enables or activates the interface.                                                                                                                      |
+| `ipv6 unicast-routing`                         | Global (Router/L3 Switch)                    | **Global Command:** Enables IPv6 routing on the device, allowing it to forward IPv6 packets.                                                             |
+| `ipv6 enable`                                  | Interface (Router/L3 Switch)                 | Enables IPv6 on an interface and automatically assigns a Link-Local Unicast IPv6 Address. Does not configure a Global Unicast Address.                   |
+| `ipv6 address 2001:db8:0:0::1/64`              | Interface (Router/L3 Switch)                 | Configures a Global Unicast IPv6 address with a specified prefix on the interface.                                                                       |
+| `ipv6 address autoconfig`                      | Interface (Router/L3 Switch)                 | Allows the router interface to obtain an IPv6 address using stateless autoconfiguration (SLAAC). Device uses NDP to learn the prefix.                      |
+| `ipv6 address 2001:db8:0:1::/64 EUI-64`        | Interface (Router/L3 Switch)                 | Configures a Global Unicast IPv6 address where the 64-bit Host Portion is generated using EUI-64 from the interface's 48-bit MAC address.                |
+
+---
+
+### IP Routing and ARP
+
+#### ARP Table Commands
+
+| Command   | Description                   |
+| :-------- | :---------------------------- |
+| `show arp`| Displays the device's IPv4 ARP table. |
+| `show ip arp` | Same as `show arp`.           |
+
+#### Routing Enablement and Route Configuration Commands
+
+| Command                                           | Context          | Description                                                                                                                                                                                                |
+| :------------------------------------------------ | :--------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ip routing`                                      | Global (L3 Switch) | Enables Layer 3 routing on a multilayer switch, allowing it to build and use an IP routing table.                                                                                                          |
+| `ip route 0.0.0.0 0.0.0.0 [Interface-ID | Interface-IP]` | Router/L3 Switch | Configures a Default Route (Gateway of Last Resort) for IPv4. Traffic not matching more specific routes is sent here. `Interface-ID` refers to the local outgoing interface, `Interface-IP` is the next hop. |
+| `ipv6 route ::/0 [Interface-ID | Interface-IP]` | Router/L3 Switch | Configures a Default Route (Gateway of Last Resort) for IPv6.                                                                                                                                              |
+| `ip route NetworkAddress NetMask {Next-hop-Addr | ExitInterface}` | Router/L3 Switch | Configures a Static Route for IPv4. Can specify a next-hop IP address or an exit interface.                                                                                                |
+| `ipv6 route NetworkAddress/Prefix {Next-hop-Addr | ExitInterface}` | Router/L3 Switch | Configures a Static Route for IPv6.                                                                                                                                                        |
+| `ip route NetworkAddress NetMask Next-hop-Addr AD` | Router/L3 Switch | Configures a Floating Static Route for IPv4. The `AD` (Administrative Distance) must be higher than the primary route's AD.                                                                        |
+| `ipv6 route NetworkAddress/Prefix {Next-hop-Addr | ExitInterface} AD` | Router/L3 Switch | Configures a Floating Static Route for IPv6.                                                                                                                                               |
+
+#### Important Considerations for Interface IP Addresses
+
+| Invalid IP Address Assignment | Valid IP Address Assignment | Rationale                                                                                                   |
+| :---------------------------- | :-------------------------- | :---------------------------------------------------------------------------------------------------------- |
+| Network Address (e.g., `192.168.1.0/24`) | First Usable Address      | Network address identifies the network itself and cannot be assigned to a host or interface.                  |
+| Broadcast Address (e.g., `192.168.1.255/24`) | Last Usable Address       | Broadcast address is reserved for sending data to all hosts on the subnet.                                  |
+| IP outside subnet range     | Within defined subnet       | An IP address must belong to the subnet defined by the configured mask for proper communication.            |
+
+*When setting up router interfaces, always ensure the IP address assigned:*
+* Is not a network address (first address in the block).
+* Is not a broadcast address (last address in the block).
+* Falls within the correct subnet as defined by the subnet mask.
+
+This understanding will help prevent errors like "Bad mask" and ensure proper communication within and between subnets.
+
+##  Dynamic Routing Protocols
+
+Complex Networks need to exchange Routing information rapidly to prevent outages, making static Routing updates impractical in most cases.
+
+A **Dynamic Routing Protocol** uses an algorithm (categorized according to Topology & Metrics) to BUILD & maintain a Routing Information database. (These databases are separate from the Routing table). Most algorithms are classed as either **Distance Vector** OR **Link State** OR **Both (Hybrid)**.
+
+The database might contain more than one Route to the Same Destination. In this case, a **metric** is used to determine which path will be selected for use in the IP Routing table. The path with the lowest cost metric is preferred.
+
+### Convergence
+
+**Convergence** is the process whereby Routers using dynamic routing protocols agree on the network Topology. Network Routers must be able to communicate changes to other routers quickly to avoid **Black Holes** (where a packet is discarded without notice given back to the source) and **loops** (where a packet is forwarded around the network until its TTL Expires, and an "ICMP Time Exceeded" notification is sent to the source).
+
+A Network where all routers share the Same Topology is described as **Steady State**. The time taken to reach steady state is a measure of a protocol's Convergence performance.
+
+**Route flapping** refers to a Router changing the properties of a Route it's advertising quickly, often leading to serious convergence problems. A flapping interface frequently changes from offline → online and vice versa.
+
+### Autonomous Systems (AS) & Gateway Protocols
+
+A Network under the administrative control of a single owner is referred to as an **Autonomous System (AS)**. An "AS" identifies a group of network prefixes.
+
+* An **Interior Gateway Protocol (IGP)** is one that identifies Routes within an AS. (e.g., OSPF, EIGRP, RIP)
+* An **Exterior Gateway Protocol (EGP)** is one that can advertise Routes between Autonomous Systems. An EGP includes a field to commit a network's Autonomous System ID and allows Network Owners to determine whether they can use paths through another organization's network. Used on the Internet backbone. (e.g., BGP)
+
+Another factor comparing Routing protocols is whether they support Classless Addressing.
+
+### Routing Protocol Comparison Table
+
+| Protocol              | Class / Port #   | Type / Algorithms             |
+| :-------------------- | :--------------- | :---------------------------- |
+| Routing Information Protocol (RIP) | UDP 520 / 521 | Distance Vector               |
+| Enhanced Interior Gateway Routing Protocol (EIGRP) | IP Protocol #88 | Distance Vector / Hybrid      |
+| Open Shortest Path First (OSPF) | IP Protocol #89 | Link State                    |
+| Border Gateway Protocol (BGP) | TCP 179          | Path Vector (Hybrid of DV/LS) |
+
+### Route Selection Process
+
+If a Router has multiple entries to similar networks in a Routing Table, it must determine which route to prefer. Preference is first based on the **LONGEST ADDRESS PREFIX MATCH OVER SHORTER ONES**. E.g., `198.51.100.0/28` is preferred over `198.51.100.0/24`. A longer prefix means fewer host IDs.
+
+The next key point is **ADMINISTRATIVE DISTANCE (AD)**. AD Value is used to express the relative trustworthiness of the protocol supplying the Route. Default AD Values are hard coded into the router & can be adjusted by the administrator if necessary.
+
+| Route Type             | Default AD (Cisco) |
+| :--------------------- | :----------------- |
+| Connected              | 0                  |
+| Static                 | 1                  |
+| EIGRP Summary Route    | 5                  |
+| External BGP (EBGP)    | 20                 |
+| Internal EIGRP         | 90                 |
+| OSPF                   | 110                |
+| IS-IS                  | 115                |
+| RIP                    | 120                |
+| External EIGRP         | 170                |
+| Internal BGP (IBGP)    | 200                |
+| Unknown / Unusable Route | 255                |
+
+Given identical prefix lengths, a static route will be preferred to everything except a directly connected network. The value of 255 for Unknown Routes means that they will not be used. A Static Route with a higher AD could be defined to function as a backup if a preferred route update fails. Normally Router prefers Dynamic Routes because they have a lower AD.
+
+I've analyzed your text on dynamic routing protocols. To improve clarity and comparison, I will add tables for:
+
+1.  **Categories of Dynamic Routing Protocols**: A table comparing IGP vs. EGP, and then sub-categorizing IGPs.
+2.  **Characteristics of Routing Protocols (Distance Vector vs. Link State)**: A direct comparative table.
+3.  **Route Selection Factors**: A table for Metric, ECMP, and Administrative Distance.
+4.  **Specific Metrics Used by Different Protocols**: A table listing protocols and their respective metrics.
+
+Dynamic routing protocols significantly enhance network efficiency and scalability by automating route calculation and maintenance based on real-time network topology changes, which are quickly adapted to, ensuring efficient and reliable network communication. They contrast with static routes, which are manually set and do not adapt to network changes unless manually updated.
+
+### Categories of Dynamic Routing Protocols
+
+Dynamic routing protocols are broadly categorized based on their scope of operation:
+
+| Category                     | Description                                            | Sub-categories / Examples                                           |
+| :--------------------------- | :----------------------------------------------------- | :------------------------------------------------------------------ |
+| **Interior Gateway Protocols (IGP)** | Used within a single Autonomous System (AS).           | **Distance Vector:** RIP, EIGRP \<br\> **Link State:** OSPF, IS-IS   |
+| **Exterior Gateway Protocols (EGP)** | Used for routing between different Autonomous Systems. | **Path Vector:** BGP (Border Gateway Protocol)                      |
+
+### Characteristics of Routing Protocols
+
+Here's a comparison of Distance Vector and Link State protocols:
+
+| Characteristic          | Distance Vector Protocols                                | Link State Protocols                                                    |
+| :---------------------- | :------------------------------------------------------- | :---------------------------------------------------------------------- |
+| **Information Exchange** | Exchange information about known destination networks and metrics with directly connected neighbors. | Each router advertises information about its directly connected links to all other routers in the network area. |
+| **Network View** | "Routing by rumor"; information is passed sequentially from router to router, leading to a "tree" view of the network. | Each router builds an identical, comprehensive "map" or topology database of the entire network. |
+| **Calculation** | Calculates routes based on information received from neighbors. | Independently calculates the best routes using its complete network map (e.g., Dijkstra's SPF algorithm). |
+| **Resource Usage** | Generally less resource-intensive in terms of CPU/memory. | Generally requires more resources due to the amount of information processed and complex calculations. |
+| **Convergence Speed** | Slower convergence due to "counting to infinity" issues and full table exchanges. | Faster convergence due to quick propagation of link state changes and independent recalculations. |
+| **Examples** | RIP, EIGRP                                               | OSPF, IS-IS                                                             |
+
+### Route Selection in Dynamic Routing
+
+Routers use several criteria to select the best path when multiple routes to a destination exist:
+
+| Selection Factor                | Description                                                                                                                                                                                                                                                                                                                      |
+| :------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Metric Value Determination** | Routers use a metric value to determine the best route to a destination. The metric could be hop count, bandwidth, delay, or a combination of factors, depending on the routing protocol. Generally, a lower metric value indicates a better route.                                                                                        |
+| **Equal Cost Multi-path (ECMP)**| If a router learns multiple routes to the same destination with the same metric via the same routing protocol, it can use ECMP to load balance traffic across all these routes. ECMP allows for load balancing across equally good paths, improving bandwidth utilization and redundancy.                                             |
+| **Administrative Distance (AD)**| This is a value used to rank the trustworthiness of the information received from different routing protocols. A lower administrative distance is preferred because it indicates a more reliable source. In cases where routes are learned from different protocols, the route with the lower administrative distance will be chosen. |
+
+### Specific Metrics Used by Different Protocols
+
+Different dynamic routing protocols use distinct metrics to calculate the best path:
+
+| Routing Protocol | Primary Metric(s)                                   | Notes                                                    |
+| :--------------- | :-------------------------------------------------- | :------------------------------------------------------- |
+| **RIP** | Hop Count                                           | Each router counts as one hop. Limited to 15 hops.       |
+| **EIGRP** | Bandwidth, Delay (and optionally Reliability, Load) | Uses a composite metric; often considered a hybrid protocol. |
+| **OSPF** | Cost (typically based on Bandwidth)                 | Cost is inversely proportional to bandwidth. Does not inherently consider latency. |
+| **IS-IS** | Cost (typically based on Bandwidth)                 | Similar to OSPF in metric calculation.                   |
+| **BGP** | Path Attributes (diverse set of parameters)         | BGP's path selection is complex, using many attributes beyond a simple metric. |
+
+### 1. Routing Information Protocol (RIP)
+
+#### Routing Information Protocol (RIP)
+
+RIP considers only a single piece of info about the Network Topology: the optimal path to a given Destination Network (lowest Hop Count). RIP sends Regular updates / triggered updates when changes occur of its own Routing database to neighboring routers. These neighbors receive the update and add unknown routes to its own Routing table, increasing the hop count by 1, and identifies the Originator of the update as the next hop to the specified network.
+
+To prevent loops, the max hop count allowed is 15. This limits the size of a RIP network, since networks that have a hop count of 16 or higher are Unreachable for RIP.
+
+* **RIPv1:** "Classful" protocol; Inefficient broadcasts to communicate updates over UDP port 520.
+* **RIPv2:** "Classless" protocol; Efficient multicasts to communicate updates over UDP port 520.
+* **RIPng (next Generation):** Designed for IPv6, using UDP port 521.
+
+RIP's simplicity makes it suited to small networks with few failover routes. Distance Vector Algorithms provide slower Convergence performance than link state algorithms due to the periodic need to propagate entire Routing tables to their neighbors. RIP is a non-native IP protocol, therefore encapsulated in the higher Transport layer datagrams (UDP 520/521).
+
+RIP is used for small size networks with less than 15 subnets.
+
+#### Overview
+Type: Distance Vector protocol.
+Metric: Hop count.
+Maximum Hop Count: 15 (prevents routing loops).
+Timers:
+  Update Timer: 30 seconds (advertises routing table).
+  Invalid Timer: 180 seconds (marks a route invalid if no updates).
+  Hold Down Timer: 180 seconds (prevents regular update instability).
+  Flush Timer: 240 seconds (removes an invalid route).
+
+#### Versions:
+RIPv1: Only supports classful routing, does not send subnet mask information.
+RIPv2: Supports classless routing, sends subnet mask information, uses multicast address `224.0.0.9` for updates.
+RIPnG: RIP Next Generation for IPv6.
+
+### 2. Enhanced Interior Gateway Routing Protocol (EIGRP)
+
+#### Overview
+EIGRP is an advanced distance vector routing protocol, often described as a hybrid protocol. It incorporates features of both distance vector and link-state protocols, enabling rapid convergence and efficient network communication. EIGRP is classed as an advanced distance vector or hybrid Routing protocol. It shares some basic principles with RIP; however, advanced changes include:
+
+1.  Uses a **metric** composed of administrator-weighted elements such as Bandwidth and Delay instead of only a simple hop count metric. (The lowest bandwidth link along a path; the sum of latency along the path).
+2.  Updates are sent in full when contact is first established between neighbors, and thereafter only send updates when there is a topology change (partial updates).
+3.  Maintains a **Topology table** alongside its routing information base, used to prevent loops whilst supporting max hops greater than RIP (nominally up to 255).
+4.  Updates are transmitted via multicast addressing.
+5.  EIGRP is a native IP protocol, meaning it is encapsulated directly in IP datagrams (IP Protocol #88 in protocol field).
+
+Type: Advanced Distance Vector (sometimes referred to as a hybrid protocol).
+Metric: Composite metric based on bandwidth, delay, reliability, load, and MTU.
+Features: Supports unequal-cost load balancing using variance, rapid convergence.
+
+#### Key Concepts:
+Feasible Distance (FD): Best known metric to reach a destination.
+Reported Distance/Advertised Distance (RD): Metric reported by a neighboring router to reach a destination.
+Successor: Route with the lowest FD to a destination.
+Feasible Successor: Backup route with a RD less than the FD of the successor.
+Hybrid Routing Protocol: Combines the best of distance vector and link-state protocols.
+Metric Calculation: Uses a composite metric based on bandwidth, delay, reliability, load, and MTU size.
+Load Balancing: Capable of unequal-cost load balancing using VARIANCE.
+Convergence: Faster than RIP due to its efficient algorithm and trigger updates.
+
+#### Metric Calculation
+EIGRP uses a complex formula to calculate its metric, considering multiple factors:
+$\{Metric\} = 256 * [ ( K_1 * \{Bandwidth\} +(K_2 * \{Bandwidth\}) / \{256 - \{Load\}\} + K_3 * \{Delay\}] * (\{K_5\}\{\{Reliability\} + K_4\}) ]$
+
+Where $K_1$ to $K_5$ are constants that can be adjusted to prioritize certain metrics over others, but by default,
+Cisco routers use $K_1 = K_3 = 1$ and $K_2 = K_4 = K_5 = 0$, focusing mainly on bandwidth and delay.
+
+#### EIGRP Configuration Commands
+To configure EIGRP on a router, you use the following commands within global configuration mode:
+- `network [NETWORK_ADDRESS] [WILDCARD_MASK]`: Specifies the interfaces on which EIGRP is enabled. The wildcard mask is the inverse of a subnet mask.
+- `eigrp router-id [ROUTER_ID]`: Manually sets a unique identifier for the EIGRP routing process.
+- `no auto-summary`: Disables automatic summarization of subnet routes into their major networks.
+- `maximum-paths [NUMBER_OF_PATHS]`: Allows load balancing across multiple paths if available.
+- `variance [MULTIPLIER]`: Enables unequal cost load balancing. Routes with a metric less than the product of the variance multiplied by the lowest metric (feasible distance) will be included in the routing table.
+
+#### Example Configuration
+Router(config)# router eigrp 100
+Router(config-router)# network 10.0.0.0 0.0.0.255
+Router(config-router)# eigrp router-id 1.1.1.1
+Router(config-router)# no auto-summary
+Router(config-router)# maximum-paths 4
+Router(config-router)# variance 2
+
+This setup configures EIGRP for autonomous system 100, enables it on all interfaces with IP addresses in the 10.0.0.0/24 range,
+sets the router ID to 1.1.1.1, disables auto-summarization, allows up to 4 equal or unequal paths for load balancing, and sets the variance multiplier to 2.
+
+EIGRP's sophisticated metric calculation and flexibility make it a robust choice for large enterprise networks seeking efficient, reliable routing with quick convergence times. Its ability to balance load across multiple paths, even those of unequal cost, provides enhanced network utilization and redundancy.
+
+A wildcard mask uses opposite bits of a subnet mask. For example, a subnet mask of `255.255.255.0` is `11111111.11111111.11111111.00000000` in binary. The corresponding wildcard mask would be `0.0.0.255`, which is `00000000.00000000.00000000.11111111` in binary.
+Shortcut for Wildcard Masks
+To quickly convert a regular subnet mask to a wildcard mask, subtract each octet in the subnet mask from 255. Example:
+* Subnet Mask: `255.255.255.0`
+* Wildcard Mask: `255 - 255.255 - 255.255 - 255.255 - 0` = `0.0.0.255`
+
+### 3. OSPF Link State Routing Protocols (Based on the shortest path first algorithm by Dijkstra, Edsger)
+
+### Open Shortest Path First (OSPF)
+
+OSPF is the most widely adopted link-state protocol, suited to large organizations with multiple redundant paths between networks. It has a higher Convergence performance than RIP and supports Classless Addressing.
+While RIP & EIGRP are generally flat, OSPF is **Hierarchical**, grouping connected hosts & Routers within an Autonomous System into Areas. Routers within a given area share the same Topological database of the network they serve. Routers that can connect to multiple areas are known as **Area Border Routers**. A **Backbone Area (Area 0)** is created by the collection of border routers.
+The Router applies a shortest path first algorithm to analyze the link-state database and build best-cost, loop-free routes into its Routing table.
+The use of areas to subdivide the network minimizes the amount of Routing traffic that must be passed around the network as a whole, further improving convergence performance, but requires more CPU and memory resources. Tagged as #89 in the IP datagram protocol header field. Supports clear text authentication.
+
+Routers create a connectivity map of the network. Each router advertises information about its interfaces to its neighbors. These advertisements are passed along to other routers until all routers in the network develop the same map. Using this map, each router independently calculates the best routes to each destination. This allows OSPF to converge more quickly and react faster to topology changes than Distance Vector protocols. However, OSPF tends to be resource-intensive on the CPU. Routers store information about the network in Link State Advertisements (LSAs), which are organized in a structure called the Link State Database (LSDB). The LSDB is identical for all routers in the OSPF area. Routers will flood LSAs until all routers in the OSPF area develop the same map of the network.
+
+- OSPF Hierarchy:
+  - OSPF is hierarchical, grouping connected hosts and routers within an Autonomous System into areas.
+  - Routers within a given area share the same topological database of the network they serve (LSDB).
+  - Routers that can connect to multiple areas are known as Area Border Routers (ABRs).
+
+- Connectivity:
+  - All routers in the same OSPF area are connected.
+  - Each router calculates the best routes by following a 3-step process:
+    1. Become neighbors with other routers connected to the same area.
+    2. Exchange link state advertisements with neighbor routers.
+    3. Calculate the best routes to each destination and insert them into the routing table.
+
+- Areas and Performance:
+  - OSPF uses areas to subdivide the network, minimizing the amount of routing traffic that must be passed around the network as a whole, thereby improving convergence performance.
+  - Small networks can be single-area without any negative effects on performance.
+  - In larger networks, a single-area design can negatively impact performance because:
+    - The SPF algorithm takes more time to calculate routes.
+    - The SPF algorithm requires exponentially more processing power on the routers' CPUs.
+    - The larger LSDB takes up more memory on the routers' RAM.
+  - Small changes in the network cause every router to flood LSAs and run the SPF algorithm again.
+
+- Area Rules:
+  - An area is a set of routers and links that share the same topological link-state database (LSDB).
+  - The Backbone Area (Area 0) is an area that all other areas must connect to.
+  - All OSPF areas should be contiguous and must have at least one ABR connected to the Backbone Area (Area 0).
+  - OSPF interfaces in the same subnet must be in the same area.
+
+- Routers:
+  - Routers with all interfaces in the same area are called Internal Routers.
+  - Routers with interfaces in multiple areas are called Area Border Routers (ABRs).
+  - ABRs maintain a separate LSDB for each area they are connected to. It is recommended that you connect an ABR to a maximum of two areas to avoid overburdening the router.
+
+- Routing:
+  - An Intra-Area Route is a route to a destination inside/within the same OSPF area.
+  - An Inter-Area Route is a route to a destination in a different OSPF area.
+
+- Basic OSPF Configuration:
+  - Unlike AS number in EIGRP, OSPF PID is locally significant.
+  - Routers with a default process ID can become OSPF neighbors.
+  - A router can run multiple OSPF processes at once; the `router ospf <PID>` command is used on the router to identify each of them.
+  - The OSPF network command tells OSPF to look for interfaces with an IP address contained in the range specified in the command and activates OSPF on the interface in the specified area. In OSPF this command will advertise a Router’s Gateway of last resort(Default Route) and that router will become an Autonomous System Boundary Router ASBR — This command configures OSPF to inject a router’s default external route into OSPF (similar to Redistribute command) in OSPF router configuration mode
+  - The `passive-interface` command tells the router to stop sending OSPF Hello messages out of the interface; used on interfaces without OSPF neighbors.
+  - The `default-information originate` command advertises a router's default route into the OSPF network.
+
+#### Autonomous System Boundary Router (ASBR)
+Default Information Originate Command: When you issue the `default-information originate` command, OSPF will advertise the router's Gateway of Last Resort (Default Route). This command configures OSPF to inject a router’s default external route into the OSPF domain. This is similar to redistributing routes in OSPF router configuration mode.
+
+#### Redistribution
+Redistributes Routes from Other Routing Protocols into OSPF: 
+ASBR redistributes routes from other routing protocols into the OSPF domain.
+
+### OSPF Initialization & Neighbor States Notes
+This structured note provides clear instructions on various OSPF configurations including initialization, neighbor relationships, and detailed interface settings.
+
+#### OSPF Hello Messages
+- With OSPF enabled on an interface, the router starts sending OSPF hello messages out of the interface at regular intervals (default is 10 seconds for Ethernet connections). These messages are multicast to 224.0.0.5, the multicast address for all OSPF routers. OSPF messages are encapsulated in an IP header with a protocol field value of 89.
+### OSPF States and Processes:
+    •   DBD: Database Description
+    •   LSR: Link State Request
+    •   LSU: Link State Update
+    •   DR: Designated Router
+    •   BDR: Backup Designated Router
+
+### Additional Points
+OSPF Interface Priority: Higher priority wins DR/BDR election. Default priority is 1 for all interfaces
+.
+Router ID: In case of a tie in priority, the higher Router ID wins.
+Election Non-preemptive: Once elected, roles are maintained unless the interface fails or OSPF is restarted.
+
+### OSPF Neighbor Requirements
+| Requirement                    | Description                                                                                                                                           |
+| :----------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Area number                    | Must match.                                                                                                                                           |
+| Subnet                         | Interfaces must be within the same subnet.                                                                                                            |
+| OSPF Process                   | Must be running (not shutdown).                                                                                                                       |
+| Router IDs                     | Must be unique.                                                                                                                                       |
+| Hello and Dead timers          | Must match.                                                                                                                                           |
+| Authentication settings        | Must match.                                                                                                                                           |
+| MTU settings                   | Must match.                                                                                                                                           |
+| OSPF network type              | Must be consistent across interfaces.                                                                                                                 |
+NB EVEN THOUGH MTU AND NETWORK TYPE MISMATCH MAY STILL RESULT TO PARTIAL ADJACENCY(stuck in 2-way State), a mismatch of MTU and NETWORK TYPE ensures that routers won’t fully synchronize their LSDBs and have full OSPF adjacency
+
+Dead and hello timers are critical for detecting failed neighbors. To edit the dead interval and hello interval for an OSPF-enabled interface on a Cisco device, use the following commands in interface configuration mode:
+
+```
+Router(config)# interface [interface_id]
+Router(config-if)# ip ospf hello-interval [seconds]
+Router(config-if)# ip ospf dead-interval [seconds]
+```
+
+Note:The dead interval must be at least 4 times the hello interval (best practice).
+Both routers on the link must have matching hello and dead timers to form or maintain an adjacency.
+
+Link-State Advertisements (LSAs):
+  - LSAs are shared among routers to ensure each has an up-to-date and accurate map of the network topology.
+
+### Loopback Interface
+Definition: A virtual interface internal to Cisco IOS, created via the command `interface loopback number`, where the number is an integer.
+Purpose: Provides a consistent IP address to identify or reach the router, as it remains in an up/up state as long as the router is operational and not manually shut down.
+State: Always "up/up" unless manually shut down.
+
+```
+Router(config)# interface loopback 0
+Router(config-if)# ip address 1.1.1.1 255.255.255.255
+```
+This sequence of commands sets up a loopback interface with a specified IP address, ensuring that it is active and saved across reboots. Often configured for testing or management purposes.
+
+### OSPF Network Types
+| Network Type      | Default On                                      | Neighbor Discovery                                              | DR/BDR Election | Adjacency                                                      | Multicast Addresses                                     |
+| :---------------- | :---------------------------------------------- | :-------------------------------------------------------------- | :-------------- | :------------------------------------------------------------- | :------------------------------------------------------ |
+| **1. Broadcast** | Ethernet & Fiber Distributed Data Interfaces    | Uses multicast address `224.0.0.5` for OSPF Hello messages.     | Mandatory       | Full adjacency with DR and BDR. DROthers have a 2-way state.   | General Hello: `224.0.0.5`   
+ To DR/BDR: `224.0.0.6` |
+| **2. Point-to-Point** | Serial interfaces (PPP or HDLC encapsulations) | Directly between the two routers without DR/BDR elections.      | No              | Full adjacency automatically formed between the two connected routers. | General Hello: `224.0.0.5`   
+ To DR/BDR: NO DR/BDR Messages |
+| **3. Non-Broadcast (NBMA)** | Frame Relay                                     | Manual neighbor specification required due to lack of broadcast. | N/A             | N/A                                                            | N/A                                                     |
+
+DCE/DTE Roles (for Serial Interfaces):
+* **DCE (Data Communication Equipment):** Sets the clock rate.
+* **DTE (Data Terminal Equipment):** Specifies the clock rate (speed) of the connection.
+
+### Commands and Configurations
+| Command                                                       | Description                                                                                                                                                 |
+| :------------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `RT(config-if)# ip ospf priority <value>`                     | Changes OSPF Priority: Higher priority wins DR/BDR election. Default priority is 1 for all interfaces.                                                    |
+| `RT(config)# clear ip ospf process`                           | Clears the OSPF process, often used to force re-elections or database synchronization.                                                                    |
+| `RT# show controllers <interface-id>`                         | Shows interface controllers, providing details about the physical layer and serial interface types (DCE/DTE).                                             |
+| `RT(config-if)# ip ospf network {broadcast|non-broadcast|point-to-multipoint|point-to-point}` | Sets the OSPF Network Type for the interface.                                                                                                             |
+| `RT(config-if)# clock rate <value>`                          | Sets Clock Rate for Serial Interface (DCE side).                                                                                                            |
+| `RT# router RIP`                                              | Enters RIP router configuration mode.                                                                                                                       |
+| `RT# version 2`                                               | Configures RIP version 2 (classless).                                                                                                                       |
+| `RT# router eigrp Autonomous-system-id`                     | Enters EIGRP router configuration mode (AS number must match between routers).                                                                            |
+| `RT# router ospf process-id`                                | Enters OSPF router configuration mode (Process ID does not have to match between routers to form adjacency). A router can run multiple OSPF processes. |
+| `RT(config-router)# variance [multiplier]`                  | Allows EIGRP to use multiple paths that have a metric less than the best path multiplied by the variance value (unequal cost load balancing).             |
+| `RT(config-router)# no auto-summary`                         | Prevents the router from summarizing routes to their classful boundaries (keeping addresses classless with CIDR/wildcard mask).                         |
+| `RT(config-router)# passive-interface [Interface-ID]`        | Stops sending OSPF Hello messages (and EIGRP updates) out of a specified interface; used on interfaces without OSPF/EIGRP neighbors for security/efficiency. |
+| `RT(config-router)# passive-interface default`               | Sets all interfaces to be Passive by default.                                                                                                               |
+| `RT(config-router)# no passive-interface intf-ID`            | Un-selects specified interfaces from being passive.                                                                                                         |
+| `RT(config-router)# Default-Information Originate`           | In OSPF, advertises a router’s Gateway of last resort (Default Route) into the OSPF domain, making the router an ASBR.                                   |
+| `RT(config-router)# network [network-address] [wildcard-mask]` | For RIP/EIGRP/OSPF, specifies which networks on the router’s interfaces will participate.                                                                 |
+| `RT(config-router)# network [network-address] [wildcard-mask] area No.` | For OSPF, activates OSPF on interfaces matching the network address/wildcard mask and assigns them to the specified area.                                 |
+| `RT(config-if)# ip ospf [process-id] area [area-id]`         | Alternatively, activates OSPF directly on an interface.                                                                                                     |
+
+#### OSPF Cost Metric
+
+OSPF's metric, called cost, is automatically calculated based on the bandwidth (speed) of the interface. All interfaces are equal and have a cost of 1 if calculated by dividing a reference bandwidth by the interface's real bandwidth.
+
+* **Default Reference Bandwidth:** The default reference bandwidth is 100 Mbps. For faster Ethernet (e.g., Gigabit Ethernet), you should change the reference bandwidth to better reflect the higher speeds, such as 10,000 Mbps.
+    ```
+    (config-router)# auto-cost reference-bandwidth [bandwidth in Mbps]
+    ```
+    A reference bandwidth greater than the fastest link's bandwidth should be configured on all OSPF routers in the network to allow for future upgrades. Note that changing the interface bandwidth setting does not change the actual operating speed of the interface; it's used to calculate OSPF cost.
+
+Three Ways to Configure New Parameters for OSPF’s Metric Calculations:
+| Method                          | Command                                    | Description                                                                                                                                                              | Recommendation        |
+| :------------------------------ | :----------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------- |
+| **Change Interface Bandwidth** | `RT(config-if)# bandwidth [bandwidth in kbps]` | Manually changes the interface speed (bandwidth) used in the OSPF cost calculation. This is NOT recommended as it affects other protocols' metric calculations.              | Not Recommended       |
+| **Set OSPF Cost Manually per Interface** | `RT(config-if)# ip ospf cost [cost-value]`  | Manually configures the OSPF cost for an individual interface. This value overrides the calculated cost.                                                                 | Used for fine-tuning  |
+| **Change Reference Bandwidth** | `RT(config-router)# auto-cost reference-bandwidth [bandwidth in mbps]` | Changes the reference bandwidth used in the OSPF cost calculation (Reference Bandwidth / Interface Bandwidth). This is the most recommended method for scaling OSPF costs. | Most Recommended      |
+
+### Show Commands Overview
+
+| Command                               | Description                                                                                                                                                                                               |
+| :------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `RT# show ip protocols`               | Displays detailed information about all IP routing protocols configured on the router, including types (OSPF, EIGRP), status, network types, timers, and specific configurations.                        |
+| `RT# show ip {eigrp|ospf} interface`  | Displays detailed information about interfaces configured for EIGRP or OSPF, showing data like network type, cost, priority, state, and protocol-specific statistics.                                   |
+| `RT# show ip {eigrp|ospf} interface brief` | Provides a summarized view of all interfaces running EIGRP or OSPF, listing interface names, IP addresses, and status indicators (e.g., passive/active).                                            |
+| `RT# show ip {eigrp|ospf} interface intf-ID` | Displays detailed information about a specific interface participating in EIGRP or OSPF, including hello/dead intervals, wait times, and other protocol-specific metrics.                           |
+| `RT# show ip {eigrp|ospf} neighbor`   | Lists all neighboring devices discovered by EIGRP or OSPF on all interfaces, showing neighbor ID, IP address, connecting interface, hold time, and adjacency status.                                  |
+| `RT# show ip {eigrp|ospf} topology`   | For EIGRP, displays entries in the EIGRP topology table (successor/feasible successors). For OSPF, shows the OSPF link-state database (LSDB) for the area, detailing all learned and calculated routes. |
+
+### Best Practices for Routing
+
+| Do's                                         | Don'ts                                                               |
+| :------------------------------------------- | :------------------------------------------------------------------- |
+| Use Correct Subnet Masks.                    | Avoid Incorrect Next-Hop Addresses.                                  |
+| Specify Exact Routes for Non-Broadcast Interfaces. | Don't Overlook Routing Protocols for Larger Networks.                |
+| Verify Interface Statuses.                   | Avoid Unnecessary Routes.                                            |
+| Use Descriptive Comments.                    | Don't Forget Security.                                               |
+| Test Connectivity & Specify exact Default Gateway. | Avoid Misconfigurations.                                             |
+
+#### Configuration Example for Floating Static Route
+If OSPF (AD 110) is the primary routing protocol, and you need a backup static route:
+```
+Router(config)# ip route 192.168.1.0 255.255.255.0 10.1.1.2 200
+```
+This command configures a static route to the network 192.168.1.0/24 with a next-hop address of 10.1.1.2 and sets the AD to 200, ensuring it is used only if the OSPF route fails.
+
+Route Preference Based on Address Length
+* When a router has multiple routes to similar networks, it prefers the route with the longest prefix length (most specific match) over routes with shorter prefix lengths.
+* In dynamic routing, routers automatically select the optimal path to each destination based on predefined metrics and administrative distances.
+
+### 4. Border Gateway Protocol (BGP)
+
+BGP replaced Exterior Gateway Protocol (EGP). BGP is designed to be used within and between Routing Domains in a mesh network and as such is used as the Routing protocol on the Internet, primarily between ISPs.
+
+| BGP Term        | Description                                                                 |
+| :-------------- | :-------------------------------------------------------------------------- |
+| **MESH Network** | A network of Routers in separate Autonomous Systems.                        |
+| **Interior BGP (IBGP)** | Implemented within an Autonomous System.                                    |
+| **Exterior BGP (EBGP)** | Implemented between Autonomous Systems.                                     |
+
+AS is designed to hide the complexity of private Organization networks from the public Internet.
+
+If all Internet locations had to be propagated to all Network Routers, the Routing tables would become too large to process. BGP prioritizes stability, so it is slow to converge. BGP is a non-native IP protocol; it works over TCP on port 179. It uses a classless network prefix called **Network Layer Reachability Information (NLRI)**, a path routing vector. Path selection is based on multiple metrics: Hop count, Weight, Local Preference, Origin, AS Path, etc. (More complex than simple distance or bandwidth).
+
+---
+
+## Exploring Network Redundancy: From Layer 2's EtherChannel to Layer 3's FHRP
+
+In the world of networking, ensuring continuous data flow and minimizing downtime is paramount. A fascinating aspect of network design involves the implementation of redundancy protocols across different layers. Let's delve into the similarities between EtherChannel at Layer 2 and First Hop Redundancy Protocols (FHRP) at Layer 3.
+
+### Similarities:
+
+| Feature           | EtherChannel (Layer 2)                                                               | FHRP (Layer 3)                                                                 |
+| :---------------- | :----------------------------------------------------------------------------------- | :----------------------------------------------------------------------------- |
+| **Redundancy** | Aggregates multiple physical links into a single logical link for enhanced bandwidth and redundancy. | Provides redundant gateway IPs to connected devices, preventing single points of failure (e.g., HSRP, VRRP, GLBP). |
+| **Load Balancing**| Distributes traffic at Layer 2 among the links in the channel (e.g., source/dest MAC). | Distributes client requests among multiple routers, efficiently managing traffic at Layer 3. |
+| **Failover Capability** | If one physical link fails, traffic automatically redistributes to remaining links without downtime. | Re-routes traffic to another router in the event of a gateway failure, ensuring high availability. |
+
+While they operate at different layers within the OSI model, the core objectives align splendidly, showcasing the layered approach to network resilience.
+Understanding these protocols is essential for designing robust networks that can efficiently handle failures and ensure uninterrupted service delivery.
+
+A First Hop Redundancy Protocol (FHRP) is a **subnetwork** designed to protect the default gateway used on a network by allowing 2 or more routers to provide backup for that address.
+In the event of a **failed** router, the backup router will take over the address, usually within a few seconds.
+Due to the degree of complexity in Endpoint-Hosts Routing Algorithms, configuring multiple default gateways for fault tolerance is impractical - FHRP resolves this issue by allowing multiple physical router appliances to function as a single logical router. Named as "First Hop" due to being an Endpoint-Host(s) Default Gateway or first router (HOP) in the path to whatever destination the hosts are trying to send traffic to.
+
+- A Virtual Router IP is configured on 2 or more routers, The Virtual IP is generated in accordance with specific rules with a Virtual MAC Address.(each FHRP uses a different format for the virtual MAC) 
+
+An Active Router and a Standby Router are elected, Endpoints/Hosts in the network are configured to use the virtual IP as their default gateway.
+The Active router replies to ARP requests using the virtual MAC Address, so traffic destined for other networks will be sent to it.
+If the active router fails, the standby router becomes the next active router. However, with Non-Preemption enabled, the new Active Router will send Gratuitous ARP messages so that switches will update their MAC Address Tables. It now functions as the new default gateway. If the old active router comes back online/recovers from failure, by default it would not take back its role as the Active router. It becomes the standby router. Router selection is non-preemptive by default, similar to DR/BDR election in OSPF, although in FHRP, there's a way to configure "PREEMPTION."
+
+### 📝 Here are some detailed notes on how FHRP operates at Layer 3:
+FHRP plays a critical role in maintaining the accessibility of network services by providing seamless failover capabilities. 
+
+### HOT STANDBY ROUTER PROTOCOL HSRP
+| Feature          | Description                                                              | HSRPv1 Specifics                      | HSRPv2 Specifics                       |
+| :--------------- | :----------------------------------------------------------------------- | :------------------------------------ | :------------------------------------- |
+| **Developer** | Cisco proprietary                                                        | N/A                                   | N/A                                    |
+| **Election** | An Active & Standby Router are elected.                                  | N/A                                   | N/A                                    |
+| **Supported Versions** | V1 and V2 supported.                                                     | N/A                                   | Adds IPv6 support.                     |
+| **Multicast IPv4 Address** | `224.0.0.2` (V1) / `224.0.0.102` (V2)                                    | `224.0.0.2`                           | `224.0.0.102`                          |
+| **Virtual MAC Address** | `0000.0C07.ACxx` (V1) / `0000.0C9F.Fxxx` (V2)                           | `0000.0C07.ACxx`                      | `0000.0C9F.Fxxx`                       |
+| **Group Number** | `xx`/`xxx` represents HSRP Group Number. Can be configured differently for each subnet/VLAN. | N/A                                   | N/A                                    |
+| **Best Practice**| Group number settings should match VLAN numbers for organizational consistency. | N/A                                   | N/A                                    |
+
+### VIRTUAL ROUTER REDUNDANCY PROTOCOL VRRP
+| Feature          | Description                                                              |
+| :--------------- | :----------------------------------------------------------------------- |
+| **Standard** | Open Standard - IEEE (`IEEE 802.1Q` - actually `IEEE 802.1Q` for VLANs, VRRP is `RFC 3768`)                                                             |
+| **Enhancements** | Cisco proprietary enhancements available.                                |
+| **Election** | A Master and Backup Router are elected. Load balances among multiple routers elected. |
+| **Multicast IPv4 Address** | `224.0.0.18`                                                             |
+| **Virtual MAC Address** | `0000.5000.01XX` (XX represents the VRRP Group ID)                       |
+| **Load Balancing**| Can be configured with a different master router in each subnet/VLAN to load balance. |
+
+#### GATEWAY LOAD BALANCING PROTOCOL GLBP
+| Feature          | Description                                                              |
+| :--------------- | :----------------------------------------------------------------------- |
+| **Capability** | Provides redundancy AND load balances traffic between multiple available routers. |
+| **Load Balancing**| Load Balances among Multiple Routers within a single subnet.             |
+| **Election (AVG)**| An Active Virtual Gateway (AVG) is elected.                              |
+| **AVF Assignment**| Up to 4 Active Virtual Forwarders (AVF) are assigned by the AVG.         |
+| **Multicast IPv4 Address** | `224.0.0.102` (same as V2 HSRP)                                          |
+| **Default Gateway**| Each AVF acts as the default gateway.                                    |
+
+### Hot Standby Router Protocol Configuration Notes
+1.  **Highest Priority** (Default Priority 100)
+2.  **The Active Router is determined in this order:**
+    I. Highest Priority
+    II. Highest IP Address (in case of a tie in priority)
+    III. Manual Config with Preempt command (if preempt is enabled, a router with higher priority will take over the active role)
+
+NOTE: The Active Router is determined by priority. Preempt causes the Router to take the role of active Router, even if another router already has the role. The Preempting Router must have a higher priority or IP Address.
+
+Configuration commands:
+```
+RT# show standby  
+RT(config-if)# interface gx/y
+RT(config-if)# standby version 1|2  
+RT(config-if)# standby group-number ip 'virtual-ip'
+RT(config-if)# standby group-number priority 'priority'
+RT(config-if)# standby group-number preempt
+```
+
+### VIRTUAL ROUTING AND FORWARDING (VRF)
+VRF is commonly used to facilitate MPLS and VRF-Lite. VRF allows us to divide one physical router into multiple virtual routers, similar to VLANs for switches.
+
+| Feature    | VLANs (Switches)                                | VRF (Routers)                                         |
+| :--------- | :---------------------------------------------- | :---------------------------------------------------- |
+| **Function** | Divide a switch into multiple virtual switches with their own logical broadcast domains. | Divide a Router into multiple Virtual Routers, each with its own Routing Table. |
+| **Traffic Isolation** | Broadcast domain isolation.                     | Traffic is isolated from each other; customer IP address schemes can overlap. |
+| **Configurable on**| Switchports, SVIs.                              | Router Interfaces, Switch Virtual Interfaces (SVIs), and Routed ports on Multilayer Switches. |
+| **Traffic Flow**| Traffic within one VLAN is isolated from others. | Traffic in one VRF cannot be forwarded out of an interface in another VRF (except with VRF Leaking). |
+| **Common Use** | Enterprise LAN segmentation.                    | Service providers to carry traffic from multiple customers (e.g., on a PE Router). |
+
+Traffic in one VRF cannot be forwarded out of an interface in another VRF. As an exception, VRF Leaking can be configured to allow traffic to pass between VRFs.
+VRF is used commonly by service providers to allow one device to carry traffic from multiple customers (e.g., on a PE Router).
+
+---
+
+## Access Control Lists
+
+IPv4 access control lists (ACL) give network engineers the ability to program a filter into a router. Each router, on each interface, for both the inbound and outbound direction, can enable a different ACL with different rules. Each ACL’s rules tell the router which packets to discard and which to allow through. IPv4 ACLs perform many functions in Cisco routers, with the most common use as a packet filter. Engineers can enable ACLs on a router so that the ACL sits in the forwarding path of packets as they pass through the router. After it is enabled, the router considers whether each IP packet will either be discarded or allowed to continue as if the ACL did not exist. ACLs can be used for many other IOS features as well. As an example, ACLs can be used to match packets for applying Quality of Service (QoS) features. QoS allows a router to give some packets better service, and other packets worse service.
+
+### ACL Location and Direction
+
+Cisco routers can apply ACL logic to packets at the point at which the IP packets enter an interface, or the point at which they exit an interface. In other words, the ACL becomes associated with an interface and for a direction of packet flow (either in or out). That is, the ACL can be applied inbound to the router, before the router makes its forwarding (routing) decision, or outbound, after the router makes its forwarding decision and has determined the exit interface to use. In short, to filter a packet, you must enable an ACL on an interface that processes the packet, in the same direction the packet flows through that interface. When enabled, the router then processes every inbound or outbound IP packet using that ACL. When you think about the location and direction for an ACL, you must already be thinking about what packets you plan to filter (discard), and which ones you want to allow through. To tell the router those same ideas, you must configure the router with an IP ACL that matches packets. Matching packets refers to how to configure the ACL commands to look at each packet, listing how to identify which packets should be discarded and which should be allowed through.
+
+When doing ACL processing, the router processes the packet, compared to the ACL, as follows:
+ACLs use first-match logic. Once a packet matches one line in the ACL, the router takes the action listed in that line of the ACL and stops looking further in the ACL.
+
+This sequence of processing an ACL as a list happens for any type of IOS ACL: IP, other protocols, standard or extended, named or numbered. Finally, if a packet does not match any of the items in the ACL, the packet is discarded. The reason is that every IP ACL has a deny all statement implied at the end of the ACL. It does not exist in the configuration, but if a router keeps searching the list, and no match is made by the end of the list, IOS considers the packet to have matched an entry that has a deny action.
+
+IOS refers to each line in an ACL as an Access Control Entry (ACE), but many engineers just call them ACL statements. IOS allows standard ACLs to match a range of addresses using a tool called a wildcard mask. Note that this is not a subnet mask. The wildcard mask (which this book abbreviates as WC mask) gives the engineer a way to tell IOS to ignore parts of the address when making comparisons, essentially treating those parts as wildcards, as if they already matched. You can think about WC masks in decimal and in binary, and both have their uses. To begin, think about WC masks in decimal, using these rules:
+* Decimal 0: The router must compare this octet as normal.
+* Decimal 255: The router ignores this octet, considering it to already match. The WC mask actually directs the router’s logic bit by bit. In short, a WC mask bit of 0 means the comparison should be done as normal, but a binary 1 means that the bit is a wildcard and can be ignored when comparing the numbers. First, to match any and all packets with an ACL command, just use the any keyword for the address. For example, to permit all packets: `access-list 1 permit any`
+
+So, when and where should you use such a command? Remember, all Cisco IP ACLs end with an implicit deny any concept at the end of each ACL. That is, if a router compares a packet to the ACL, and the packet matches none of the configured statements, the router discards the packet. Want to override that default behavior? Configure a `permit any` at the end of the ACL. You might also want to explicitly configure a command to deny all traffic (for example, `access-list 1 deny any`) at the end of an ACL. Why, when the same logic already sits at the end of the ACL anyway? Well, the ACL show commands list counters for the number of packets matched by each command in the ACL, but there is no counter for that implicit deny any concept at the end of the ACL. So, if you want to see counters for how many packets are matched by the deny any logic at the end of the ACL, configure an explicit deny any. When routers apply an ACL to filter packets in the outbound direction, as shown in Example 2-3, the router checks packets that it routes against the ACL. However, a router does not filter packets that the router itself creates with an outbound ACL.
+Examples of those packets include routing protocol messages and packets sent by the ping and traceroute commands on that router. In addition, if you add the `log` keyword to the end of an access-list command, IOS then issues log messages with occasional statistics about matches of that particular line of the ACL. Both the statistics and the log messages can be helpful in deciding which line in the ACL is being matched by a packet. When you troubleshoot an ACL for the first time, before getting into the details of the matching logic, take the time to think about both the interface on which the ACL is enabled and the direction of packet flow. Sometimes the matching logic is perfect—but the ACL has been enabled on the wrong interface, or for the wrong direction, to match the packets as configured for the ACL.
+
+To match a specific address, just list the address. To match any and all addresses, use the ANY keyword. To match based only on the first one, two, or three octets of an address, use the 0.255.255.255, 0.0.255.255, and 0.0.0.255 WC masks, respectively. Also, make the source (address) parameter have 0s in the wildcard octets (those octets with 255 in the wildcard mask). To match a subnet, use the subnet ID as the source, and find the WC mask by subtracting the DDN subnet mask from 255.255.255.255.
+
+The change IOS can make with an access-list command is to convert to 0 any octet of an address for which the wildcard mask’s octet is 255. For example, with a wildcard mask of 0.0.255.255, IOS ignores the last two octets. IOS expects the address field to end with two 0s. If not, IOS still accepts the access-list command, but IOS changes the last two octets of the address to 0s. Extended ACLs differ from standard ACLs mostly because of the larger variety of packet header fields that can be used to match a packet. One extended ACE (ACL statement) can examine multiple parts of the packet headers, requiring that all the parameters be matched correctly to match that one ACE. That powerful matching logic makes extended access lists both more useful and more complex than standard IP ACLs.
+
+Numbered ACLs have existed in IOS since the early days of Cisco routers and IOS; however, for many years, through many IOS versions, the ability to edit a numbered IP ACL was poor. For example, to simply delete a line from the ACL, the user had to delete the entire ACL and then reconfigure it. The ACL editing feature uses an ACL sequence number that is added to each ACL permit or deny statement, with the numbers representing the sequence of statements in the ACL. ACL sequence numbers provide the following features for both numbered and named ACLs:
+* New configuration style for numbered: Numbered ACLs use a configuration style like named ACLs, as well as the traditional style, for the same ACL; the new style is required to perform advanced ACL editing.
+* Deleting single lines: An individual ACL permit or deny statement can be deleted with a `no sequence-number` subcommand.
+* Inserting new lines: Newly added permit and deny commands can be configured with a sequence number before the deny or permit command, dictating the location of the statement within the ACL.
+* Automatic sequence numbering: IOS adds sequence numbers to commands as you configure them, even if you do not include the sequence numbers.
+
+ACLs have multiple uses, they function as a packet filter, instructing the router to permit or discard specific traffic, ACLs can filter traffic based on source/destination Layer 3 IP addresses, source /destination layer 4 ports. Different types of ACLs have a different range of numbers that can be used.
+
+Configuring an ACL in Global Config Mode will not make the ACL take effect. The ACL must then be applied to an interface, ACLs are applied either inbound or outbound. ACLs are made up of one or more ACCESS CONTROL ENTRIES ACE. When the router checks a packet against the ACL, it processes the ACEs in order, from top to bottom. If the packet matches one of the ACEs in the ACL, the router takes the action and stops processing the ACL. All entries below the matching entry will be ignored. ACLs have multiple uses, and are processed sequentially from the first entry in the list to the last entry. They control packet flow across a network by either permitting or denying packets based on source network, destination network, (protocol or destination port-Extended). Each ACL can only be applied to a single protocol per interface and per direction, Multiples ACLs can be used to accomplish more complex packet flow through out an organization.
+
+A very common point of confusion with Cisco ACLs! It seems counterintuitive, but the "in" and "out" directions in an ACL are always relative to the router interface itself, not the direction of the traffic flow in the network as a whole.
+
+| Direction | Perspective                                    | Processing Point                                                | Action on Deny        | Action on Permit                  |
+| :-------- | :--------------------------------------------- | :-------------------------------------------------------------- | :-------------------- | :-------------------------------- |
+| **Inbound** | Traffic coming *into* the router interface.    | Router checks ACL *before* making any routing decisions.        | Router drops the packet. | Router proceeds with routing.     |
+| **Outbound**| Traffic going *out of* the router interface.   | Router checks ACL *after* making routing decisions and determining the exit interface. | Router drops the packet. | Router sends the packet out.      |
+
+NOTE: If you apply a new ACL named or numbered to the same interface in the same direction, it will replace/overwrite the previous one, in such case the last ACL we applied will be the running one.
+NOTE: If you added ACEs to an existing ACL, the ACEs will be appended to the end of the existing ACL; consequently, it may be necessary to re-create the ACL if you need the add an entry that should appear at or near the top of the ACL. 
+
+### Standard ACLs
+
+STANDARD ACLs match traffic based only on the source IP address of the packet. Standard ACLs can use numbers 1-99 and 1300-1999. A rule of thumb is to apply standard ACLs as close to the destination as possible.
+
+#### Standard Numbered ACLs:
+They are identified with a number (i.e., ACL 1, ACL 2 etc). The Basic command to configure a “standard numbered” ACL is:
+
+```cli
+RT(config)# ip access-list standard number
+RT(config-std-nacl)# deny 1.1.1.1 0.0.0.0
+RT(config-std-nacl)# deny 1.1.1.1
+RT(config-std-nacl)# permit any
+RT(config-std-nacl)# permit 0.0.0.0 255.255.255.255
+RT(config-std-nacl)# remark ## BLOCK BOB FROM ACCOUNTING ##
+RT(config-std-nacl)# interface g0/0
+RT(config-if)# ip access-group number {in | out}
+```
+
+Display commands for Standard Numbered ACLs:
+```cli
+RT(config)# do show access-lists
+RT(config)# do show running-config | include access-lists
+```
+
+#### Standard Named ACLs:
+They are identified with a Name (i.e., ‘BLOCK_BOB’). They are configured by entering ‘standard named ACL configuration mode’ and then configuring each entry within that configuration mode.
+
+```cli
+RT(config)# ip access-list standard ACL_NAME
+RT(config-std-nacl)# [entry-number] {deny | permit} ip wildcard-mask
+RT(config)# ip access-list standard BLOCK_BOB
+RT(config-std-nacl)# deny 192.168.1.24 0.0.0.0
+RT(config-std-nacl)# permit any
+RT(config-std-nacl)# remark ## configured April21,2025 ##
+RT(config-std-nacl)# interface g0/0
+RT(config-if)# ip access-group BLOCK_BOB {in | out}
+```
+
+NOTE: One disadvantage of the numbered ACL is that when configuring/deleting numbered ACLs from global config mode, you can’t delete individual entries, you can only delete the entire ACL. However, from `config-std-nacl` mode, you can use `no entry-number` to delete individual entries.
+NOTE: One advantage of the named ACL is that you can easily delete individual entries in the ACL with `RT(config-std-nacl)# NO sequence-number`, and you can insert new entries in between other entries by specifying the sequence number. Named ACLs originally had three big differences compared to numbered ACLs:
+* Using names instead of numbers to identify the ACL, making it easier to remember the reason for the ACL
+* Using ACL subcommands, not global commands, to define the action and matching parameters
+* Using ACL editing features that allow the CLI user to delete individual lines from the ACL and insert new lines
+
+Display commands for Standard Named ACLs:
+```cli
+RT(config)# do show access-lists
+RT(config)# do show running-config | include access-list
+RT(config)# do show running-config | section access-list
+```
+
+NOTE: There is a RESEQUENCING function that helps edit ACLs.
+The command is:
+```cli
+#ip access-list resequence number/name starting-seq-num increment
+```
+
+### Extended ACLs
+
+Extended ACLs let you imagine the exact path of the traffic you want to filter. This will make it easier to determine the source and destination. They match traffic based on more parameters -> on the src/dest IP address && src/dest Port/Protocol of the packet, so they are more precise and also more complex than standard ACLs. Extended ACLs can use numbers 100-199 and 2000-2699.
+Use named ACLs instead of numbered ones. They are easier to read and modify.
+If you specify the protocol, source IP, source Port, destination IP, destination Port, etc, a packet must match all of those values to match the ACL entry. Even if it matches all except one of the parameters, the packet won’t match that entry of the ACL.
+
+#### Extended Numbered ACLs:
+```cli
+RT(config)# access-list number [permit | deny] protocol src-IP dest-ip
+```
+
+#### Extended Named ACLs:
+```cli
+RT(config)# ip access-list extended {name | number}
+RT(config-ext-nacl)# [permit | deny] protocol src-IP dest-ip
+RT(config-ext-nacl)# permit ip any any
+RT(config-ext-nacl)# deny ip any any
+```
+
+* **Protocol Awareness:** Extended ACLs let you specify protocols (TCP, UDP, ICMP). Know their common port numbers (e.g., TCP port 80 for HTTP, 22 for SSH). The Protocol name IP-Internet Protocol Allows or Deny Any Internet Protocol, only specify this when we don’t care about the protocol, we just want to deny or permit all packets.
+* **"Any" Keyword:** Use "any" as a shortcut for "0.0.0.0 255.255.255.255" (any IP address) to simplify rules.
+* **"Host" Keyword:** Use "host" before an IP address (e.g., "host 192.168.1.10") instead of "192.168.1.10 0.0.0.0" for a single host.
+* **Port Operators:** Utilize operators like "eq" (equal), "neq" (not equal), "gt" (greater than), "lt" (less than), "range" to specify port ranges. The most common being “eq”.
+When you specify tcp/udp as the protocol to match you can optionally specify the source and /or destination port to match, this is optionally, if you just specified TCP or UDP without the port numbers, all port numbers will be matched.
+```cli
+RT(config-ext-nacl)# deny tcp src-ip “eq” src-port-num dest-ip “eq” dst-port-num
+RT(config-ext-nacl)# deny udp src-ip “lt” src-port-num dest-ip “gt” dst-port-num
+```
+
+### ACL Placement Guidelines
+
+"Ever wonder where to place them on your Cisco router? 🤔 It's all about control! 💡Placement is KEY. Standard ACLs = 🚫 destination. Extended ACLs = 🎯 source. This prevents headaches and keeps your network lean. Think of ACLs like bouncers! 🚪"
+
+| ACL Type      | Analogy                                   | Placement Rule                                                     | Rationale                                                                                                                                                                                                                                                                                                                                                                                                                                        | Common Application |
+| :------------ | :---------------------------------------- | :----------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------- |
+| **Standard ACLs** | Like a 'destination only' filter.         | Place them near the destination.                                   | Because standard ACLs can filter packets only by source Internet Protocol (IP) address, they should be placed as close to the destination as possible. This prevents them from blocking legitimate traffic from the same source that needs to reach other destinations. If applied close to the source, there is a risk of blocking more traffic than intended. When applying them to an interface, applying them "outbound" is often the correct approach, meaning closer to the destination interface. The goal is to filter the traffic as it's about to leave the router towards its final destination, minimizing the impact on other traffic. | Often outbound     |
+| **Extended ACLs** | Super precise, checking ID and destination. | Place them near the source for maximum efficiency.                 | By contrast, you can use extended ACLs to filter packets based on Source & Destination IP, Protocols, and Ports. Extended ACLs should be placed as "close to the source" of the packet as possible, to limit how far the packets travel in the network before being denied. As a result, applying them "inbound" is often the correct approach, meaning on the interface where the traffic (we intend to permit or deny) enters the router. | Often inbound      |
+
+In Summary:
+* Standard ACLs are placed closer to the destination (often outbound) to minimize their broad impact.
+* Extended ACLs are placed closer to the source (often inbound) for more efficient filtering.

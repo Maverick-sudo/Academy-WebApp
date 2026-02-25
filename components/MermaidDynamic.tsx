@@ -79,19 +79,27 @@ export default function Mermaid({ code }: MermaidProps) {
 
   if (error) {
     return (
-      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded p-4 my-4">
-        <p className="text-red-800 dark:text-red-200 text-sm">Failed to render diagram: {error}</p>
-        <pre className="text-xs mt-2 overflow-auto text-red-600 dark:text-red-300">{code}</pre>
+      <div className="relative my-6 not-prose">
+        <div className="max-h-[600px] overflow-auto rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/10 p-4">
+          <p className="text-red-800 dark:text-red-200 text-sm">Failed to render diagram: {error}</p>
+          <pre className="text-xs mt-2 overflow-auto text-red-600 dark:text-red-300">{code}</pre>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="relative">
-      {isLoading && (
-        <div className="absolute inset-0 bg-slate-100 dark:bg-slate-800 animate-pulse rounded h-32" />
-      )}
-      <div ref={containerRef} className="mermaid-diagram" />
+    <div className="relative my-6 not-prose">
+      <div className="max-h-[600px] overflow-auto rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4">
+        {isLoading && (
+          <div className="bg-slate-100 dark:bg-slate-800 animate-pulse rounded h-32 w-full" />
+        )}
+        <div
+          ref={containerRef}
+          className="mermaid-diagram mx-auto"
+          style={{ maxHeight: '550px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        />
+      </div>
     </div>
   )
 }
