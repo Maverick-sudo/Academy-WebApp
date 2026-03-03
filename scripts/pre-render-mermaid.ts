@@ -64,12 +64,15 @@ function extractDiagramsFromDirectory(directory: string): any[] {
     const items = fs.readdirSync(dir)
     
     for (const item of items) {
+      if (item === '.archive') {
+        continue
+      }
       const fullPath = path.join(dir, item)
       const stat = fs.statSync(fullPath)
       
       if (stat.isDirectory()) {
         walkDir(fullPath)
-      } else if (item.endsWith('.md')) {
+      } else if (item.endsWith('.md') || item.endsWith('.mdx')) {
         try {
           const content = fs.readFileSync(fullPath, 'utf8')
           const { content: markdownContent } = matter(content)
@@ -108,16 +111,18 @@ async function renderMermaidDiagram(code: string, hash: string): Promise<string 
   try {
     const page = await browser.newPage()
     
-    // Set up HTML with Mermaid CDN
+    // Set up HTML with Mermaid CDN - use v10.9.5 to match client-side version
     await page.setContent(`
       <!DOCTYPE html>
       <html>
       <head>
-        <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.5/dist/mermaid.min.js"></script>
       </head>
       <body>
-        <div class="mermaid">${code}</div>
+        <pre class="mermaid" id="diagram"></pre>
         <script>
+          // Set diagram code safely via textContent to avoid HTML interpretation
+          document.getElementById('diagram').textContent = ${JSON.stringify(code)};
           mermaid.initialize({ startOnLoad: true, theme: 'neutral', securityLevel: 'loose' });
         </script>
       </body>

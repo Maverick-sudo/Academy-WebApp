@@ -387,7 +387,7 @@ The service key uniquely identifies your ExpressRoute circuit. Provide this key 
 | Setup Complexity | More complex, requires provider | Simpler, can be deployed quickly |
 | Use Case | Mission-critical, high-bandwidth, low-latency | General hybrid connectivity, backup for ExpressRoute |
 
-For VPN Gateway details and configuration, see [Azure VPN Gateway Configuration](./Azure_VPN_Gateway_Configuration.md).
+For VPN Gateway details and configuration, see [Azure VPN Gateway Configuration](./AzureVPNGatewayConfiguration.md).
 
 ## Configuration Commands
 
@@ -500,9 +500,9 @@ az network vpn-connection update \
 
 ## Cross-References
 
-- For VPN-based hybrid connectivity, see [Azure VPN Gateway Configuration](./Azure_VPN_Gateway_Configuration.md)
-- For traffic distribution across ExpressRoute-connected resources, see [Azure Load Balancing Services](./Azure_Load_Balancing_Services.md)
-- For private DNS resolution over ExpressRoute peering, see [Azure Private DNS Configuration](./Azure_Private_DNS_Configuration.md)
+- For VPN-based hybrid connectivity, see [Azure VPN Gateway Configuration](./AzureVPNGatewayConfiguration.md)
+- For traffic distribution across ExpressRoute-connected resources, see [Azure Load Balancing Services](./AzureLoadBalancingServices.md)
+- For private DNS resolution over ExpressRoute peering, see [Azure Private DNS Configuration](./AzurePrivateDNSConfiguration.md)
 - For comprehensive Azure networking architecture, see [CloudEngineering.md](./CloudEngineering.md)
 
 ## References

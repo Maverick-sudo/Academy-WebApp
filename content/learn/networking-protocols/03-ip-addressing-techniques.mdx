@@ -486,9 +486,7 @@ sequenceDiagram
         Note over HostA,HostB: Communication established\nLayer 2 addressing resolved
     end
     
-    ARPDetails["ARP Key Concepts:\n✓ Layer 2 protocol (operates at Data Link)\n✓ Maps Layer 3 (IP) to Layer 2 (MAC) addresses\n✓ Request: Broadcast to all hosts in subnet\n✓ Reply: Unicast directly to requester\n✓ Cache: Stores mappings to avoid repeated requests\n✓ Timeout: Cache entries expire (prevent stale data)\n✓ Gratuitous ARP: Announce own IP/MAC (detect conflicts)"]
-    
-    style ARPDetails fill:#FFF9C4,stroke:#F39C12
+    Note over HostA,HostC: ARP Key Concepts:\n✓ Layer 2 protocol (operates at Data Link)\n✓ Maps Layer 3 (IP) to Layer 2 (MAC) addresses\n✓ Request: Broadcast to all hosts in subnet\n✓ Reply: Unicast directly to requester\n✓ Cache: Stores mappings to avoid repeated requests\n✓ Timeout: Cache entries expire (prevent stale data)\n✓ Gratuitous ARP: Announce own IP/MAC (detect conflicts)
 ```
 
 *Figure: ARP protocol operation showing MAC address discovery process. Host A broadcasts ARP request asking "Who has IP 192.168.1.20?", Host B (owner of that IP) responds with unicast ARP reply containing its MAC address DD:EE:FF:44:55:66. Both hosts cache the mapping to avoid future ARP requests. Essential for Layer 2 frame forwarding within the same subnet.*

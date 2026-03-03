@@ -192,9 +192,7 @@ sequenceDiagram
 
     Note over Client,Server: Connection Closed
 
-    KeyConcepts["Key TCP Features:\n✓ Reliable: Guarantees delivery via ACKs\n✓ Connection-oriented: Handshake before data\n✓ Flow control: Window size management\n✓ Congestion control: Prevents network overload\n✓ Error detection: Checksums verify integrity"]
-
-    style KeyConcepts fill:#FFF9C4,stroke:#F39C12
+    Note over Client,Server: Key TCP Features:\n✓ Reliable: Guarantees delivery via ACKs\n✓ Connection-oriented: Handshake before data\n✓ Flow control: Window size management\n✓ Congestion control: Prevents network overload\n✓ Error detection: Checksums verify integrity
 ```
 
 *Figure: TCP three-way handshake for connection establishment. Client sends SYN, server responds with SYN-ACK, client sends final ACK. Connection state progresses from SYN_SENT → SYN_RECEIVED → ESTABLISHED. TCP ensures reliable, ordered data delivery through sequence numbers and acknowledgments.*

@@ -49,17 +49,17 @@ The following diagram illustrates the complete AWS EC2 web server architecture, 
 graph LR
     subgraph "Internet"
         User[User Browser]
-        DNS[Domain Registrar<br/>Hostinger/GoDaddy]
+        DNS[Domain Registrar\nHostinger/GoDaddy]
     end
     
     subgraph "AWS VPC"
-        SG[Security Group<br/>Ports: 22, 80, 443, 10000]
-        EC2[EC2 Instance<br/>t2.micro Ubuntu]
+        SG[Security Group\nPorts: 22, 80, 443, 10000]
+        EC2[EC2 Instance\nt2.micro Ubuntu]
         
         subgraph "EC2 Services"
-            Apache[Apache Web Server<br/>Port 80/443]
-            Webmin[Webmin<br/>Port 10000]
-            SSL[Let's Encrypt SSL<br/>Certbot]
+            Apache[Apache Web Server\nPort 80/443]
+            Webmin[Webmin\nPort 10000]
+            SSL[Let's Encrypt SSL\nCertbot]
         end
     end
     
@@ -561,12 +561,12 @@ flowchart TD
     Params --> KeyName[KeyName: SSH Key]
     Params --> InstType[InstanceType: t2.micro]
     
-    Resources --> SG[Security Group<br/>Ports: 22, 80, 443, 10000]
-    Resources --> EC2[EC2 Instance<br/>Ubuntu + Apache]
+    Resources --> SG[Security Group\nPorts: 22, 80, 443, 10000]
+    Resources --> EC2[EC2 Instance\nUbuntu + Apache]
     
     SG --> EC2
     
-    EC2 --> UserData[User Data Script<br/>Install Apache]
+    EC2 --> UserData[User Data Script\nInstall Apache]
     
     Outputs --> URL[Website URL]
     Outputs --> InstanceID[Instance ID]
@@ -886,9 +886,9 @@ With the manual setup, we learned how to configure and secure a web server step 
 
 This AWS EC2 web server setup complements Azure-based infrastructure:
 
-- **[Azure Load Balancing Services](./Azure_Load_Balancing_Services.md)**: Compare AWS Application Load Balancer with Azure Application Gateway for Layer 7 load balancing scenarios
-- **[Azure VPN Gateway](./Azure_VPN_Gateway_Configuration.md)**: Explore hybrid cloud scenarios connecting AWS EC2 with Azure VNets via VPN tunnels
-- **[Azure ExpressRoute](./Azure_ExpressRoute_Deep_Dive.md)**: Learn about Azure's private connectivity alternative to AWS Direct Connect
+- **[Azure Load Balancing Services](./AzureLoadBalancingServices.md)**: Compare AWS Application Load Balancer with Azure Application Gateway for Layer 7 load balancing scenarios
+- **[Azure VPN Gateway](./AzureVPNGatewayConfiguration.md)**: Explore hybrid cloud scenarios connecting AWS EC2 with Azure VNets via VPN tunnels
+- **[Azure ExpressRoute](./AzureExpressRouteDeepDive.md)**: Learn about Azure's private connectivity alternative to AWS Direct Connect
 
 **Cross-Platform Scenarios:**
 - **Multi-Cloud Load Balancing**: Use DNS-based global load balancing to distribute traffic between AWS EC2 and Azure VMs

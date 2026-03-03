@@ -52,7 +52,7 @@ export function extractDiagramsFromDirectory(directory: string): DiagramInfo[] {
 
       if (stat.isDirectory()) {
         walkDir(fullPath)
-      } else if (item.endsWith('.md')) {
+      } else if (item.endsWith('.md') || item.endsWith('.mdx')) {
         try {
           const content = fs.readFileSync(fullPath, 'utf8')
           const { content: markdownContent } = matter(content)

@@ -255,7 +255,7 @@ export function getAllDocs(folder: string): Doc[] {
     const { data, content } = readAndParseFile(fullPath)
     
     const normalized = file
-      .replace(/\.md$/, '')
+      .replace(/\.(md|mdx)$/, '')
       .replace(/\/README$/i, '')
     const slug = /^README$/i.test(normalized) ? [] : normalized.split('/')
 
@@ -298,7 +298,7 @@ export function getAllStaticPaths(): string[][] {
     
     for (const file of files) {
       const normalized = file
-        .replace(/\.md$/, '')
+        .replace(/\.(md|mdx)$/, '')
         .replace(/\/README$/i, '')
       const slug = /^README$/i.test(normalized) ? [] : normalized.split('/')
       

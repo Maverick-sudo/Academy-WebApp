@@ -166,9 +166,7 @@ sequenceDiagram
         Client->>Client: Cache in local DNS cache\nwww.example.com → 93.184.216.34\nCan now connect to server
     end
     
-    QueryTypes["Query Types:\n✓ Recursive: Client → Local DNS (full answer required)\n✓ Iterative: Local DNS → Root/TLD/Auth (referrals OK)\n✓ Authoritative: Final answer from domain's NS\n✓ Non-Authoritative: Answer from cache\n✓ Caching reduces load & latency (TTL control)"]
-    
-    style QueryTypes fill:#FFF9C4,stroke:#F39C12
+    Note over Client,Auth: Query Types:\n✓ Recursive: Client → Local DNS (full answer required)\n✓ Iterative: Local DNS → Root/TLD/Auth (referrals OK)\n✓ Authoritative: Final answer from domain's NS\n✓ Non-Authoritative: Answer from cache\n✓ Caching reduces load & latency (TTL control)
 ```
 
 *Figure: DNS resolution showing the complete query process. Client makes recursive query to local DNS server, which performs iterative queries to Root → TLD → Authoritative servers. Each server either provides the answer or refers to the next level in the hierarchy. Final answer is cached at multiple levels with TTL.*
@@ -372,9 +370,7 @@ sequenceDiagram
         Note over Client: Lease expires\nRelease IP, restart DORA
     end
     
-    LeaseTimers["DHCP Lease Timers:\n✓ Lease Duration: Full period IP is valid\n✓ T1 (50%): Try renewing with original server\n✓ T2 (87.5%): Try rebinding with any server\n✓ Expired: Release IP, start DORA again"]
-    
-    style LeaseTimers fill:#FFF9C4,stroke:#F39C12
+    Note over Client,Server: DHCP Lease Timers:\n✓ Lease Duration: Full period IP is valid\n✓ T1 (50%): Try renewing with original server\n✓ T2 (87.5%): Try rebinding with any server\n✓ Expired: Release IP, start DORA again
 ```
 
 *Figure: DHCP DORA process showing the four-phase IP address acquisition: (D)iscover → (O)ffer → (R)equest → (A)cknowledge. Client starts with no IP (0.0.0.0), broadcasts to find servers, receives offers, selects one, and gets configuration confirmed. Includes lease management with T1 (renewal) and T2 (rebind) timers.*

@@ -33,19 +33,19 @@ Azure Private DNS enables cross-VNet name resolution through Virtual Network Lin
 ```mermaid
 graph LR
     subgraph "Private DNS Zone: contoso.com"
-        DNS[DNS Zone<br/>contoso.com]
+        DNS[DNS Zone\ncontoso.com]
     end
     
     subgraph "CoreServicesVnet"
-        CoreVM[VM: CoreServer<br/>10.20.20.4]
+        CoreVM[VM: CoreServer\n10.20.20.4]
     end
     
     subgraph "ManufacturingVnet"
-        MfgVM[VM: MfgServer<br/>10.30.20.4]
+        MfgVM[VM: MfgServer\n10.30.20.4]
     end
     
     subgraph "ResearchVnet"
-        ResVM[VM: ResearchServer<br/>10.40.20.4]
+        ResVM[VM: ResearchServer\n10.40.20.4]
     end
     
     CoreVM -->|Auto-registered| DNS
@@ -186,13 +186,13 @@ Virtual network peering enables you to seamlessly connect two Azure virtual netw
 
 ```mermaid
 flowchart TD
-    A[CoreServicesVnet<br/>10.20.0.0/16] -->|Peering| B[ManufacturingVnet<br/>10.30.0.0/16]
-    A -->|Peering| C[ResearchVnet<br/>10.40.0.0/16]
+    A[CoreServicesVnet\n10.20.0.0/16] -->|Peering| B[ManufacturingVnet\n10.30.0.0/16]
+    A -->|Peering| C[ResearchVnet\n10.40.0.0/16]
     B -->|Peering| C
     
-    A -->|Private Traffic<br/>Microsoft Backbone| B
-    A -->|Private Traffic<br/>Microsoft Backbone| C
-    B -->|Private Traffic<br/>Microsoft Backbone| C
+    A -->|Private Traffic\nMicrosoft Backbone| B
+    A -->|Private Traffic\nMicrosoft Backbone| C
+    B -->|Private Traffic\nMicrosoft Backbone| C
     
     style A fill:#e1f5ff
     style B fill:#ffe1e1
@@ -453,14 +453,14 @@ flowchart TD
 
 This Azure Private DNS configuration integrates with other Azure networking services:
 
-- **[Azure VPN Gateway](./Azure_VPN_Gateway_Configuration.md)**: For hybrid DNS scenarios requiring on-premises to Azure name resolution via Site-to-Site VPN connections
-- **[Azure ExpressRoute](./Azure_ExpressRoute_Deep_Dive.md)**: For private DNS resolution over ExpressRoute private peering connections to on-premises networks
-- **[Azure Load Balancer](./Azure_Load_Balancing_Services.md)**: For DNS-based load balancing scenarios and health probe configuration with custom DNS names
+- **[Azure VPN Gateway](./AzureVPNGatewayConfiguration.md)**: For hybrid DNS scenarios requiring on-premises to Azure name resolution via Site-to-Site VPN connections
+- **[Azure ExpressRoute](./AzureExpressRouteDeepDive.md)**: For private DNS resolution over ExpressRoute private peering connections to on-premises networks
+- **[Azure Load Balancer](./AzureLoadBalancingServices.md)**: For DNS-based load balancing scenarios and health probe configuration with custom DNS names
 
 **Cross-Reference Scenarios:**
-- **Hybrid DNS with VPN Gateway**: Combine Private DNS with [Azure VPN Gateway](./Azure_VPN_Gateway_Configuration.md) for bidirectional DNS resolution between Azure and on-premises
-- **ExpressRoute DNS Forwarding**: Use [Azure ExpressRoute](./Azure_ExpressRoute_Deep_Dive.md) with Private DNS for low-latency name resolution in hybrid environments
-- **DNS-Based Load Balancing**: Integrate Private DNS with [Azure Load Balancer](./Azure_Load_Balancing_Services.md) for custom domain-based health probes
+- **Hybrid DNS with VPN Gateway**: Combine Private DNS with [Azure VPN Gateway](./AzureVPNGatewayConfiguration.md) for bidirectional DNS resolution between Azure and on-premises
+- **ExpressRoute DNS Forwarding**: Use [Azure ExpressRoute](./AzureExpressRouteDeepDive.md) with Private DNS for low-latency name resolution in hybrid environments
+- **DNS-Based Load Balancing**: Integrate Private DNS with [Azure Load Balancer](./AzureLoadBalancingServices.md) for custom domain-based health probes
 
 ---
 

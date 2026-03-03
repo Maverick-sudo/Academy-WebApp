@@ -1114,41 +1114,41 @@ flowchart LR
     subgraph DEV ["👨‍💻 Development Phase"]
         direction TB
         D1[Developer Commits Code]:::dev
-        D2[Version Control<br/>Git/GitHub]:::dev
-        D3[Pre-commit Hooks<br/>Linting, Secrets Scan]:::security
+        D2[Version Control\nGit/GitHub]:::dev
+        D3[Pre-commit Hooks\nLinting, Secrets Scan]:::security
         D1 --> D2 --> D3
     end
     
     subgraph CI ["⚙️ Continuous Integration"]
         direction TB
-        C1[Build Trigger<br/>Automated]:::build
-        C2[Compile & Build<br/>Maven/Gradle/npm]:::build
-        C3[Unit Tests<br/>JUnit/PyTest]:::test
-        C4[SAST - Static Analysis<br/>SonarQube/Checkmarx]:::security
-        C5[Dependency Scan<br/>OWASP Dependency-Check]:::security
-        C6[Secret Detection<br/>GitGuardian/TruffleHog]:::security
+        C1[Build Trigger\nAutomated]:::build
+        C2[Compile & Build\nMaven/Gradle/npm]:::build
+        C3[Unit Tests\nJUnit/PyTest]:::test
+        C4[SAST - Static Analysis\nSonarQube/Checkmarx]:::security
+        C5[Dependency Scan\nOWASP Dependency-Check]:::security
+        C6[Secret Detection\nGitGuardian/TruffleHog]:::security
         
         C1 --> C2 --> C3 --> C4 --> C5 --> C6
     end
     
     subgraph CD_Delivery ["🧪 Continuous Delivery"]
         direction TB
-        CD1[Deploy to Staging<br/>Environment]:::deploy
-        CD2[Integration Tests<br/>Selenium/Postman]:::test
-        CD3[DAST - Dynamic Analysis<br/>OWASP ZAP/Burp Suite]:::security
-        CD4[Container Scan<br/>Trivy/Clair]:::security
-        CD5[Compliance Check<br/>CIS Benchmarks]:::security
-        CD6[Performance Tests<br/>JMeter/Gatling]:::test
+        CD1[Deploy to Staging\nEnvironment]:::deploy
+        CD2[Integration Tests\nSelenium/Postman]:::test
+        CD3[DAST - Dynamic Analysis\nOWASP ZAP/Burp Suite]:::security
+        CD4[Container Scan\nTrivy/Clair]:::security
+        CD5[Compliance Check\nCIS Benchmarks]:::security
+        CD6[Performance Tests\nJMeter/Gatling]:::test
         
         CD1 --> CD2 --> CD3 --> CD4 --> CD5 --> CD6
     end
     
     subgraph CD_Deploy ["🚀 Continuous Deployment"]
         direction TB
-        P1[Manual Approval Gate<br/>Change Advisory Board]:::approval
-        P2[Deploy to Production<br/>Blue/Green or Canary]:::deploy
-        P3[Health Checks<br/>Smoke Tests]:::test
-        P4[Rollback on Failure<br/>Automated]:::deploy
+        P1[Manual Approval Gate\nChange Advisory Board]:::approval
+        P2[Deploy to Production\nBlue/Green or Canary]:::deploy
+        P3[Health Checks\nSmoke Tests]:::test
+        P4[Rollback on Failure\nAutomated]:::deploy
         
         P1 --> P2 --> P3
         P3 -.->|Failure| P4
@@ -1156,10 +1156,10 @@ flowchart LR
     
     subgraph MONITOR ["📊 Continuous Monitoring"]
         direction TB
-        M1[Application Monitoring<br/>New Relic/Datadog]:::monitor
-        M2[Security Monitoring<br/>SIEM - Splunk]:::security
-        M3[Log Aggregation<br/>ELK Stack]:::monitor
-        M4[Incident Response<br/>SOAR Platform]:::security
+        M1[Application Monitoring\nNew Relic/Datadog]:::monitor
+        M2[Security Monitoring\nSIEM - Splunk]:::security
+        M3[Log Aggregation\nELK Stack]:::monitor
+        M4[Incident Response\nSOAR Platform]:::security
         
         M1 ~~~ M2 ~~~ M3 ~~~ M4
     end
@@ -1167,17 +1167,17 @@ flowchart LR
     DEV --> CI --> CD_Delivery --> CD_Deploy --> MONITOR
     MONITOR -.->|Feedback Loop| DEV
     
-    FailGate1{Security<br/>Gate}:::gate
-    FailGate2{Quality<br/>Gate}:::gate
-    FailGate3{Compliance<br/>Gate}:::gate
+    FailGate1{Security\nGate}:::gate
+    FailGate2{Quality\nGate}:::gate
+    FailGate3{Compliance\nGate}:::gate
     
     C6 --> FailGate1
     CD6 --> FailGate2
     CD5 --> FailGate3
     
-    FailGate1 -.->|Fail| Notify1[❌ Block Pipeline<br/>Notify Team]:::fail
-    FailGate2 -.->|Fail| Notify2[❌ Block Pipeline<br/>Notify Team]:::fail
-    FailGate3 -.->|Fail| Notify3[❌ Block Pipeline<br/>Notify Team]:::fail
+    FailGate1 -.->|Fail| Notify1[❌ Block Pipeline\nNotify Team]:::fail
+    FailGate2 -.->|Fail| Notify2[❌ Block Pipeline\nNotify Team]:::fail
+    FailGate3 -.->|Fail| Notify3[❌ Block Pipeline\nNotify Team]:::fail
     
     classDef dev fill:#4dabf7,stroke:#1864ab,stroke-width:2px,color:#000
     classDef build fill:#ffd43b,stroke:#f08c00,stroke-width:2px,color:#000
@@ -1253,7 +1253,7 @@ The key security consideration is the **Shared Responsibility Model**—identify
 
 ```mermaid
 flowchart LR
-    subgraph IaaS ["🏗️ IaaS (Infrastructure as a Service)<br/>Example: AWS EC2, Azure VMs"]
+    subgraph IaaS ["🏗️ IaaS (Infrastructure as a Service)\nExample: AWS EC2, Azure VMs"]
         direction TB
         I1["👤 Customer Responsible"]:::custHeader
         I2[Data & Access]:::customer
@@ -1268,7 +1268,7 @@ flowchart LR
         I1 --> I2 --> I3 --> I4 --> I5 --> I6 --> I7 --> I8 --> I9
     end
     
-    subgraph PaaS ["⚙️ PaaS (Platform as a Service)<br/>Example: Azure App Service, Heroku"]
+    subgraph PaaS ["⚙️ PaaS (Platform as a Service)\nExample: Azure App Service, Heroku"]
         direction TB
         P1["👤 Customer Responsible"]:::custHeader
         P2[Data & Access]:::customer
@@ -1283,7 +1283,7 @@ flowchart LR
         P1 --> P2 --> P3 --> P4 --> P5 --> P6 --> P7 --> P8 --> P9
     end
     
-    subgraph SaaS ["📱 SaaS (Software as a Service)<br/>Example: Microsoft 365, Salesforce"]
+    subgraph SaaS ["📱 SaaS (Software as a Service)\nExample: Microsoft 365, Salesforce"]
         direction TB
         S1["👤 Customer Responsible"]:::custHeader
         S2[Data & Access]:::customer
@@ -2138,37 +2138,37 @@ PHASES OF INCIDENT RESPONSE LIFECYCLE
 flowchart TD
     Start([Security Event Occurs]) --> Prep
     
-    Prep["1️⃣ PREPARATION<br/>────────────<br/>• Harden Systems<br/>• Create Policies & Procedures<br/>• Establish IR Team<br/>• Deploy Monitoring Tools<br/>• Conduct Training"]
+    Prep["1️⃣ PREPARATION\n────────────\n• Harden Systems\n• Create Policies & Procedures\n• Establish IR Team\n• Deploy Monitoring Tools\n• Conduct Training"]
     
     Prep --> Identify
     
-    Identify["2️⃣ IDENTIFICATION<br/>────────────<br/>• Monitor Alerts & Logs<br/>• Detect Anomalies<br/>• Triage Incidents<br/>• Determine Scope<br/>• Notify Stakeholders"]
+    Identify["2️⃣ IDENTIFICATION\n────────────\n• Monitor Alerts & Logs\n• Detect Anomalies\n• Triage Incidents\n• Determine Scope\n• Notify Stakeholders"]
     
-    Identify --> IsIncident{Confirmed<br/>Incident?}
+    Identify --> IsIncident{Confirmed\nIncident?}
     IsIncident -->|No - False Positive| Document1[Document & Close]
     IsIncident -->|Yes| Contain
     
-    Contain["3️⃣ CONTAINMENT<br/>────────────<br/>• Isolate Affected Systems<br/>• Limit Scope & Impact<br/>• Preserve Evidence<br/>• Short-term Containment<br/>• Long-term Containment"]
+    Contain["3️⃣ CONTAINMENT\n────────────\n• Isolate Affected Systems\n• Limit Scope & Impact\n• Preserve Evidence\n• Short-term Containment\n• Long-term Containment"]
     
     Contain --> Erad
     
-    Erad["4️⃣ ERADICATION<br/>────────────<br/>• Remove Malware/Threats<br/>• Close Attack Vectors<br/>• Apply Patches<br/>• Strengthen Defenses<br/>• Verify Threat Removal"]
+    Erad["4️⃣ ERADICATION\n────────────\n• Remove Malware/Threats\n• Close Attack Vectors\n• Apply Patches\n• Strengthen Defenses\n• Verify Threat Removal"]
     
     Erad --> Recover
     
-    Recover["5️⃣ RECOVERY<br/>────────────<br/>• Restore Systems<br/>• Validate Operations<br/>• Monitor for Recurrence<br/>• Gradual Return to Production<br/>• Continuous Monitoring"]
+    Recover["5️⃣ RECOVERY\n────────────\n• Restore Systems\n• Validate Operations\n• Monitor for Recurrence\n• Gradual Return to Production\n• Continuous Monitoring"]
     
     Recover --> Lessons
     
-    Lessons["6️⃣ LESSONS LEARNED<br/>────────────<br/>• Post-Incident Review<br/>• Document What Happened<br/>• Identify Improvements<br/>• Update Procedures<br/>• Share Intelligence"]
+    Lessons["6️⃣ LESSONS LEARNED\n────────────\n• Post-Incident Review\n• Document What Happened\n• Identify Improvements\n• Update Procedures\n• Share Intelligence"]
     
     Lessons -->|Continuous Improvement| Prep
     Document1 --> Prep
     
     subgraph Support ["Supporting Activities"]
-        Comm[Communication<br/>Stakeholder Notifications]
-        Legal[Legal/Compliance<br/>Requirements]
-        Forensics[Digital Forensics<br/>Evidence Collection]
+        Comm[Communication\nStakeholder Notifications]
+        Legal[Legal/Compliance\nRequirements]
+        Forensics[Digital Forensics\nEvidence Collection]
     end
     
     Identify -.-> Comm
@@ -2300,27 +2300,27 @@ LOCKHEED MARTIN CYBER KILL CHAIN
 ```mermaid
 flowchart LR
     subgraph Attacker ["🎯 Attacker Activities"]
-        R["1. RECONNAISSANCE<br/>────────<br/>• OSINT Gathering<br/>• Network Scanning<br/>• Social Engineering"]
-        W["2. WEAPONIZATION<br/>────────<br/>• Create Exploit<br/>• Couple with Payload<br/>• Prepare Delivery"]
+        R["1. RECONNAISSANCE\n────────\n• OSINT Gathering\n• Network Scanning\n• Social Engineering"]
+        W["2. WEAPONIZATION\n────────\n• Create Exploit\n• Couple with Payload\n• Prepare Delivery"]
     end
     
     subgraph Target ["🏢 Target Environment"]
-        D["3. DELIVERY<br/>────────<br/>• Phishing Email<br/>• Malicious Link<br/>• USB Drop<br/>• Watering Hole"]
-        E["4. EXPLOITATION<br/>────────<br/>• Execute Code<br/>• Trigger Vulnerability<br/>• Gain Initial Access"]
-        I["5. INSTALLATION<br/>────────<br/>• Install Malware<br/>• Create Backdoor<br/>• Establish Persistence"]
-        C["6. COMMAND & CONTROL<br/>────────<br/>• Beacon to C2 Server<br/>• Remote Access<br/>• Await Instructions"]
-        A["7. ACTIONS ON OBJECTIVES<br/>────────<br/>• Data Exfiltration<br/>• Lateral Movement<br/>• Deploy Ransomware"]
+        D["3. DELIVERY\n────────\n• Phishing Email\n• Malicious Link\n• USB Drop\n• Watering Hole"]
+        E["4. EXPLOITATION\n────────\n• Execute Code\n• Trigger Vulnerability\n• Gain Initial Access"]
+        I["5. INSTALLATION\n────────\n• Install Malware\n• Create Backdoor\n• Establish Persistence"]
+        C["6. COMMAND & CONTROL\n────────\n• Beacon to C2 Server\n• Remote Access\n• Await Instructions"]
+        A["7. ACTIONS ON OBJECTIVES\n────────\n• Data Exfiltration\n• Lateral Movement\n• Deploy Ransomware"]
     end
     
     R --> W --> D --> E --> I --> C --> A
     
     subgraph Defense ["🛡️ Defensive Controls (Map to Each Stage)"]
-        D1["Threat Intel<br/>Web Filtering"]
-        D2["Email Security<br/>User Training"]
-        D3["Patch Management<br/>EDR/AV"]
-        D4["Application Whitelisting<br/>Least Privilege"]
-        D5["Network Segmentation<br/>Firewall Rules"]
-        D6["DLP<br/>SIEM Alerting"]
+        D1["Threat Intel\nWeb Filtering"]
+        D2["Email Security\nUser Training"]
+        D3["Patch Management\nEDR/AV"]
+        D4["Application Whitelisting\nLeast Privilege"]
+        D5["Network Segmentation\nFirewall Rules"]
+        D6["DLP\nSIEM Alerting"]
     end
     
     D1 -.->|Block| R
@@ -3472,39 +3472,39 @@ The RAID Advisory Board defines RAID levels, numbered from 0-6, representing cor
 flowchart TB
     subgraph RAID0 ["RAID 0 - Striping (No Redundancy)"]
         direction LR
-        R0D1[Disk 1<br/>───<br/>Block A1<br/>Block A3<br/>Block A5]:::disk
-        R0D2[Disk 2<br/>───<br/>Block A2<br/>Block A4<br/>Block A6]:::disk
-        R0Info["⚡ Performance: Excellent<br/>💾 Capacity: 100%<br/>🛡️ Fault Tolerance: NONE<br/>❌ Any disk failure = data loss"]:::info
+        R0D1[Disk 1\n───\nBlock A1\nBlock A3\nBlock A5]:::disk
+        R0D2[Disk 2\n───\nBlock A2\nBlock A4\nBlock A6]:::disk
+        R0Info["⚡ Performance: Excellent\n💾 Capacity: 100%\n🛡️ Fault Tolerance: NONE\n❌ Any disk failure = data loss"]:::info
     end
     
     subgraph RAID1 ["RAID 1 - Mirroring"]
         direction LR
-        R1D1[Disk 1<br/>───<br/>Block A<br/>Block B<br/>Block C]:::disk
-        R1D2[Disk 2<br/>───<br/>Block A<br/>Block B<br/>Block C]:::disk
+        R1D1[Disk 1\n───\nBlock A\nBlock B\nBlock C]:::disk
+        R1D2[Disk 2\n───\nBlock A\nBlock B\nBlock C]:::disk
         R1Mirror["🔄 Mirror"]:::mirror
         R1D1 <--> R1Mirror
         R1Mirror <--> R1D2
-        R1Info["⚡ Performance: Read Fast<br/>💾 Capacity: 50%<br/>🛡️ Fault Tolerance: 1 disk<br/>✅ Complete data redundancy"]:::info
+        R1Info["⚡ Performance: Read Fast\n💾 Capacity: 50%\n🛡️ Fault Tolerance: 1 disk\n✅ Complete data redundancy"]:::info
     end
     
     subgraph RAID5 ["RAID 5 - Striping with Parity"]
         direction LR
-        R5D1[Disk 1<br/>───<br/>Block A1<br/>Block B2<br/>Parity C]:::disk
-        R5D2[Disk 2<br/>───<br/>Block A2<br/>Parity B<br/>Block C1]:::disk
-        R5D3[Disk 3<br/>───<br/>Parity A<br/>Block B1<br/>Block C2]:::disk
-        R5Info["⚡ Performance: Good<br/>💾 Capacity: (n-1)/n<br/>🛡️ Fault Tolerance: 1 disk<br/>✅ Min 3 disks required"]:::info
+        R5D1[Disk 1\n───\nBlock A1\nBlock B2\nParity C]:::disk
+        R5D2[Disk 2\n───\nBlock A2\nParity B\nBlock C1]:::disk
+        R5D3[Disk 3\n───\nParity A\nBlock B1\nBlock C2]:::disk
+        R5Info["⚡ Performance: Good\n💾 Capacity: (n-1)/n\n🛡️ Fault Tolerance: 1 disk\n✅ Min 3 disks required"]:::info
     end
     
     subgraph RAID6 ["RAID 6 - Striping with Double Parity"]
         direction LR
-        R6D1[Disk 1<br/>───<br/>Block A1<br/>Parity BP<br/>Parity CQ]:::disk
-        R6D2[Disk 2<br/>───<br/>Block A2<br/>Block B1<br/>Parity CP]:::disk
-        R6D3[Disk 3<br/>───<br/>Parity AP<br/>Block B2<br/>Block C1]:::disk
-        R6D4[Disk 4<br/>───<br/>Parity AQ<br/>Parity BQ<br/>Block C2]:::disk
-        R6Info["⚡ Performance: Moderate<br/>💾 Capacity: (n-2)/n<br/>🛡️ Fault Tolerance: 2 disks<br/>✅ Min 4 disks required"]:::info
+        R6D1[Disk 1\n───\nBlock A1\nParity BP\nParity CQ]:::disk
+        R6D2[Disk 2\n───\nBlock A2\nBlock B1\nParity CP]:::disk
+        R6D3[Disk 3\n───\nParity AP\nBlock B2\nBlock C1]:::disk
+        R6D4[Disk 4\n───\nParity AQ\nParity BQ\nBlock C2]:::disk
+        R6Info["⚡ Performance: Moderate\n💾 Capacity: (n-2)/n\n🛡️ Fault Tolerance: 2 disks\n✅ Min 4 disks required"]:::info
     end
     
-    Summary["📊 RAID Selection Guide<br/>────────────────<br/>RAID 0: Maximum performance, no safety<br/>RAID 1: Maximum safety, 50% capacity<br/>RAID 5: Balanced (common for servers)<br/>RAID 6: High safety (critical systems)"]:::summary
+    Summary["📊 RAID Selection Guide\n────────────────\nRAID 0: Maximum performance, no safety\nRAID 1: Maximum safety, 50% capacity\nRAID 5: Balanced (common for servers)\nRAID 6: High safety (critical systems)"]:::summary
     
     RAID0 ~~~ RAID1 ~~~ RAID5 ~~~ RAID6 ~~~ Summary
     
@@ -3841,11 +3841,11 @@ flowchart TB
     
     Layer1 --> Layer2 --> Layer3 --> Layer4 --> Layer5 --> Layer6 --> Layer7
     
-    Core[🎯 Protected Assets<br/>Data, Systems, Users]:::core
+    Core[🎯 Protected Assets\nData, Systems, Users]:::core
     Layer7 --> Core
     
     Attack[⚠️ Attack Vector]:::attack
-    Attack -.->|Must breach<br/>ALL layers| Layer1
+    Attack -.->|Must breach\nALL layers| Layer1
     
     classDef perimeter fill:#ff6b6b,stroke:#c92a2a,stroke-width:3px,color:#fff
     classDef network fill:#ff922b,stroke:#d9480f,stroke-width:3px,color:#fff
@@ -4441,51 +4441,51 @@ This approach seeks out people's opinions of which risk factors are significant.
 flowchart TD
     Start([Begin Risk Assessment]) --> Phase1
     
-    Phase1["📋 PHASE I<br/>Identify Assets & MEFs<br/>────────────<br/>• Mission Essential Functions<br/>• Critical Systems<br/>• Asset Inventory<br/>• Asset Valuation"]
+    Phase1["📋 PHASE I\nIdentify Assets & MEFs\n────────────\n• Mission Essential Functions\n• Critical Systems\n• Asset Inventory\n• Asset Valuation"]
     
     Phase1 --> Phase2
     
-    Phase2["🔍 PHASE II<br/>Identify Vulnerabilities<br/>────────────<br/>• Security Weaknesses<br/>• Configuration Issues<br/>• Unpatched Systems<br/>• Human Factors"]
+    Phase2["🔍 PHASE II\nIdentify Vulnerabilities\n────────────\n• Security Weaknesses\n• Configuration Issues\n• Unpatched Systems\n• Human Factors"]
     
     Phase2 --> Phase3
     
-    Phase3["⚠️ PHASE III<br/>Identify Threats<br/>────────────<br/>• Threat Actors<br/>• Attack Vectors<br/>• Likelihood/Probability<br/>• Threat Intelligence"]
+    Phase3["⚠️ PHASE III\nIdentify Threats\n────────────\n• Threat Actors\n• Attack Vectors\n• Likelihood/Probability\n• Threat Intelligence"]
     
     Phase3 --> Phase4
     
-    Phase4["📊 PHASE IV<br/>Analyze Business Impact<br/>────────────<br/>Quantitative or Qualitative"]
+    Phase4["📊 PHASE IV\nAnalyze Business Impact\n────────────\nQuantitative or Qualitative"]
     
-    Phase4 --> Method{Assessment<br/>Method?}
+    Phase4 --> Method{Assessment\nMethod?}
     
-    Method -->|Quantitative| Quant["Calculate Risk Metrics<br/>────────────<br/>• SLE = Asset Value × EF<br/>• ALE = SLE × ARO<br/>• ROSI = (ALE - ALEm - Cost) / Cost"]
+    Method -->|Quantitative| Quant["Calculate Risk Metrics\n────────────\n• SLE = Asset Value × EF\n• ALE = SLE × ARO\n• ROSI = (ALE - ALEm - Cost) / Cost"]
     
-    Method -->|Qualitative| Qual["Risk Categories<br/>────────────<br/>• Impact: Critical/High/Med/Low<br/>• Likelihood: High/Med/Low<br/>• Heat Map (Red/Yellow/Green)"]
+    Method -->|Qualitative| Qual["Risk Categories\n────────────\n• Impact: Critical/High/Med/Low\n• Likelihood: High/Med/Low\n• Heat Map (Red/Yellow/Green)"]
     
     Quant --> Risk
     Qual --> Risk
     
-    Risk["Calculate Inherent Risk<br/>(Before Mitigation)"]
+    Risk["Calculate Inherent Risk\n(Before Mitigation)"]
     
     Risk --> Phase5
     
-    Phase5["🎯 PHASE V<br/>Risk Response Decision"]
+    Phase5["🎯 PHASE V\nRisk Response Decision"]
     
-    Phase5 --> Response{Risk<br/>Response<br/>Strategy?}
+    Phase5 --> Response{Risk\nResponse\nStrategy?}
     
-    Response -->|Accept| Accept["ACCEPT<br/>────<br/>Risk within appetite<br/>No action needed<br/>Document decision"]
+    Response -->|Accept| Accept["ACCEPT\n────\nRisk within appetite\nNo action needed\nDocument decision"]
     
-    Response -->|Mitigate| Mitigate["MITIGATE<br/>────<br/>Implement controls<br/>Reduce likelihood/impact<br/>Calculate Residual Risk"]
+    Response -->|Mitigate| Mitigate["MITIGATE\n────\nImplement controls\nReduce likelihood/impact\nCalculate Residual Risk"]
     
-    Response -->|Transfer| Transfer["TRANSFER<br/>────<br/>Insurance<br/>Outsource<br/>Share risk"]
+    Response -->|Transfer| Transfer["TRANSFER\n────\nInsurance\nOutsource\nShare risk"]
     
-    Response -->|Avoid| Avoid["AVOID<br/>────<br/>Eliminate activity<br/>Remove asset<br/>Change process"]
+    Response -->|Avoid| Avoid["AVOID\n────\nEliminate activity\nRemove asset\nChange process"]
     
     Accept --> Monitor
     Mitigate --> Monitor
     Transfer --> Monitor
     Avoid --> Monitor
     
-    Monitor["📈 Continuous Monitoring<br/>────────────<br/>• Track Risk Posture<br/>• Review Controls<br/>• Update Assessments<br/>• Report to Stakeholders"]
+    Monitor["📈 Continuous Monitoring\n────────────\n• Track Risk Posture\n• Review Controls\n• Update Assessments\n• Report to Stakeholders"]
     
     Monitor -.->|Periodic Review| Phase1
     

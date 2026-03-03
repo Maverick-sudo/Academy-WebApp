@@ -713,7 +713,7 @@ Use Azure Traffic Manager for global load balancing across regional Application 
 <!-- TODO: Complex diagram - requires detailed Mermaid conversion -->
 Traffic Manager provides DNS-level routing to regional Application Gateways, which then distribute traffic to regional backend pools.
 
-For hybrid connectivity options, see [Azure VPN Gateway Configuration](./Azure_VPN_Gateway_Configuration.md) and [Azure ExpressRoute Deep Dive](./Azure_ExpressRoute_Deep_Dive.md).
+For hybrid connectivity options, see [Azure VPN Gateway Configuration](./AzureVPNGatewayConfiguration.md) and [Azure ExpressRoute Deep Dive](./AzureExpressRouteDeepDive.md).
 
 ## Best Practices
 
@@ -785,9 +785,9 @@ az monitor metrics list \
 
 ## Cross-References
 
-- For hybrid connectivity options, see [Azure VPN Gateway Configuration](./Azure_VPN_Gateway_Configuration.md)
-- For private dedicated connectivity, see [Azure ExpressRoute Deep Dive](./Azure_ExpressRoute_Deep_Dive.md)
-- For DNS-based load balancing and health probe configuration, see [Azure Private DNS Configuration](./Azure_Private_DNS_Configuration.md)
+- For hybrid connectivity options, see [Azure VPN Gateway Configuration](./AzureVPNGatewayConfiguration.md)
+- For private dedicated connectivity, see [Azure ExpressRoute Deep Dive](./AzureExpressRouteDeepDive.md)
+- For DNS-based load balancing and health probe configuration, see [Azure Private DNS Configuration](./AzurePrivateDNSConfiguration.md)
 - For AWS load balancing comparison, see [AWS EC2 Web Server Setup](./AWS_EC2_Web_Server_Setup.md)
 - For comprehensive Azure networking architecture, see [CloudEngineering.md](./CloudEngineering.md)
 

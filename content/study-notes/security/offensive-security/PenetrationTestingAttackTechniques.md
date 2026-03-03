@@ -113,30 +113,30 @@ Within segregated zones, put hosts with the same security requirements. **A Chok
 flowchart TB
     subgraph Internet ["🌐 Internet (Untrusted Zone)"]
         direction TB
-        Web[External Users<br/>Attackers/Public]:::untrusted
+        Web[External Users\nAttackers/Public]:::untrusted
     end
     
     subgraph EdgeSecurity ["🔥 Edge Security Layer"]
         direction LR
-        FW1[External Firewall<br/>Stateful Inspection]:::firewall
-        IPS1[IPS/IDS<br/>Threat Detection]:::security
-        WAF[Web Application<br/>Firewall]:::security
+        FW1[External Firewall\nStateful Inspection]:::firewall
+        IPS1[IPS/IDS\nThreat Detection]:::security
+        WAF[Web Application\nFirewall]:::security
         FW1 ~~~ IPS1 ~~~ WAF
     end
     
     subgraph DMZ ["⚠️ DMZ - Demilitarized Zone (Low Trust)"]
         direction TB
-        DMZ1["VLAN 10: Public Web Servers<br/>HTTP/HTTPS - Port 80/443"]:::dmz
-        DMZ2["VLAN 20: Email Servers<br/>SMTP/IMAP - Port 25/993"]:::dmz
-        DMZ3["VLAN 30: DNS Servers<br/>Port 53"]:::dmz
-        DMZ4["VLAN 40: VPN Gateway<br/>IPSec/SSL VPN"]:::dmz
+        DMZ1["VLAN 10: Public Web Servers\nHTTP/HTTPS - Port 80/443"]:::dmz
+        DMZ2["VLAN 20: Email Servers\nSMTP/IMAP - Port 25/993"]:::dmz
+        DMZ3["VLAN 30: DNS Servers\nPort 53"]:::dmz
+        DMZ4["VLAN 40: VPN Gateway\nIPSec/SSL VPN"]:::dmz
         DMZ1 ~~~ DMZ2 ~~~ DMZ3 ~~~ DMZ4
     end
     
     subgraph InternalFirewall ["🛡️ Internal Firewall (Choke Point)"]
         direction LR
-        FW2[Internal Firewall<br/>ACL Policies]:::firewall
-        NAC[Network Access Control<br/>802.1X Authentication]:::security
+        FW2[Internal Firewall\nACL Policies]:::firewall
+        NAC[Network Access Control\n802.1X Authentication]:::security
         FW2 ~~~ NAC
     end
     
@@ -145,31 +145,31 @@ flowchart TB
         
         subgraph Corp ["VLAN 100: Corporate LAN (High Trust)"]
             direction LR
-            C1[Workstations<br/>Employee Devices]:::trusted
-            C2[Printers & Shared<br/>Resources]:::trusted
+            C1[Workstations\nEmployee Devices]:::trusted
+            C2[Printers & Shared\nResources]:::trusted
             C1 ~~~ C2
         end
         
         subgraph Server ["VLAN 200: Server Segment (Critical)"]
             direction LR
-            S1[Database Servers<br/>SQL/Oracle]:::critical
-            S2[Application Servers<br/>Internal Apps]:::critical
-            S3[File Servers<br/>NAS/SAN]:::critical
+            S1[Database Servers\nSQL/Oracle]:::critical
+            S2[Application Servers\nInternal Apps]:::critical
+            S3[File Servers\nNAS/SAN]:::critical
             S1 ~~~ S2 ~~~ S3
         end
         
         subgraph Mgmt ["VLAN 300: Management Network (Highest Trust)"]
             direction LR
-            M1[Domain Controllers<br/>AD/LDAP]:::critical
-            M2[SIEM & Monitoring<br/>Splunk/Nagios]:::critical
-            M3[Backup Systems<br/>Veeam/Commvault]:::critical
+            M1[Domain Controllers\nAD/LDAP]:::critical
+            M2[SIEM & Monitoring\nSplunk/Nagios]:::critical
+            M3[Backup Systems\nVeeam/Commvault]:::critical
             M1 ~~~ M2 ~~~ M3
         end
         
         subgraph Guest ["VLAN 400: Guest Network (No Trust)"]
             direction LR
-            G1[Guest Wi-Fi<br/>Isolated Subnet]:::guest
-            G2[IoT Devices<br/>Cameras/Sensors]:::guest
+            G1[Guest Wi-Fi\nIsolated Subnet]:::guest
+            G2[IoT Devices\nCameras/Sensors]:::guest
             G1 ~~~ G2
         end
     end
@@ -179,12 +179,12 @@ flowchart TB
     DMZ -->|Strict ACLs| InternalFirewall
     InternalFirewall --> InternalZones
     
-    Corp -.->|Allow: HTTP/HTTPS<br/>Deny: Direct DB| DMZ
-    Server -.->|Allow: App Traffic<br/>Deny: Internet Direct| DMZ
-    Mgmt -.->|Allow: Monitoring<br/>Deny: User Access| Server
-    Guest -.->|Allow: Internet Only<br/>Deny: Internal Access| Internet
+    Corp -.->|Allow: HTTP/HTTPS\nDeny: Direct DB| DMZ
+    Server -.->|Allow: App Traffic\nDeny: Internet Direct| DMZ
+    Mgmt -.->|Allow: Monitoring\nDeny: User Access| Server
+    Guest -.->|Allow: Internet Only\nDeny: Internal Access| Internet
     
-    TrustLevels["📊 Trust Level Hierarchy<br/>━━━━━━━━━━━━━━━━<br/>🔴 Untrusted: Internet, Guest<br/>🟡 Low Trust: DMZ<br/>🟢 Trusted: Corporate LAN<br/>🔵 Critical: Servers, Management"]:::legend
+    TrustLevels["📊 Trust Level Hierarchy\n━━━━━━━━━━━━━━━━\n🔴 Untrusted: Internet, Guest\n🟡 Low Trust: DMZ\n🟢 Trusted: Corporate LAN\n🔵 Critical: Servers, Management"]:::legend
     
     classDef untrusted fill:#e03131,stroke:#c92a2a,stroke-width:3px,color:#fff
     classDef dmz fill:#ff922b,stroke:#d9480f,stroke-width:3px,color:#fff
@@ -556,26 +556,26 @@ WiFi Auth comes in 3 types: **Personal (PSK)**, **Enterprise**, and **Open**.
 flowchart TB
     subgraph WPA2 ["WPA2 4-Way Handshake (Vulnerable to Offline Attacks)"]
         direction TB
-        W2Start([Client + AP]) --> W2PMK["Derive PMK from<br/>PBKDF2(Passphrase, SSID)"]
-        W2PMK --> W2M1["Message 1: AP → Client<br/>ANonce (AP Random)"]
-        W2M1 --> W2M2["Message 2: Client → AP<br/>SNonce + MIC<br/>(Derive PTK from PMK)"]
-        W2M2 --> W2M3["Message 3: AP → Client<br/>GTK + MIC<br/>(Group Temporal Key)"]
-        W2M3 --> W2M4["Message 4: Client → AP<br/>ACK Confirmation"]
+        W2Start([Client + AP]) --> W2PMK["Derive PMK from\nPBKDF2(Passphrase, SSID)"]
+        W2PMK --> W2M1["Message 1: AP → Client\nANonce (AP Random)"]
+        W2M1 --> W2M2["Message 2: Client → AP\nSNonce + MIC\n(Derive PTK from PMK)"]
+        W2M2 --> W2M3["Message 3: AP → Client\nGTK + MIC\n(Group Temporal Key)"]
+        W2M3 --> W2M4["Message 4: Client → AP\nACK Confirmation"]
         W2M4 --> W2Done([Encrypted Communication])
         
-        Note2["⚠️ Vulnerability: Handshake can be<br/>captured and used for offline<br/>dictionary/brute-force attacks"]:::warning
+        Note2["⚠️ Vulnerability: Handshake can be\ncaptured and used for offline\ndictionary/brute-force attacks"]:::warning
         W2M2 -.-> Note2
     end
     
     subgraph WPA3 ["WPA3 SAE (Simultaneous Authentication of Equals)"]
         direction TB
-        W3Start([Client + AP]) --> W3Commit["Commit Exchange<br/>Dragonfly Handshake<br/>(EC-DH Key Agreement)"]
-        W3Commit --> W3Derive["Derive PMK from:<br/>• Passphrase<br/>• Both MAC Addresses<br/>• Random Values"]
-        W3Derive --> W3Confirm["Confirm Exchange<br/>Mutual Authentication<br/>with Zero-Knowledge Proof"]
-        W3Confirm --> W3PTK["Derive PTK & GTK<br/>Forward Secrecy Enabled"]
+        W3Start([Client + AP]) --> W3Commit["Commit Exchange\nDragonfly Handshake\n(EC-DH Key Agreement)"]
+        W3Commit --> W3Derive["Derive PMK from:\n• Passphrase\n• Both MAC Addresses\n• Random Values"]
+        W3Derive --> W3Confirm["Confirm Exchange\nMutual Authentication\nwith Zero-Knowledge Proof"]
+        W3Confirm --> W3PTK["Derive PTK & GTK\nForward Secrecy Enabled"]
         W3PTK --> W3Done([Encrypted Communication])
         
-        Note3["✅ Security: Each session uses unique<br/>keys. Offline attacks impossible.<br/>Forward secrecy protects past sessions."]:::secure
+        Note3["✅ Security: Each session uses unique\nkeys. Offline attacks impossible.\nForward secrecy protects past sessions."]:::secure
         W3Confirm -.-> Note3
     end
     
@@ -1162,10 +1162,10 @@ flowchart TB
     end
     
     subgraph Collection ["Collection Layer"]
-        Agent1[SIEM Agents<br/>Installed on Hosts]
-        Syslog[Syslog Receivers<br/>Port 514]
-        SNMP[SNMP Traps<br/>Port 162]
-        API[API Connectors<br/>Cloud Integration]
+        Agent1[SIEM Agents\nInstalled on Hosts]
+        Syslog[Syslog Receivers\nPort 514]
+        SNMP[SNMP Traps\nPort 162]
+        API[API Connectors\nCloud Integration]
     end
     
     FW -->|Syslog| Syslog
@@ -1178,10 +1178,10 @@ flowchart TB
     
     subgraph Processing ["SIEM Processing Engine"]
         direction TB
-        Agg[Log Aggregation<br/>Central Repository]
-        Norm[Normalization<br/>Format Standardization]
-        Parse[Parsing<br/>Field Extraction]
-        Enrich[Enrichment<br/>Add Context]
+        Agg[Log Aggregation\nCentral Repository]
+        Norm[Normalization\nFormat Standardization]
+        Parse[Parsing\nField Extraction]
+        Enrich[Enrichment\nAdd Context]
     end
     
     Agent1 --> Agg
@@ -1195,10 +1195,10 @@ flowchart TB
     
     subgraph Analysis ["Analysis & Correlation"]
         direction TB
-        Rules[Correlation Rules<br/>Pattern Matching]
-        CTI[Threat Intelligence<br/>IoC Matching]
-        UEBA[UEBA<br/>Behavioral Analytics]
-        ML[Machine Learning<br/>Anomaly Detection]
+        Rules[Correlation Rules\nPattern Matching]
+        CTI[Threat Intelligence\nIoC Matching]
+        UEBA[UEBA\nBehavioral Analytics]
+        ML[Machine Learning\nAnomaly Detection]
     end
     
     Enrich --> Rules
@@ -1207,11 +1207,11 @@ flowchart TB
     Enrich --> ML
     
     subgraph Output ["Output & Response"]
-        Alerts[Alerts<br/>Security Events]
-        Dashboard[Dashboards<br/>Visualization]
-        Reports[Reports<br/>Compliance]
-        SOAR[SOAR Integration<br/>Automated Response]
-        Archive[Long-term Storage<br/>Retention]
+        Alerts[Alerts\nSecurity Events]
+        Dashboard[Dashboards\nVisualization]
+        Reports[Reports\nCompliance]
+        SOAR[SOAR Integration\nAutomated Response]
+        Archive[Long-term Storage\nRetention]
     end
     
     Rules --> Alerts

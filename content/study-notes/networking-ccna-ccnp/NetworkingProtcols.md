@@ -157,18 +157,18 @@ The Transport layer refers to how data is actually transferred. The transport la
 
 ```mermaid
 sequenceDiagram
-    participant Client
-    participant Server
+    participant Client as "Client"
+    participant Server as "Server"
 
     Note over Client,Server: TCP Three-Way Handshake\nEstablishes Connection
 
-    Client->>Server: 1. SYN\nSEQ = 1000\nPort: Random → 80
+    Client->>Server: 1. SYN\nSEQ = 1000\nPort: Random -> 80
     Note left of Client: Client initiates connection\nState: SYN_SENT\nChooses initial SEQ number
 
-    Server->>Client: 2. SYN-ACK\nSEQ = 5000, ACK = 1001\nPort: 80 → Random
+    Server->>Client: 2. SYN-ACK\nSEQ = 5000, ACK = 1001\nPort: 80 -> Random
     Note right of Server: Server acknowledges\nState: SYN_RECEIVED\nChooses own SEQ, ACKs client SEQ+1
 
-    Client->>Server: 3. ACK\nSEQ = 1001, ACK = 5001\nPort: Random → 80
+    Client->>Server: 3. ACK\nSEQ = 1001, ACK = 5001\nPort: Random -> 80
     Note left of Client: Client acknowledges\nState: ESTABLISHED\nACKs server SEQ+1
 
     Note over Server: State: ESTABLISHED
@@ -189,10 +189,8 @@ sequenceDiagram
     end
 
     Note over Client,Server: Connection Closed
-
-    KeyConcepts["Key TCP Features:\n✓ Reliable: Guarantees delivery via ACKs\n✓ Connection-oriented: Handshake before data\n✓ Flow control: Window size management\n✓ Congestion control: Prevents network overload\n✓ Error detection: Checksums verify integrity"]
-
-    style KeyConcepts fill:#FFF9C4,stroke:#F39C12
+    
+    Note over Client,Server: Key TCP Features:\n- Reliable: Guarantees delivery via ACKs\n- Connection-oriented: Handshake before data\n- Flow control: Window size management\n- Congestion control: Prevents network overload\n- Error detection: Checksums verify integrity
 ```
 
 *Figure: TCP three-way handshake for connection establishment. Client sends SYN, server responds with SYN-ACK, client sends final ACK. Connection state progresses from SYN_SENT → SYN_RECEIVED → ESTABLISHED. TCP ensures reliable, ordered data delivery through sequence numbers and acknowledgments.*
@@ -831,7 +829,7 @@ sequenceDiagram
     
     rect rgb(240, 255, 240)
         Note over HostB: 3. Cache Sender Info
-        HostB->>HostB: Update ARP cache:\n192.168.1.10 → AA:BB:CC:11:22:33\nStore for future use
+        HostB->>HostB: Update ARP cache:\n192.168.1.10 -> AA:BB:CC:11:22:33\nStore for future use
         Note right of HostB: Cache sender's mapping\nbefore replying\n(Optimization)
     end
     
@@ -845,7 +843,7 @@ sequenceDiagram
     
     rect rgb(245, 255, 245)
         Note over HostA: 5. Update ARP Cache
-        HostA->>HostA: Update ARP cache:\n192.168.1.20 → DD:EE:FF:44:55:66\nCache entry timeout: 120-300 sec
+        HostA->>HostA: Update ARP cache:\n192.168.1.20 -> DD:EE:FF:44:55:66\nCache entry timeout: 120-300 sec
         Note left of HostA: Cache updated\nFuture packets to\n192.168.1.20 use this MAC\nNo ARP needed (until timeout)
     end
     
@@ -856,9 +854,7 @@ sequenceDiagram
         Note over HostA,HostB: Communication established\nLayer 2 addressing resolved
     end
     
-    ARPDetails["ARP Key Concepts:\n✓ Layer 2 protocol (operates at Data Link)\n✓ Maps Layer 3 (IP) to Layer 2 (MAC) addresses\n✓ Request: Broadcast to all hosts in subnet\n✓ Reply: Unicast directly to requester\n✓ Cache: Stores mappings to avoid repeated requests\n✓ Timeout: Cache entries expire (prevent stale data)\n✓ Gratuitous ARP: Announce own IP/MAC (detect conflicts)"]
-    
-    style ARPDetails fill:#FFF9C4,stroke:#F39C12
+    Note over HostA,HostC: ARP Key Concepts:\n- Layer 2 protocol (operates at Data Link)\n- Maps Layer 3 (IP) to Layer 2 (MAC) addresses\n- Request: Broadcast to all hosts in subnet\n- Reply: Unicast directly to requester\n- Cache: Stores mappings to avoid repeated requests\n- Timeout: Cache entries expire (prevent stale data)\n- Gratuitous ARP: Announce own IP/MAC (detect conflicts)
 ```
 
 *Figure: ARP protocol operation showing MAC address discovery process. Host A broadcasts ARP request asking "Who has IP 192.168.1.20?", Host B (owner of that IP) responds with unicast ARP reply containing its MAC address DD:EE:FF:44:55:66. Both hosts cache the mapping to avoid future ARP requests. Essential for Layer 2 frame forwarding within the same subnet.*
@@ -1878,19 +1874,16 @@ sequenceDiagram
     
     rect rgb(255, 250, 240)
         Note over Local: 6. Cache & Return
-        Local->>Local: Cache record for TTL\nwww.example.com → 93.184.216.34\nExpires in 3600s
+        Local->>Local: Cache record for TTL\nwww.example.com -> 93.184.216.34\nExpires in 3600s
         Local->>Client: Recursive Response\nwww.example.com\nA 93.184.216.34
         Note right of Local: Response sent back\nto client\nRecord cached locally
     end
     
     rect rgb(240, 255, 240)
         Note over Client: 7. Client Caches Result
-        Client->>Client: Cache in local DNS cache\nwww.example.com → 93.184.216.34\nCan now connect to server
+        Client->>Client: Cache in local DNS cache\nwww.example.com -> 93.184.216.34\nCan now connect to server
     end
     
-    QueryTypes["Query Types:\n✓ Recursive: Client → Local DNS (full answer required)\n✓ Iterative: Local DNS → Root/TLD/Auth (referrals OK)\n✓ Authoritative: Final answer from domain's NS\n✓ Non-Authoritative: Answer from cache\n✓ Caching reduces load & latency (TTL control)"]
-    
-    style QueryTypes fill:#FFF9C4,stroke:#F39C12
 ```
 
 *Figure: DNS resolution showing the complete query process. Client makes recursive query to local DNS server, which performs iterative queries to Root → TLD → Authoritative servers. Each server either provides the answer or refers to the next level in the hierarchy. Final answer is cached at multiple levels with TTL.*
@@ -2069,7 +2062,7 @@ sequenceDiagram
         Note over Client,Server: 1. DISCOVER Phase
         Client->>Network: DHCP DISCOVER (Broadcast)\nSrc: 0.0.0.0:68\nDst: 255.255.255.255:67\nMAC: Client's MAC\nRequesting IP configuration
         Network->>Server: Forward broadcast to\nall DHCP servers
-        Note left of Client: Client has no IP yet\nBroadcasts to find servers\nUDP Port 68→67
+        Note left of Client: Client has no IP yet\nBroadcasts to find servers\nUDP Port 68->67
     end
     
     rect rgb(230, 245, 255)
@@ -2102,9 +2095,7 @@ sequenceDiagram
         Note over Client: Lease expires\nRelease IP, restart DORA
     end
     
-    LeaseTimers["DHCP Lease Timers:\n✓ Lease Duration: Full period IP is valid\n✓ T1 (50%): Try renewing with original server\n✓ T2 (87.5%): Try rebinding with any server\n✓ Expired: Release IP, start DORA again"]
-    
-    style LeaseTimers fill:#FFF9C4,stroke:#F39C12
+    Note over Client,Server: DHCP Lease Timers:\n- Lease Duration: Full period IP is valid\n- T1 (50%): Try renewing with original server\n- T2 (87.5%): Try rebinding with any server\n- Expired: Release IP, start DORA again
 ```
 
 *Figure: DHCP DORA process showing the four-phase IP address acquisition: (D)iscover → (O)ffer → (R)equest → (A)cknowledge. Client starts with no IP (0.0.0.0), broadcasts to find servers, receives offers, selects one, and gets configuration confirmed. Includes lease management with T1 (renewal) and T2 (rebind) timers.*

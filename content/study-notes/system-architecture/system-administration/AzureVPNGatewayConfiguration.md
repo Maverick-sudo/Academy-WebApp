@@ -280,7 +280,7 @@ Integrates with existing RADIUS servers, allowing leverage of existing user dire
 - Secure access to Azure VMs for administration
 - Temporary access for contractors or partners
 
-For related hybrid connectivity options using dedicated private circuits, see [Azure ExpressRoute Deep Dive](./Azure_ExpressRoute_Deep_Dive.md).
+For related hybrid connectivity options using dedicated private circuits, see [Azure ExpressRoute Deep Dive](./AzureExpressRouteDeepDive.md).
 
 ## VNet-to-VNet VPN Configuration
 
@@ -461,9 +461,9 @@ az monitor diagnostic-settings create \
 
 ## Cross-References
 
-- For dedicated private connectivity without VPN overhead, see [Azure ExpressRoute Deep Dive](./Azure_ExpressRoute_Deep_Dive.md)
-- For traffic distribution across VPN-connected resources, see [Azure Load Balancing Services](./Azure_Load_Balancing_Services.md)
-- For DNS resolution across VPN-connected VNets and hybrid scenarios, see [Azure Private DNS Configuration](./Azure_Private_DNS_Configuration.md)
+- For dedicated private connectivity without VPN overhead, see [Azure ExpressRoute Deep Dive](./AzureExpressRouteDeepDive.md)
+- For traffic distribution across VPN-connected resources, see [Azure Load Balancing Services](./AzureLoadBalancingServices.md)
+- For DNS resolution across VPN-connected VNets and hybrid scenarios, see [Azure Private DNS Configuration](./AzurePrivateDNSConfiguration.md)
 - For comprehensive Azure networking fundamentals, see [CloudEngineering.md](./CloudEngineering.md)
 
 ## References

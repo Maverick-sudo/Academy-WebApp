@@ -141,32 +141,32 @@ In protocols like TLS, requirements for authentication and encryption are fulfil
 
 ```mermaid
 sequenceDiagram
-    participant C as 🖥️ Client
-    participant S as 🔒 Server
+    participant C as "Client"
+    participant S as "Server"
     
     Note over C,S: Phase 1: Hello & Cipher Suite Negotiation
-    C->>S: ClientHello<br/>(TLS version, cipher suites, random nonce)
-    S->>C: ServerHello<br/>(Selected cipher suite, random nonce)
+    C->>S: ClientHello\n(TLS version, cipher suites, random nonce)
+    S->>C: ServerHello\n(Selected cipher suite, random nonce)
     
     Note over C,S: Phase 2: Certificate Exchange & Authentication
-    S->>C: Certificate<br/>(Server's digital certificate + public key)
+    S->>C: Certificate\n(Server's digital certificate + public key)
     S->>C: ServerHelloDone
     
     Note over C,S: Phase 3: Key Exchange
-    C->>C: Verify certificate validity<br/>(Check CA signature, expiration, domain)
-    C->>S: ClientKeyExchange<br/>(Pre-master secret encrypted with server's public key)
+    C->>C: Verify certificate validity\n(Check CA signature, expiration, domain)
+    C->>S: ClientKeyExchange\n(Pre-master secret encrypted with server's public key)
     
     Note over C,S: Phase 4: Session Key Derivation
-    C->>C: Generate session keys<br/>(Master secret from pre-master + nonces)
-    S->>S: Decrypt pre-master secret<br/>Generate session keys
+    C->>C: Generate session keys\n(Master secret from pre-master + nonces)
+    S->>S: Decrypt pre-master secret\nGenerate session keys
     
     Note over C,S: Phase 5: Handshake Completion
-    C->>S: ChangeCipherSpec<br/>(Switch to encrypted communication)
-    C->>S: Finished<br/>(Encrypted handshake hash)
+    C->>S: ChangeCipherSpec\n(Switch to encrypted communication)
+    C->>S: Finished\n(Encrypted handshake hash)
     S->>C: ChangeCipherSpec
-    S->>C: Finished<br/>(Encrypted handshake hash)
+    S->>C: Finished\n(Encrypted handshake hash)
     
-    Note over C,S: ✅ Secure Channel Established<br/>All subsequent traffic encrypted with symmetric session keys
+    Note over C,S: ✅ Secure Channel Established\nAll subsequent traffic encrypted with symmetric session keys
     
     C->>S: Encrypted Application Data
     S->>C: Encrypted Application Data
@@ -390,16 +390,16 @@ Staff authorized to perform management must be carefully vetted, and due offboar
 
 ```mermaid
 flowchart TD
-    Start([Subject Needs Certificate]) --> Gen[Key Generation<br/>Create Key Pair]
-    Gen --> CSR[Certificate Signing Request<br/>Submit to CA/RA]
-    CSR --> Verify{Identity<br/>Verification}
+    Start([Subject Needs Certificate]) --> Gen[Key Generation\nCreate Key Pair]
+    Gen --> CSR[Certificate Signing Request\nSubmit to CA/RA]
+    CSR --> Verify{Identity\nVerification}
     Verify -->|Failed| Reject[Request Rejected]
     Verify -->|Passed| Issue[CA Issues Certificate]
-    Issue --> Store[Secure Storage<br/>M-of-N Control for Critical Keys]
+    Issue --> Store[Secure Storage\nM-of-N Control for Critical Keys]
     Store --> Deploy[Certificate Deployment]
     Deploy --> Valid[Certificate in Use]
     
-    Valid --> Check{Validation<br/>Check}
+    Valid --> Check{Validation\nCheck}
     Check -->|CRL Check| CRL[Check Revocation List]
     Check -->|OCSP| OCSP[Online Status Check]
     CRL --> Status{Valid?}
@@ -408,13 +408,13 @@ flowchart TD
     Status -->|Valid| Continue[Continue Use]
     Status -->|Revoked/Suspended| Revoke[Certificate Revoked]
     
-    Continue --> Expire{Approaching<br/>Expiration?}
+    Continue --> Expire{Approaching\nExpiration?}
     Expire -->|No| Valid
-    Expire -->|Yes| Renew{Renew or<br/>Rekey?}
+    Expire -->|Yes| Renew{Renew or\nRekey?}
     
     Renew -->|Renew Same Key| Issue
     Renew -->|Rekey New Key| Gen
-    Renew -->|Don't Renew| Archive{Archive or<br/>Destroy?}
+    Renew -->|Don't Renew| Archive{Archive or\nDestroy?}
     
     Revoke --> Archive
     Archive -->|Archive| Backup[Secure Backup Storage]
@@ -540,24 +540,24 @@ Servers and protocols implementing these are referred to as **AAA Servers** (Aut
 
 ```mermaid
 flowchart TD
-    Start([User Access Request]) --> ID[1. IDENTIFICATION<br/>Present User ID/Account]
-    ID --> Auth[2. AUTHENTICATION<br/>Verify Credentials]
-    Auth --> VerifyFactor{Credentials<br/>Valid?}
+    Start([User Access Request]) --> ID[1. IDENTIFICATION\nPresent User ID/Account]
+    ID --> Auth[2. AUTHENTICATION\nVerify Credentials]
+    Auth --> VerifyFactor{Credentials\nValid?}
     VerifyFactor -->|Invalid| Fail[Authentication Failed]
     Fail --> Log1[Log Failed Attempt]
-    Log1 --> Retry{Retry<br/>Allowed?}
+    Log1 --> Retry{Retry\nAllowed?}
     Retry -->|Yes| Auth
     Retry -->|No| Block[Account Locked/Blocked]
     Block --> End([Access Denied])
     
-    VerifyFactor -->|Valid| Authz[3. AUTHORIZATION<br/>Check Permissions & Policies]
-    Authz --> PermCheck{Has Required<br/>Permissions?}
+    VerifyFactor -->|Valid| Authz[3. AUTHORIZATION\nCheck Permissions & Policies]
+    Authz --> PermCheck{Has Required\nPermissions?}
     PermCheck -->|No| Deny[Access Denied]
     Deny --> Log2[Log Authorization Failure]
     Log2 --> End
     
     PermCheck -->|Yes| Grant[Access Granted]
-    Grant --> Acct[4. ACCOUNTING<br/>Log Access & Activities]
+    Grant --> Acct[4. ACCOUNTING\nLog Access & Activities]
     Acct --> Monitor[Continuous Monitoring]
     Monitor --> Success([Authorized Session])
     
@@ -724,12 +724,12 @@ sequenceDiagram
     C->>S: 2. Response (Username + Hash)
     
     Note over C,S: Phase 3: Verification
-    Note over S: Compute Expected Hash<br/>Compare with Received Hash
+    Note over S: Compute Expected Hash\nCompare with Received Hash
     S->>S: Verify Hash
     
     alt Hash Valid
         S->>C: 3. Success (Connection Established)
-        Note over C,S: Periodic Re-authentication<br/>(Prevents Replay Attacks)
+        Note over C,S: Periodic Re-authentication\n(Prevents Replay Attacks)
     else Hash Invalid
         S->>C: 3. Failure (Connection Rejected)
     end
@@ -1203,10 +1203,10 @@ Often implemented using a **RESTful API** (Representational State Transfer).
 
 ```mermaid
 sequenceDiagram
-    participant U as 👤 User<br/>(Resource Owner)
-    participant C as 📱 Client App<br/>(Third-party App)
-    participant A as 🔐 Authorization Server<br/>(IdP - Google/Azure AD)
-    participant R as 📊 Resource Server<br/>(API/Data Host)
+    participant U as "👤 User\n(Resource Owner)"
+    participant C as "📱 Client App\n(Third-party App)"
+    participant A as "🔐 Authorization Server\n(IdP - Google/Azure AD)"
+    participant R as "📊 Resource Server\n(API/Data Host)"
     
     Note over U,R: Step 1: User Initiates Login
     U->>C: Click "Login with Google/Azure"
@@ -1214,21 +1214,21 @@ sequenceDiagram
     
     Note over U,R: Step 2: Authorization Request
     U->>A: GET /authorize?client_id=xxx&redirect_uri=xxx&scope=read
-    A->>U: Display login page & consent screen<br/>("App X wants to access your profile")
+    A->>U: Display login page & consent screen\n("App X wants to access your profile")
     
     Note over U,R: Step 3: User Grants Permission
     U->>A: Enter credentials & approve consent
-    A->>A: Validate credentials<br/>Generate authorization code
-    A->>C: Redirect with authorization code<br/>(https://app.com/callback?code=AUTH_CODE)
+    A->>A: Validate credentials\nGenerate authorization code
+    A->>C: Redirect with authorization code\n(https://app.com/callback?code=AUTH_CODE)
     
     Note over U,R: Step 4: Exchange Code for Token
-    C->>A: POST /token<br/>(code + client_id + client_secret)
+    C->>A: POST /token\n(code + client_id + client_secret)
     A->>A: Validate code & client credentials
-    A->>C: Return Access Token + Refresh Token<br/>(JWT: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...)
+    A->>C: Return Access Token + Refresh Token\n(JWT: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...)
     
     Note over U,R: Step 5: Access Protected Resources
-    C->>R: API Request with Access Token<br/>(Authorization: Bearer {access_token})
-    R->>R: Validate token signature<br/>Check expiration & scope
+    C->>R: API Request with Access Token\n(Authorization: Bearer {access_token})
+    R->>R: Validate token signature\nCheck expiration & scope
     R->>C: Return requested data (JSON)
     C->>U: Display user profile/data
     

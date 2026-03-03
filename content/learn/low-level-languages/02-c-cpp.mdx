@@ -52,22 +52,22 @@ The `int` can be omitted in such situations and typically is.
 ```mermaid
 flowchart LR
     subgraph "Signed Types"
-        char1["char<br/>8-bit<br/>-128 to 127"]
-        short1["short<br/>16-bit<br/>-32768 to 32767"]
-        int1["int<br/>16/32-bit<br/>varies"]
-        long1["long<br/>32-bit"]
+        char1["char\n8-bit\n-128 to 127"]
+        short1["short\n16-bit\n-32768 to 32767"]
+        int1["int\n16/32-bit\nvaries"]
+        long1["long\n32-bit"]
     end
     
     subgraph "Unsigned Types"
-        uchar["unsigned char<br/>8-bit<br/>0 to 255"]
-        ushort["unsigned short<br/>16-bit<br/>0 to 65535"]
-        uint["unsigned int<br/>16/32-bit<br/>0 to 2^n-1"]
-        ulong["unsigned long<br/>32-bit"]
+        uchar["unsigned char\n8-bit\n0 to 255"]
+        ushort["unsigned short\n16-bit\n0 to 65535"]
+        uint["unsigned int\n16/32-bit\n0 to 2^n-1"]
+        ulong["unsigned long\n32-bit"]
     end
     
     subgraph "Floating Point"
-        float1["float<br/>32-bit<br/>±10^-38 to ±10^38"]
-        double1["double<br/>64-bit<br/>Higher precision"]
+        float1["float\n32-bit\n±10^-38 to ±10^38"]
+        double1["double\n64-bit\nHigher precision"]
     end
     
     style char1 fill:#e1f5ff
@@ -95,9 +95,9 @@ A decimal point in a constant indicates that it is floating point, so `5.0/9.0` 
 
 ```mermaid
 flowchart TD
-    Start["Expression: 5/9"] --> Check{"Any operand<br/>floating point?"}
-    Check -->|No| IntDiv["Integer Division<br/>Result: 0<br/>(truncated)"]
-    Check -->|Yes| FloatDiv["Floating Point Division<br/>Result: 0.555..."]
+    Start["Expression: 5/9"] --> Check{"Any operand\nfloating point?"}
+    Check -->|No| IntDiv["Integer Division\nResult: 0\n(truncated)"]
+    Check -->|Yes| FloatDiv["Floating Point Division\nResult: 0.555..."]
     
     Example1["5/9"] --> IntDiv
     Example2["5.0/9 or 5/9.0"] --> FloatDiv
@@ -394,17 +394,17 @@ This inability to enforce correct array size checking leads to a serious securit
 flowchart TD
     subgraph "Memory Before Overflow"
         subgraph "Stack Frame - Normal"
-            ret1["Return Address<br/>0xBFFF8<br/>✓ Valid"]
-            fp1["Frame Pointer<br/>0xBFFF0"]
-            arr1["array[10]<br/>0xBFFE8-0xBFFFB<br/>40 bytes"]
+            ret1["Return Address\n0xBFFF8\n✓ Valid"]
+            fp1["Frame Pointer\n0xBFFF0"]
+            arr1["array[10]\n0xBFFE8-0xBFFFB\n40 bytes"]
         end
     end
     
     subgraph "Memory After Buffer Overflow"
         subgraph "Stack Frame - Corrupted"
-            ret2["Return Address<br/>0xBFFF8<br/>☠ OVERWRITTEN<br/>Attacker controls PC"]
-            fp2["Frame Pointer<br/>0xBFFF0<br/>☠ CORRUPTED"]
-            arr2["array[15] write<br/>Beyond valid range<br/>Corrupts adjacent memory"]
+            ret2["Return Address\n0xBFFF8\n☠ OVERWRITTEN\nAttacker controls PC"]
+            fp2["Frame Pointer\n0xBFFF0\n☠ CORRUPTED"]
+            arr2["array[15] write\nBeyond valid range\nCorrupts adjacent memory"]
         end
     end
     
@@ -1105,10 +1105,10 @@ A **pointer** is a variable that contains the address of another variable or mem
 flowchart LR
     subgraph Memory["Memory Layout"]
         subgraph "Address 0x1000"
-            px["px (pointer)<br/>Value: 0x2000<br/>Size: 4/8 bytes"]
+            px["px (pointer)\nValue: 0x2000\nSize: 4/8 bytes"]
         end
         subgraph "Address 0x2000"
-            x["x (int)<br/>Value: 42<br/>Size: 4 bytes"]
+            x["x (int)\nValue: 42\nSize: 4 bytes"]
         end
     end
     
@@ -1184,21 +1184,21 @@ pa + i == &a[i]
 ```mermaid
 flowchart TD
     subgraph "Array Memory Layout (int array)"
-        a0["a[0]<br/>Address: 0x1000<br/>Value: 10"]
-        a1["a[1]<br/>Address: 0x1004<br/>Value: 20"]
-        a2["a[2]<br/>Address: 0x1008<br/>Value: 30"]
-        a3["a[3]<br/>Address: 0x100C<br/>Value: 40"]
+        a0["a[0]\nAddress: 0x1000\nValue: 10"]
+        a1["a[1]\nAddress: 0x1004\nValue: 20"]
+        a2["a[2]\nAddress: 0x1008\nValue: 30"]
+        a3["a[3]\nAddress: 0x100C\nValue: 40"]
     end
     
-    pa["pa = &a[0]<br/>(points to 0x1000)"]
-    pa1["pa + 1<br/>(points to 0x1004)"]
-    pa2["pa + 2<br/>(points to 0x1008)"]
+    pa["pa = &a[0]\n(points to 0x1000)"]
+    pa1["pa + 1\n(points to 0x1004)"]
+    pa2["pa + 2\n(points to 0x1008)"]
     
     pa --> a0
     pa1 --> a1
     pa2 --> a2
     
-    note1["Each increment adds<br/>sizeof(int) = 4 bytes"]
+    note1["Each increment adds\nsizeof(int) = 4 bytes"]
     
     style a0 fill:#e1f5ff
     style a1 fill:#e1f5ff
@@ -1248,7 +1248,7 @@ flowchart TD
         a1 --> a4["&a[0] ✓ OK"]
     end
     
-    note["Array name is a constant pointer<br/>to the first element<br/>Cannot be modified"]
+    note["Array name is a constant pointer\nto the first element\nCannot be modified"]
     
     style pa1 fill:#e1ffe1
     style pa2 fill:#e1ffe1
@@ -1325,16 +1325,16 @@ Recursion generally provides no saving in storage, since somewhere a stack of th
 
 ```mermaid
 flowchart TD
-    Start["factorial(4) called"] --> Frame1["Stack Frame 1<br/>n=4<br/>calls factorial(3)"]
-    Frame1 --> Frame2["Stack Frame 2<br/>n=3<br/>calls factorial(2)"]
-    Frame2 --> Frame3["Stack Frame 3<br/>n=2<br/>calls factorial(1)"]
-    Frame3 --> Frame4["Stack Frame 4<br/>n=1<br/>Base case: return 1"]
+    Start["factorial(4) called"] --> Frame1["Stack Frame 1\nn=4\ncalls factorial(3)"]
+    Frame1 --> Frame2["Stack Frame 2\nn=3\ncalls factorial(2)"]
+    Frame2 --> Frame3["Stack Frame 3\nn=2\ncalls factorial(1)"]
+    Frame3 --> Frame4["Stack Frame 4\nn=1\nBase case: return 1"]
     Frame4 --> Return1["Frame 4 returns 1"]
     Return1 --> Return2["Frame 3 returns 2*1=2"]
     Return2 --> Return3["Frame 2 returns 3*2=6"]
     Return3 --> Return4["Frame 1 returns 4*6=24"]
     
-    StackLimit["Stack Space Limit<br/>Too many frames = Stack Overflow"]
+    StackLimit["Stack Space Limit\nToo many frames = Stack Overflow"]
     
     style Frame1 fill:#e1f5ff
     style Frame2 fill:#e1f5ff
@@ -1510,13 +1510,13 @@ In situations where a function is called from itself (recursive), the new invoca
 flowchart TD
     subgraph "Memory Layout"
         direction TB
-        Low["Low Addresses<br/>0x00000000"]
-        Text["Text Segment<br/>(Program Code)<br/>Read-only"]
-        Data["Data Segment<br/>(Global/Static Variables)<br/>Fixed size"]
-        Heap["Heap ↓<br/>(Dynamic Memory)<br/>malloc(), new<br/>Grows downward"]
-        Gap["...<br/>Unused Memory<br/>..."]
-        Stack["Stack ↑<br/>(Local Variables)<br/>Function calls<br/>Grows upward"]
-        High["High Addresses<br/>0xFFFFFFFF"]
+        Low["Low Addresses\n0x00000000"]
+        Text["Text Segment\n(Program Code)\nRead-only"]
+        Data["Data Segment\n(Global/Static Variables)\nFixed size"]
+        Heap["Heap ↓\n(Dynamic Memory)\nmalloc(), new\nGrows downward"]
+        Gap["...\nUnused Memory\n..."]
+        Stack["Stack ↑\n(Local Variables)\nFunction calls\nGrows upward"]
+        High["High Addresses\n0xFFFFFFFF"]
     end
     
     Low --> Text --> Data --> Heap --> Gap --> Stack --> High
@@ -1570,19 +1570,19 @@ The calling pattern of functions naturally follows a stack-like pattern; the all
 flowchart TD
     subgraph "Stack Growth - Multiple Function Calls"
         direction TB
-        Main["main() Stack Frame<br/>Local: argc, argv<br/>FP: 0xFFFC<br/>SP: 0xFFF0"]
-        FuncA["funcA() Stack Frame<br/>Local: x, y<br/>Return addr: main+offset<br/>FP: 0xFFEC<br/>SP: 0xFFE0"]
-        FuncB["funcB() Stack Frame<br/>Local: a, b, c<br/>Return addr: funcA+offset<br/>FP: 0xFFDC<br/>SP: 0xFFD0"]
-        FuncC["funcC() Stack Frame<br/>Local: temp<br/>Return addr: funcB+offset<br/>FP: 0xFFCC<br/>SP: 0xFFC8"]
+        Main["main() Stack Frame\nLocal: argc, argv\nFP: 0xFFFC\nSP: 0xFFF0"]
+        FuncA["funcA() Stack Frame\nLocal: x, y\nReturn addr: main+offset\nFP: 0xFFEC\nSP: 0xFFE0"]
+        FuncB["funcB() Stack Frame\nLocal: a, b, c\nReturn addr: funcA+offset\nFP: 0xFFDC\nSP: 0xFFD0"]
+        FuncC["funcC() Stack Frame\nLocal: temp\nReturn addr: funcB+offset\nFP: 0xFFCC\nSP: 0xFFC8"]
     end
     
     Main -->|"calls funcA()"| FuncA
     FuncA -->|"calls funcB()"| FuncB
     FuncB -->|"calls funcC()"| FuncC
     
-    Return1["funcC() returns<br/>SP restored to 0xFFD0<br/>Pop frame"]
-    Return2["funcB() returns<br/>SP restored to 0xFFE0<br/>Pop frame"]
-    Return3["funcA() returns<br/>SP restored to 0xFFF0<br/>Pop frame"]
+    Return1["funcC() returns\nSP restored to 0xFFD0\nPop frame"]
+    Return2["funcB() returns\nSP restored to 0xFFE0\nPop frame"]
+    Return3["funcA() returns\nSP restored to 0xFFF0\nPop frame"]
     
     FuncC -.->|"return"| Return1
     Return1 -.-> Return2
@@ -1609,19 +1609,19 @@ flowchart TD
 ```mermaid
 flowchart LR
     subgraph "Caller Responsibilities"
-        Caller1["Save caller-saved<br/>registers if needed"]
-        Caller2["Push arguments<br/>onto stack"]
-        Caller3["Call function<br/>(saves return address)"]
-        Caller4["Restore caller-saved<br/>registers"]
-        Caller5["Clean up stack<br/>(pop arguments)"]
+        Caller1["Save caller-saved\nregisters if needed"]
+        Caller2["Push arguments\nonto stack"]
+        Caller3["Call function\n(saves return address)"]
+        Caller4["Restore caller-saved\nregisters"]
+        Caller5["Clean up stack\n(pop arguments)"]
     end
     
     subgraph "Callee Responsibilities"
-        Callee1["Save callee-saved<br/>registers"]
-        Callee2["Allocate stack frame<br/>(local variables)"]
-        Callee3["Execute function<br/>body"]
-        Callee4["Restore callee-saved<br/>registers"]
-        Callee5["Return<br/>(pops return address)"]
+        Callee1["Save callee-saved\nregisters"]
+        Callee2["Allocate stack frame\n(local variables)"]
+        Callee3["Execute function\nbody"]
+        Callee4["Restore callee-saved\nregisters"]
+        Callee5["Return\n(pops return address)"]
     end
     
     Caller1 --> Caller2 --> Caller3

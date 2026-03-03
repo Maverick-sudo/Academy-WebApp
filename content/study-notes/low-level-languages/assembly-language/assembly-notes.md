@@ -71,11 +71,11 @@ The **Instruction Cycle** consists of 6 phases:
 
 ```mermaid
 flowchart TD
-    Fetch["1. FETCH<br/>MAR ← PC<br/>MDR ← M[MAR]<br/>IR ← MDR<br/>PC ← PC + 1"] --> Decode["2. DECODE<br/>Determine opcode<br/>from IR[15:12]"]
-    Decode --> EvalAddr["3. EVALUATE ADDRESS<br/>Calculate operand<br/>address if needed"]
-    EvalAddr --> FetchOp["4. FETCH OPERANDS<br/>Retrieve operands<br/>from registers/memory"]
-    FetchOp --> Execute["5. EXECUTE<br/>Perform operation<br/>Set condition codes"]
-    Execute --> Store["6. STORE RESULT<br/>Write result to<br/>register or memory"]
+    Fetch["1. FETCH\nMAR ← PC\nMDR ← M[MAR]\nIR ← MDR\nPC ← PC + 1"] --> Decode["2. DECODE\nDetermine opcode\nfrom IR[15:12]"]
+    Decode --> EvalAddr["3. EVALUATE ADDRESS\nCalculate operand\naddress if needed"]
+    EvalAddr --> FetchOp["4. FETCH OPERANDS\nRetrieve operands\nfrom registers/memory"]
+    FetchOp --> Execute["5. EXECUTE\nPerform operation\nSet condition codes"]
+    Execute --> Store["6. STORE RESULT\nWrite result to\nregister or memory"]
     Store --> |"Start next cycle"| Fetch
     
     style Fetch fill:#e1f5ff
@@ -231,16 +231,16 @@ ADD R0, R0, #1    ; Add 1 to get 2's complement
 
 ```mermaid
 flowchart TD
-    Inst["Instruction executes<br/>Result produced"] --> Check{"Check result value"}
+    Inst["Instruction executes\nResult produced"] --> Check{"Check result value"}
     Check -->|"< 0"| SetN["Set N=1, Z=0, P=0"]
     Check -->|"= 0"| SetZ["Set N=0, Z=1, P=0"]
     Check -->|"> 0"| SetP["Set N=0, Z=0, P=1"]
     
-    Example1["ADD R1, R2, R3<br/>Result: -5"] --> SetN
-    Example2["AND R1, R1, #0<br/>Result: 0"] --> SetZ
-    Example3["ADD R1, R2, #5<br/>Result: 10"] --> SetP
+    Example1["ADD R1, R2, R3\nResult: -5"] --> SetN
+    Example2["AND R1, R1, #0\nResult: 0"] --> SetZ
+    Example3["ADD R1, R2, #5\nResult: 10"] --> SetP
     
-    SetN --> Branch["BR instruction<br/>checks flags"]
+    SetN --> Branch["BR instruction\nchecks flags"]
     SetZ --> Branch
     SetP --> Branch
     
@@ -403,18 +403,18 @@ LC-3 supports three main addressing modes:
 ```mermaid
 flowchart TD
     subgraph "PC-Relative Addressing"
-        PC1["PC = 0x3010"] --> Calc1["Address = PC + SEXT(offset9)<br/>offset9 = 5<br/>Address = 0x3010 + 5 = 0x3015"]
+        PC1["PC = 0x3010"] --> Calc1["Address = PC + SEXT(offset9)\noffset9 = 5\nAddress = 0x3010 + 5 = 0x3015"]
         Calc1 --> Mem1["Load from M[0x3015]"]
     end
     
     subgraph "Indirect Addressing"
-        PC2["PC = 0x3010"] --> Calc2["Pointer = PC + SEXT(offset9)<br/>offset9 = 5<br/>Pointer = 0x3015"]
+        PC2["PC = 0x3010"] --> Calc2["Pointer = PC + SEXT(offset9)\noffset9 = 5\nPointer = 0x3015"]
         Calc2 --> Mem2["Address = M[0x3015] = 0x4020"]
         Mem2 --> Final2["Load from M[0x4020]"]
     end
     
     subgraph "Base+Offset Addressing"
-        Base["BaseR = 0x4000"] --> Calc3["Address = BaseR + SEXT(offset6)<br/>offset6 = 10<br/>Address = 0x4000 + 10 = 0x400A"]
+        Base["BaseR = 0x4000"] --> Calc3["Address = BaseR + SEXT(offset6)\noffset6 = 10\nAddress = 0x4000 + 10 = 0x400A"]
         Calc3 --> Mem3["Load from M[0x400A]"]
     end
     
@@ -853,22 +853,22 @@ Despite these differences, the fundamental concepts remain constant: programs ar
 ```mermaid
 flowchart TD
     subgraph "RAX Register Aliasing (64 bits total)"
-        RAX["RAX (64-bit)<br/>0x0000000012345678<br/>All 64 bits"]
+        RAX["RAX (64-bit)\n0x0000000012345678\nAll 64 bits"]
         
-        EAX["EAX (32-bit)<br/>0x12345678<br/>Lower 32 bits<br/>WRITING TO EAX ZEROS UPPER 32 BITS"]
+        EAX["EAX (32-bit)\n0x12345678\nLower 32 bits\nWRITING TO EAX ZEROS UPPER 32 BITS"]
         
-        AX["AX (16-bit)<br/>0x5678<br/>Lower 16 bits"]
+        AX["AX (16-bit)\n0x5678\nLower 16 bits"]
         
-        AH["AH (8-bit)<br/>0x56<br/>Bits [15:8]"]
-        AL["AL (8-bit)<br/>0x78<br/>Bits [7:0]"]
+        AH["AH (8-bit)\n0x56\nBits [15:8]"]
+        AL["AL (8-bit)\n0x78\nBits [7:0]"]
     end
     
     subgraph "Example: Register Modification Effects"
         Orig["mov rax, 0x123456789ABCDEF0"]
-        Step1["mov eax, 0x11111111<br/>Result: RAX = 0x0000000011111111<br/>(upper 32 bits zeroed!)"]
-        Step2["mov ax, 0x2222<br/>Result: RAX = 0x0000000011112222<br/>(only lower 16 bits changed)"]
-        Step3["mov al, 0x33<br/>Result: RAX = 0x0000000011112233<br/>(only lower 8 bits changed)"]
-        Step4["mov ah, 0x44<br/>Result: RAX = 0x0000000011114433<br/>(bits [15:8] changed)"]
+        Step1["mov eax, 0x11111111\nResult: RAX = 0x0000000011111111\n(upper 32 bits zeroed!)"]
+        Step2["mov ax, 0x2222\nResult: RAX = 0x0000000011112222\n(only lower 16 bits changed)"]
+        Step3["mov al, 0x33\nResult: RAX = 0x0000000011112233\n(only lower 8 bits changed)"]
+        Step4["mov ah, 0x44\nResult: RAX = 0x0000000011114433\n(bits [15:8] changed)"]
     end
     
     RAX -.-> EAX
@@ -950,24 +950,24 @@ flowchart TD
 ```mermaid
 flowchart TD
     subgraph "AT&T Syntax (GAS, GCC default)"
-        ATT1["Source, Destination order<br/>mov %rax, %rbx<br/>Copies RAX → RBX"]
-        ATT2["Registers prefixed with %<br/>Immediates prefixed with $<br/>mov $42, %rax"]
-        ATT3["Memory: displacement(base, index, scale)<br/>mov 8(%rbp), %rax<br/>lea -16(%rbp, %rcx, 4), %rax"]
-        ATT4["Size suffixes on instructions<br/>movb, movw, movl, movq"]
+        ATT1["Source, Destination order\nmov %rax, %rbx\nCopies RAX → RBX"]
+        ATT2["Registers prefixed with %\nImmediates prefixed with $\nmov $42, %rax"]
+        ATT3["Memory: displacement(base, index, scale)\nmov 8(%rbp), %rax\nlea -16(%rbp, %rcx, 4), %rax"]
+        ATT4["Size suffixes on instructions\nmovb, movw, movl, movq"]
     end
     
     subgraph "Intel Syntax (NASM, MASM, most docs)"
-        Intel1["Destination, Source order<br/>mov rbx, rax<br/>Copies RAX → RBX"]
-        Intel2["No register/immediate prefix<br/>mov rax, 42"]
-        Intel3["Memory: [base + index*scale + displacement]<br/>mov rax, [rbp+8]<br/>lea rax, [rbp + rcx*4 - 16]"]
-        Intel4["Size in operand or ptr directive<br/>mov byte ptr [rax], 5<br/>mov qword ptr [rbx], rax"]
+        Intel1["Destination, Source order\nmov rbx, rax\nCopies RAX → RBX"]
+        Intel2["No register/immediate prefix\nmov rax, 42"]
+        Intel3["Memory: [base + index*scale + displacement]\nmov rax, [rbp+8]\nlea rax, [rbp + rcx*4 - 16]"]
+        Intel4["Size in operand or ptr directive\nmov byte ptr [rax], 5\nmov qword ptr [rbx], rax"]
     end
     
     subgraph "Side-by-Side Examples"
-        Ex1["Integer immediate:<br/>AT&T: mov $5, %rax<br/>Intel: mov rax, 5"]
-        Ex2["Register to register:<br/>AT&T: add %rbx, %rax<br/>Intel: add rax, rbx"]
-        Ex3["Memory to register:<br/>AT&T: movq 16(%rsp), %rax<br/>Intel: mov rax, [rsp+16]"]
-        Ex4["Complex addressing:<br/>AT&T: leaq 8(%rbp,%rcx,4), %rax<br/>Intel: lea rax, [rbp+rcx*4+8]"]
+        Ex1["Integer immediate:\nAT&T: mov $5, %rax\nIntel: mov rax, 5"]
+        Ex2["Register to register:\nAT&T: add %rbx, %rax\nIntel: add rax, rbx"]
+        Ex3["Memory to register:\nAT&T: movq 16(%rsp), %rax\nIntel: mov rax, [rsp+16]"]
+        Ex4["Complex addressing:\nAT&T: leaq 8(%rbp,%rcx,4), %rax\nIntel: lea rax, [rbp+rcx*4+8]"]
     end
     
     ATT1 -.->|"Same operation"| Intel1
@@ -1214,27 +1214,27 @@ flowchart TD
     subgraph "Function Call with 7+ Arguments (System V AMD64 ABI)"
         Caller["Caller prepares arguments"]
         
-        Arg1to6["Arguments 1-6<br/>RDI, RSI, RDX, RCX, R8, R9"]
-        Arg7Plus["Arguments 7+ pushed on stack<br/>(right to left order)"]
+        Arg1to6["Arguments 1-6\nRDI, RSI, RDX, RCX, R8, R9"]
+        Arg7Plus["Arguments 7+ pushed on stack\n(right to left order)"]
         
-        CallInst["call function<br/>Pushes return address<br/>Jumps to function entry"]
+        CallInst["call function\nPushes return address\nJumps to function entry"]
         
-        Prologue["Function prologue:<br/>push rbp<br/>mov rbp, rsp<br/>sub rsp, N (local space)"]
+        Prologue["Function prologue:\npush rbp\nmov rbp, rsp\nsub rsp, N (local space)"]
         
-        Body["Function body executes<br/>Access args via registers/[rbp+offset]<br/>Access locals via [rbp-offset]"]
+        Body["Function body executes\nAccess args via registers/[rbp+offset]\nAccess locals via [rbp-offset]"]
         
-        Epilogue["Function epilogue:<br/>mov rsp, rbp<br/>pop rbp<br/>ret"]
+        Epilogue["Function epilogue:\nmov rsp, rbp\npop rbp\nret"]
         
-        Return["Return to caller<br/>Pop return address into RIP<br/>RAX contains return value"]
+        Return["Return to caller\nPop return address into RIP\nRAX contains return value"]
     end
     
     subgraph "Stack Memory Layout During Execution"
         direction TB
         High["Higher Addresses"]
-        ArgStack["[rbp+24] Arg 9<br/>[rbp+16] Arg 8<br/>[rbp+8] Arg 7"]
-        RetAddr["[rbp] Return Address (8 bytes)<br/>Pushed by CALL instruction"]
-        SavedRBP["[rbp-8] Saved RBP<br/>Pushed in prologue"]
-        Locals["[rbp-16] Local var 1<br/>[rbp-24] Local var 2<br/>[rbp-32] Local var 3"]
+        ArgStack["[rbp+24] Arg 9\n[rbp+16] Arg 8\n[rbp+8] Arg 7"]
+        RetAddr["[rbp] Return Address (8 bytes)\nPushed by CALL instruction"]
+        SavedRBP["[rbp-8] Saved RBP\nPushed in prologue"]
+        Locals["[rbp-16] Local var 1\n[rbp-24] Local var 2\n[rbp-32] Local var 3"]
         Low["Lower Addresses (RSP here)"]
         
         High --> ArgStack

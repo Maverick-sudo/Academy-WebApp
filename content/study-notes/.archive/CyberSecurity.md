@@ -858,8 +858,8 @@ In protocols like TLS, requirements for authentication and encryption are fulfil
 
 ```mermaid
 sequenceDiagram
-    participant C as 🖥️ Client
-    participant S as 🔒 Server
+    participant C as "C"
+    participant S as "S"
     
     Note over C,S: Phase 1: Hello & Cipher Suite Negotiation
     C->>S: ClientHello
@@ -1948,13 +1948,13 @@ Often implemented using a **RESTful API** (Representational State Transfer).
 
 ```mermaid
 sequenceDiagram
-    participant U as 👤 User
+    participant U as "U"
 (Resource Owner)
-    participant C as 📱 Client App
+    participant C as "C"
 (Third-party App)
-    participant A as 🔐 Authorization Server
+    participant A as "A"
 (IdP - Google/Azure AD)
-    participant R as 📊 Resource Server
+    participant R as "R"
 (API/Data Host)
     
     Note over U,R: Step 1: User Initiates Login

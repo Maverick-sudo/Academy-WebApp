@@ -1,4 +1,5 @@
 import { notFound, redirect } from 'next/navigation'
+import path from 'path'
 import { getDocBySlug, getDocsInDirectory, getAdjacentDocs, getGitHubUrl, getAllStaticPaths } from '@/lib/content'
 import { Suspense } from 'react'
 import { remarkPlugins, rehypePlugins } from '@/lib/markdown-plugins'
@@ -30,7 +31,10 @@ export default async function DocPage({ params }: DocPageProps) {
       return segment
     }
   }
-  const normalizedSlug = resolvedParams.slug.map(segment => decodeSegment(segment).replace(/\.md$/i, ''))
+  const normalizedSlug = resolvedParams.slug.map(segment => decodeSegment(segment).replace(/\.mdx?$/i, ''))
+  const repoSegment = normalizedSlug[0]?.toLowerCase()
+  if (repoSegment === 'ccna-labs') normalizedSlug[0] = 'CCNA-Labs'
+  if (repoSegment === 'python-projects') normalizedSlug[0] = 'Python-Projects'
   const repoRoot = normalizedSlug[0] ? String(normalizedSlug[0]).toLowerCase() : ''
   const isAutomation = repoRoot === 'automation'
   const isCcnaLabs = repoRoot === 'ccna-labs' || repoRoot === 'ccna-lab'
@@ -248,17 +252,40 @@ export default async function DocPage({ params }: DocPageProps) {
                   )
                 }
 
-                // Handle internal markdown links - strip .md extension and convert to proper path
-                let cleanHref = href.replace(/\.md$/i, '')
-
-                // If it's a relative path, prepend current doc path
-                if (!cleanHref.startsWith('/')) {
-                  const basePath = `/docs/${normalizedSlug.join('/')}`
-                  cleanHref = `${basePath}/${cleanHref}`
+                const stripMarkdownExtension = (value: string) => {
+                  const [pathPart, hashPart] = value.split('#')
+                  const cleanedPath = pathPart.replace(/\.mdx?$/i, '')
+                  return hashPart ? `${cleanedPath}#${hashPart}` : cleanedPath
                 }
 
-                // Normalize multiple slashes
-                cleanHref = cleanHref.replace(/\/+/g, '/')
+                const resolveInternalHref = (value: string) => {
+                  const cleaned = stripMarkdownExtension(value)
+                  const [pathPart, hashPart] = cleaned.split('#')
+                  const isAbsolute = pathPart.startsWith('/')
+                  const repoPrefixPattern = /^\/(study-notes|automation|Python-Projects|CCNA-Labs|ccna-labs|python-projects)\b/
+
+                  let resolvedPath = pathPart
+
+                  if (isAbsolute) {
+                    if (!resolvedPath.startsWith('/docs') && repoPrefixPattern.test(resolvedPath)) {
+                      resolvedPath = `/docs${resolvedPath}`
+                    }
+                    resolvedPath = resolvedPath
+                      .replace(/^\/docs\/ccna-labs\b/, '/docs/CCNA-Labs')
+                      .replace(/^\/docs\/python-projects\b/, '/docs/Python-Projects')
+                  } else {
+                    const basePath = `/docs/${normalizedSlug.join('/')}`
+                    resolvedPath = path.posix.normalize(path.posix.join(basePath, resolvedPath))
+                    if (!resolvedPath.startsWith('/')) {
+                      resolvedPath = `/${resolvedPath}`
+                    }
+                  }
+
+                  resolvedPath = resolvedPath.replace(/\/+/g, '/')
+                  return hashPart ? `${resolvedPath}#${hashPart}` : resolvedPath
+                }
+
+                const cleanHref = resolveInternalHref(href)
 
                 return (
                   <span className="inline-flex items-center">
@@ -277,7 +304,7 @@ export default async function DocPage({ params }: DocPageProps) {
                 // If explicitly marked as mermaid, render with Mermaid.
                 // Also, treat indented or missing className blocks as mermaid
                 // when the code starts with a known mermaid keyword.
-                const looksLikeMermaid = /^(?:graph|flowchart|sequenceDiagram|stateDiagram|classDiagram)\b/i.test(text)
+                const looksLikeMermaid = /^(?:%%\{|(?:graph|flowchart|sequenceDiagram|stateDiagram(?:-v2)?|classDiagram|erDiagram|journey|gantt|pie|gitGraph|mindmap|timeline|sankey|quadrantChart|xychart-beta|requirementDiagram|C4Context|C4Container|C4Component|C4Dynamic|architecture)\b)/i.test(text)
 
                 if (language === 'mermaid' || (!language && looksLikeMermaid)) {
                   return <Mermaid code={text} />

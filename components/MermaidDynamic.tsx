@@ -19,9 +19,10 @@ export default function Mermaid({ code }: MermaidProps) {
     // Normalize incoming code to avoid common parser pitfalls (HTML <br/>, CRLF, box-drawing chars)
     const normalize = (input: string) => {
       return input
-        .replace(/<br\s*\/?>/gi, '\\n')
+        .replace(/<br\s*\/?>/gi, '\n')
         .replace(/\r\n/g, '\n')
-        .replace(/\u2500+/g, '---')
+        .replace(/\r/g, '\n')
+        .replace(/[─│┌┐└┘├┤┬┴┼]/g, '-')
         .trim()
     }
 

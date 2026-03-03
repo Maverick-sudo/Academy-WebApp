@@ -14,8 +14,10 @@ export default function Mermaid({ code }: MermaidProps) {
   const svgPath = `/mermaid-cache/${hash}.svg`
   const svgFilePath = path.join(process.cwd(), 'public', 'mermaid-cache', `${hash}.svg`)
   const hasSvg = fs.existsSync(svgFilePath)
+  const svgContent = hasSvg ? fs.readFileSync(svgFilePath, 'utf8') : ''
+  const hasMermaidError = svgContent.includes('Syntax error in text') || svgContent.includes('mermaid version')
 
-  if (!hasSvg) {
+  if (!hasSvg || hasMermaidError) {
     return <MermaidDynamic code={normalizedCode} />
   }
 
